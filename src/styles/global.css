@@ -98,10 +98,18 @@
 }
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* 手机上固定尺寸：页面不能被左右拖动，也没有下拉弹跳；需要横向滚动的表格、代码块自己单独允许 */
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  touch-action: pan-y;
   /* 背景从上到下：纸张颗粒 → 点阵 → 彩铅色块与涂鸦（位图，由 tools/bake_bg.py 烘焙）。
      全部画在画布背景上，滚动和动画时浏览器不需要为它们做任何合成 / 混合计算 */
   background-color: var(--paper);
@@ -302,7 +310,9 @@ input {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--paper) 95%, transparent);
+  /* 不透明：正文从下面滚过去时不会透出来 */
+  background: var(--paper);
+  padding-top: env(safe-area-inset-top);
 }
 /* 手画的波浪线当分隔 */
 .site-header::after,
@@ -1882,9 +1892,20 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 210px;
+  /* 手机上两张卡片并排时各占一半，标题自己换行；之前固定 210px，在窄屏上会把页面撑宽、导致左右晃动 */
+  min-width: min(210px, 46%);
+  max-width: 100%;
   padding: 16px 24px;
   transition: transform 0.2s;
+}
+@media (max-width: 560px) {
+  .lab-nav {
+    gap: 12px;
+    margin-top: 44px;
+  }
+  .lab-nav-a {
+    padding: 12px 14px;
+  }
 }
 .lab-nav-a:hover {
   transform: translate(-2px, -3px);
@@ -1932,4 +1953,14 @@ kbd {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* 需要自己横向滚动的区域：恢复横向手势 */
+.tbl,
+.code-body,
+.code-card pre,
+.trace-code,
+.mm-wrap {
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
 }

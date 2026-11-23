@@ -1,1 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1f9d6b"/><g fill="none" stroke="#ffffff" stroke-opacity=".55" stroke-width="2"><path d="M16 16h32v32H16z"/><path d="M26.7 16v32M37.3 16v32M16 26.7h32M16 37.3h32"/></g><rect x="26.7" y="26.7" width="10.6" height="10.6" fill="#ffd66b"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<defs>
+  <clipPath id="clip"><rect width="512" height="512" rx="112"/></clipPath>
+  <filter id="wob" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="7"/>
+  </filter>
+  <pattern id="hb" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><path d="M0 7H14" stroke="#2f6fd8" stroke-opacity="0.45" stroke-width="3.4"/></pattern>
+  <pattern id="hg" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><path d="M0 7H14" stroke="#3a9a64" stroke-opacity="0.42" stroke-width="3.4"/></pattern>
+  <pattern id="hy" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><path d="M0 7H14" stroke="#e8a800" stroke-opacity="0.6" stroke-width="3.4"/></pattern>
+</defs>
+<g clip-path="url(#clip)">
+  <rect width="512" height="512" fill="#f8f5ee"/>
+  <g fill="#2f6fd8" fill-opacity="0.22"><circle cx="40" cy="40" r="3.4"/><circle cx="40" cy="84" r="3.4"/><circle cx="40" cy="128" r="3.4"/><circle cx="40" cy="172" r="3.4"/><circle cx="40" cy="216" r="3.4"/><circle cx="40" cy="260" r="3.4"/><circle cx="40" cy="304" r="3.4"/><circle cx="40" cy="348" r="3.4"/><circle cx="40" cy="392" r="3.4"/><circle cx="40" cy="436" r="3.4"/><circle cx="40" cy="480" r="3.4"/><circle cx="84" cy="40" r="3.4"/><circle cx="84" cy="84" r="3.4"/><circle cx="84" cy="128" r="3.4"/><circle cx="84" cy="172" r="3.4"/><circle cx="84" cy="216" r="3.4"/><circle cx="84" cy="260" r="3.4"/><circle cx="84" cy="304" r="3.4"/><circle cx="84" cy="348" r="3.4"/><circle cx="84" cy="392" r="3.4"/><circle cx="84" cy="436" r="3.4"/><circle cx="84" cy="480" r="3.4"/><circle cx="128" cy="40" r="3.4"/><circle cx="128" cy="84" r="3.4"/><circle cx="128" cy="128" r="3.4"/><circle cx="128" cy="172" r="3.4"/><circle cx="128" cy="216" r="3.4"/><circle cx="128" cy="260" r="3.4"/><circle cx="128" cy="304" r="3.4"/><circle cx="128" cy="348" r="3.4"/><circle cx="128" cy="392" r="3.4"/><circle cx="128" cy="436" r="3.4"/><circle cx="128" cy="480" r="3.4"/><circle cx="172" cy="40" r="3.4"/><circle cx="172" cy="84" r="3.4"/><circle cx="172" cy="128" r="3.4"/><circle cx="172" cy="172" r="3.4"/><circle cx="172" cy="216" r="3.4"/><circle cx="172" cy="260" r="3.4"/><circle cx="172" cy="304" r="3.4"/><circle cx="172" cy="348" r="3.4"/><circle cx="172" cy="392" r="3.4"/><circle cx="172" cy="436" r="3.4"/><circle cx="172" cy="480" r="3.4"/><circle cx="216" cy="40" r="3.4"/><circle cx="216" cy="84" r="3.4"/><circle cx="216" cy="128" r="3.4"/><circle cx="216" cy="172" r="3.4"/><circle cx="216" cy="216" r="3.4"/><circle cx="216" cy="260" r="3.4"/><circle cx="216" cy="304" r="3.4"/><circle cx="216" cy="348" r="3.4"/><circle cx="216" cy="392" r="3.4"/><circle cx="216" cy="436" r="3.4"/><circle cx="216" cy="480" r="3.4"/><circle cx="260" cy="40" r="3.4"/><circle cx="260" cy="84" r="3.4"/><circle cx="260" cy="128" r="3.4"/><circle cx="260" cy="172" r="3.4"/><circle cx="260" cy="216" r="3.4"/><circle cx="260" cy="260" r="3.4"/><circle cx="260" cy="304" r="3.4"/><circle cx="260" cy="348" r="3.4"/><circle cx="260" cy="392" r="3.4"/><circle cx="260" cy="436" r="3.4"/><circle cx="260" cy="480" r="3.4"/><circle cx="304" cy="40" r="3.4"/><circle cx="304" cy="84" r="3.4"/><circle cx="304" cy="128" r="3.4"/><circle cx="304" cy="172" r="3.4"/><circle cx="304" cy="216" r="3.4"/><circle cx="304" cy="260" r="3.4"/><circle cx="304" cy="304" r="3.4"/><circle cx="304" cy="348" r="3.4"/><circle cx="304" cy="392" r="3.4"/><circle cx="304" cy="436" r="3.4"/><circle cx="304" cy="480" r="3.4"/><circle cx="348" cy="40" r="3.4"/><circle cx="348" cy="84" r="3.4"/><circle cx="348" cy="128" r="3.4"/><circle cx="348" cy="172" r="3.4"/><circle cx="348" cy="216" r="3.4"/><circle cx="348" cy="260" r="3.4"/><circle cx="348" cy="304" r="3.4"/><circle cx="348" cy="348" r="3.4"/><circle cx="348" cy="392" r="3.4"/><circle cx="348" cy="436" r="3.4"/><circle cx="348" cy="480" r="3.4"/><circle cx="392" cy="40" r="3.4"/><circle cx="392" cy="84" r="3.4"/><circle cx="392" cy="128" r="3.4"/><circle cx="392" cy="172" r="3.4"/><circle cx="392" cy="216" r="3.4"/><circle cx="392" cy="260" r="3.4"/><circle cx="392" cy="304" r="3.4"/><circle cx="392" cy="348" r="3.4"/><circle cx="392" cy="392" r="3.4"/><circle cx="392" cy="436" r="3.4"/><circle cx="392" cy="480" r="3.4"/><circle cx="436" cy="40" r="3.4"/><circle cx="436" cy="84" r="3.4"/><circle cx="436" cy="128" r="3.4"/><circle cx="436" cy="172" r="3.4"/><circle cx="436" cy="216" r="3.4"/><circle cx="436" cy="260" r="3.4"/><circle cx="436" cy="304" r="3.4"/><circle cx="436" cy="348" r="3.4"/><circle cx="436" cy="392" r="3.4"/><circle cx="436" cy="436" r="3.4"/><circle cx="436" cy="480" r="3.4"/><circle cx="480" cy="40" r="3.4"/><circle cx="480" cy="84" r="3.4"/><circle cx="480" cy="128" r="3.4"/><circle cx="480" cy="172" r="3.4"/><circle cx="480" cy="216" r="3.4"/><circle cx="480" cy="260" r="3.4"/><circle cx="480" cy="304" r="3.4"/><circle cx="480" cy="348" r="3.4"/><circle cx="480" cy="392" r="3.4"/><circle cx="480" cy="436" r="3.4"/><circle cx="480" cy="480" r="3.4"/></g>
+  <!-- 彩铅涂出来的色块：左上蓝、右下黄绿，和网站背景呼应 -->
+  <path d="M-20 -20 H200 Q160 100 -20 160 Z" fill="url(#hb)"/>
+  <path d="M532 320 Q440 350 410 532 H532 Z" fill="url(#hg)"/>
+  <path d="M350 -20 H532 V130 Q430 120 350 -20 Z" fill="url(#hy)"/>
+  
+<path d="M140 380 C116 404 96 366 74 392 S50 428 92 428 L170 430" fill="none" stroke="#34373e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" filter="url(#wob)"/>
+  
+<g transform="translate(256 256) rotate(-45) scale(1.08) translate(-165 0)" filter="url(#wob)" stroke="#34373e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+  <!-- 木头削出来的锥形 -->
+  <path d="M0 0 L88 -40 L88 40 Z" fill="#f6d5aa"/>
+  <path d="M30 -13 L30 13" stroke="none"/>
+  <!-- 石墨笔芯 -->
+  <path d="M0 0 L30 -14 L30 14 Z" fill="#34373e"/>
+  <!-- 笔杆：中间亮，两边暗，像六棱柱 -->
+  <rect x="88" y="-40" width="176" height="80" fill="#f3b72b"/>
+  <rect x="88" y="-14" width="176" height="28" fill="#ffe27a" stroke="none"/>
+  <path d="M88 -14 H264 M88 14 H264" fill="none" stroke-width="5"/>
+  <!-- 金属箍 -->
+  <rect x="264" y="-40" width="34" height="80" fill="#c3cad2"/>
+  <path d="M273 -40 V40 M282 -40 V40 M291 -40 V40" fill="none" stroke-width="4"/>
+  <!-- 橡皮 -->
+  <path d="M298 -40 H322 Q342 -40 342 -20 V20 Q342 40 322 40 H298 Z" fill="#f08d84"/>
+</g>
+</g>
+</svg>

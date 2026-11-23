@@ -105,7 +105,7 @@ const cpp: Chapter[] = [
   },
   {
     id: 'stl',
-    title: 'STL 工具箱',
+    title: 'STL',
     blurb: '标准库提供了许多现成的容器和函数。熟练使用它们，代码会更短，也更不容易出错。',
     tone: 'yellow',
     lessons: [

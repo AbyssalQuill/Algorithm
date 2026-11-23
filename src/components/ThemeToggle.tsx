@@ -11,6 +11,7 @@ export function ThemeToggle() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark'
     setTheme(next)
     document.documentElement.dataset.theme = next
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#1b2321' : '#f8f5ee')
     try {
       localStorage.setItem('theme', next)
     } catch {
