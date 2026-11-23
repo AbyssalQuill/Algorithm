@@ -608,7 +608,7 @@
   font-size: 1.04rem;
   line-height: 1.95;
 }
-.prose > :first-child {
+.prose > .lsec:first-child > :first-child {
   margin-top: 0;
 }
 .prose p {
@@ -972,4 +972,21 @@
   justify-content: space-between;
   gap: 20px;
   margin-top: 56px;
+}
+
+/* ======================= 首屏性能 ======================= */
+/* 首页、学习页里屏幕以外的大块内容：滚到附近才参与布局和绘制，首屏的计算量因此少很多 */
+.section,
+.learn-next,
+.lesson-problems {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 560px;
+}
+/* 课文按二级标题分段：第一段立刻渲染，后面的段落滚到附近才布局（高度由程序按内容估算） */
+.lsec-defer {
+  content-visibility: auto;
+}
+/* 课文加载期间占住版面，内容出现时下面的东西不会往下跳 */
+.prose-wait {
+  min-height: 60vh;
 }

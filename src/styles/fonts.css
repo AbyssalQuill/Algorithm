@@ -1,0 +1,22 @@
+/* 由 tools/subset_fonts.py 生成的字体（霞鹜文楷，只含站点用到的字）。文字改动后请重新运行该脚本。 */
+@font-face {
+  font-family: 'LXGW WenKai';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/wenkai-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LXGW WenKai';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/wenkai-bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'LXGW WenKai Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/wenkaimono-regular.woff2') format('woff2');
+}

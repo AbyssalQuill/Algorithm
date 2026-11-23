@@ -44,9 +44,9 @@ const cpp: Chapter[] = [
     tone: 'blue',
     lessons: [
       { slug: 'hello', title: '第一个程序', summary: '拆开一个最小的 C++ 程序，看看 main、头文件、cout、分号和注释各自负责什么。', minutes: 10, points: ['main 函数', '#include', 'cout 输出', '分号与花括号', '注释'], problems: ['P1000'] },
-      { slug: 'output', title: '输出：让程序说话', summary: '说明 cout 和 printf 的区别，如何换行、输出特殊字符，以及怎样控制小数位数。', minutes: 12, points: ['cout 与 <<', '换行 \\n 与 endl', '转义字符', 'printf 格式', '保留小数'], problems: ['P1000'] },
+      { slug: 'output', title: '输出', summary: '说明 cout 和 printf 的区别，如何换行、输出特殊字符，以及怎样控制小数位数。', minutes: 12, points: ['cout 与 <<', '换行 \\n 与 endl', '转义字符', 'printf 格式', '保留小数'], problems: ['P1000'] },
       { slug: 'variable', title: '变量与数据类型', summary: '变量如何保存数据，int、long long、double、char、bool 分别适合什么场合。', minutes: 15, points: ['变量 = 带标签的盒子', 'int 与 long long', 'double 小数', 'char 与 bool', '赋值与命名'], problems: ['P5703'] },
-      { slug: 'input', title: '输入：让程序听你说', summary: '用 cin 和 scanf 读入数据；怎样读一整行、读到输入结束，以及在数据量大时加速输入。', minutes: 15, points: ['cin >>', 'scanf', 'getline 读一行', '读到文件结束', '输入加速'], problems: ['P1001', 'P1421'] },
+      { slug: 'input', title: '输入', summary: '用 cin 和 scanf 读入数据；怎样读一整行、读到输入结束，以及在数据量大时加速输入。', minutes: 15, points: ['cin >>', 'scanf', 'getline 读一行', '读到文件结束', '输入加速'], problems: ['P1001', 'P1421'] },
     ],
   },
   {
@@ -57,7 +57,7 @@ const cpp: Chapter[] = [
     lessons: [
       { slug: 'arithmetic', title: '算术运算', summary: '四则运算与取余，整数除法容易出错的地方，自增自减、类型转换，以及什么情况下会溢出。', minutes: 15, points: ['整数除法', '取余 %', '++ 与 --', '类型转换', '溢出'], problems: ['P5706', 'P5707'] },
       { slug: 'logic', title: '比较与逻辑', summary: '比较运算和逻辑运算怎么组合，为什么 = 和 == 不能混用，短路求值与运算优先级。', minutes: 12, points: ['关系运算', '逻辑运算', '短路求值', '运算优先级', '区间判断'], problems: ['P5710'] },
-      { slug: 'branch', title: '分支：if 与 switch', summary: 'if、else if、else 的执行顺序，嵌套与 else 的配对规则，三目运算符和 switch。', minutes: 18, points: ['if / else', 'else if 链', '嵌套与悬空 else', '?: 三目', 'switch'], problems: ['P5711', 'P5715', 'P5716', 'P1422'] },
+      { slug: 'branch', title: '条件分支', summary: 'if、else if、else 的执行顺序，嵌套与 else 的配对规则，三目运算符和 switch。', minutes: 18, points: ['if / else', 'else if 链', '嵌套与悬空 else', '?: 三目', 'switch'], problems: ['P5711', 'P5715', 'P5716', 'P1422'] },
     ],
   },
   {
@@ -68,7 +68,7 @@ const cpp: Chapter[] = [
     lessons: [
       { slug: 'for', title: 'for 循环', summary: '拆解 for 循环的四个部分，学习正序、倒序、固定步长，以及累加累乘的写法。', minutes: 18, points: ['初值 / 条件 / 更新', '正序与倒序', '累加累乘', '循环变量作用域', 'rep 宏'], problems: ['P5722', 'P5719', 'P1424'] },
       { slug: 'while', title: 'while 与 do-while', summary: '次数不确定时怎么写循环：读到 0 结束、读到输入结尾、先做一次再判断的 do-while。', minutes: 15, points: ['while', 'do-while', '不知道次数', '死循环', '输入到文件结束'], problems: ['P1035', 'P1425'] },
-      { slug: 'loop-control', title: 'break、continue 与嵌套循环', summary: '提前结束、跳过一轮和循环嵌套，用它们打印图形、输出乘法表并判断素数。', minutes: 20, points: ['break', 'continue', '嵌套循环', '打印图形', '素数判断'], problems: ['P5721', 'P5723', 'P1075'] },
+      { slug: 'loop-control', title: '循环的控制与嵌套', summary: '提前结束、跳过一轮和循环嵌套，用它们打印图形、输出乘法表并判断素数。', minutes: 20, points: ['break', 'continue', '嵌套循环', '打印图形', '素数判断'], problems: ['P5721', 'P5723', 'P1075'] },
     ],
   },
   {
@@ -89,7 +89,7 @@ const cpp: Chapter[] = [
     tone: 'blue',
     lessons: [
       { slug: 'function', title: '函数的定义与调用', summary: '函数的定义与调用，返回值和 void，函数的声明顺序，局部变量与全局变量。', minutes: 18, points: ['定义与调用', '返回值', '参数', '声明与定义', '作用域'], problems: ['P5736', 'P5737'] },
-      { slug: 'pass-by', title: '参数怎么传', summary: '传值与传引用的区别，为什么交换两个数的函数必须用引用，数组和大对象怎样传参。', minutes: 15, points: ['传值', '传引用 &', '传数组', 'const 引用', '返回多个结果'], problems: [] },
+      { slug: 'pass-by', title: '函数的参数传递', summary: '传值与传引用的区别，为什么交换两个数的函数必须用引用，数组和大对象怎样传参。', minutes: 15, points: ['传值', '传引用 &', '传数组', 'const 引用', '返回多个结果'], problems: [] },
       { slug: 'recursion', title: '递归入门', summary: '递归的三个要素，阶乘与斐波那契两个经典例子，以及调用栈和递归深度的限制。', minutes: 20, points: ['递归三要素', '阶乘', '斐波那契', '调用栈', '递归与循环'], problems: ['P5739', 'P1028'] },
     ],
   },
@@ -109,7 +109,7 @@ const cpp: Chapter[] = [
     blurb: '标准库提供了许多现成的容器和函数。熟练使用它们，代码会更短，也更不容易出错。',
     tone: 'yellow',
     lessons: [
-      { slug: 'vector', title: 'vector：会长大的数组', summary: '可以自动扩容的数组：增删改查、遍历、二维 vector，以及使用时要留意的细节。', minutes: 20, points: ['push_back', '下标与遍历', 'size / empty', 'insert / erase', '二维 vector'], problems: ['P3156'] },
+      { slug: 'vector', title: 'vector 动态数组', summary: '可以自动扩容的数组：增删改查、遍历、二维 vector，以及使用时要留意的细节。', minutes: 20, points: ['push_back', '下标与遍历', 'size / empty', 'insert / erase', '二维 vector'], problems: ['P3156'] },
       { slug: 'sort', title: 'sort 与 pair', summary: '用 sort 排序，从大到小、按多个条件排序、自定义比较函数，以及严格弱序的含义。', minutes: 22, points: ['sort 基本用法', '从大到小', 'pair', 'lambda 比较', '严格弱序'], problems: ['P1177', 'P1012'] },
       { slug: 'algo-funcs', title: '常用函数速查', summary: '一次看全最常用的标准库函数：min、max、swap、reverse、unique、lower_bound、gcd、accumulate 等。', minutes: 15, points: ['min max swap', 'reverse / unique', 'lower_bound', '__gcd', 'accumulate'], problems: [] },
       { slug: 'set-map', title: 'set 与 map', summary: 'set 自动去重并排序，map 保存键值对；用它们统计次数、判断元素是否出现过。', minutes: 20, points: ['set 去重排序', 'map 键值对', '统计次数', 'count / find', '遍历'], problems: ['P1059', 'P5266'] },

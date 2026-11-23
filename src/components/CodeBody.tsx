@@ -31,7 +31,13 @@ export function CodeBody({ lines, lang, active = [], scroll = false, maxHeight }
   const bodyRef = useRef<HTMLDivElement>(null)
   const first = ranges.length ? ranges[0][0] : 0
   const last = ranges.length ? ranges[ranges.length - 1][1] : 0
+  const mounted = useRef(false)
   useEffect(() => {
+    // 第一次挂载时不滚动：读 clientHeight 会强制整页同步重排，首屏白白多花一次布局的时间
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
     const el = bodyRef.current
     if (!scroll || !el || !first) return
     const top = PAD + (first - 1) * LH

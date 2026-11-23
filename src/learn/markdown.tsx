@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { memo, useMemo, type ReactNode } from 'react'
 import { marked, type Token, type Tokens } from 'marked'
 import { CodeBlock } from './CodeBlock'
 import { parseFence } from './fence'
@@ -31,13 +31,24 @@ export function parseLesson(md: string): Token[] {
   return marked.lexer(md)
 }
 
-export function extractToc(tokens: Token[]): TocItem[] {
+/** 给每个小标题算好锚点 id（按文档顺序、重名自动加序号）。渲染时直接查这张表，不在渲染过程里改状态 */
+function headingIds(tokens: Token[]): Map<Token, string> {
   const slug = makeSlugger()
-  const out: TocItem[] = []
+  const ids = new Map<Token, string>()
   for (const t of tokens) {
     if (t.type !== 'heading') continue
     const h = t as Tokens.Heading
-    if (h.depth === 2 || h.depth === 3) out.push({ id: slug(h.text), text: h.text, depth: h.depth })
+    if (h.depth === 2 || h.depth === 3) ids.set(t, slug(h.text))
+  }
+  return ids
+}
+
+export function extractToc(tokens: Token[]): TocItem[] {
+  const ids = headingIds(tokens)
+  const out: TocItem[] = []
+  for (const t of tokens) {
+    const id = ids.get(t)
+    if (id) out.push({ id, text: (t as Tokens.Heading).text, depth: (t as Tokens.Heading).depth as 2 | 3 })
   }
   return out
 }
@@ -102,7 +113,7 @@ function unescape(s: string) {
   return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
 }
 
-function Blocks({ tokens, slug }: { tokens: Token[]; slug: (s: string) => string }): ReactNode {
+function Blocks({ tokens, ids }: { tokens: Token[]; ids: Map<Token, string> }): ReactNode {
   return (
     <>
       {tokens.map((t, i) => {
@@ -112,7 +123,7 @@ function Blocks({ tokens, slug }: { tokens: Token[]; slug: (s: string) => string
           case 'heading': {
             const h = t as Tokens.Heading
             if (h.depth === 1) return null
-            const id = slug(h.text)
+            const id = ids.get(t)
             const inner = <Inline tokens={h.tokens} />
             if (h.depth === 2)
               return (
@@ -155,7 +166,7 @@ function Blocks({ tokens, slug }: { tokens: Token[]; slug: (s: string) => string
               <Tag key={i} start={l.ordered && l.start !== 1 ? Number(l.start) : undefined}>
                 {l.items.map((it, j) => (
                   <li key={j}>
-                    <Blocks tokens={it.tokens} slug={slug} />
+                    <Blocks tokens={it.tokens} ids={ids} />
                   </li>
                 ))}
               </Tag>
@@ -196,13 +207,13 @@ function Blocks({ tokens, slug }: { tokens: Token[]; slug: (s: string) => string
             if (!m || !CALLOUT[m[1]]) {
               return (
                 <blockquote key={i}>
-                  <Blocks tokens={b.tokens} slug={slug} />
+                  <Blocks tokens={b.tokens} ids={ids} />
                 </blockquote>
               )
             }
             const c = CALLOUT[m[1]]
             const body = marked.lexer(b.text.slice(m[0].length))
-            const inner = <Blocks tokens={body} slug={slug} />
+            const inner = <Blocks tokens={body} ids={ids} />
             if (c.cls === 'answer')
               return (
                 <details key={i} className="callout c-answer">
@@ -233,6 +244,58 @@ function Blocks({ tokens, slug }: { tokens: Token[]; slug: (s: string) => string
   )
 }
 
-export function Markdown({ tokens }: { tokens: Token[] }) {
-  return <Blocks tokens={tokens} slug={makeSlugger()} />
+/** 估算一段内容渲染出来有多高（像素）。屏幕外的段落先按这个高度占位，滚过去才真正布局，所以不用算得很准 */
+function estimateHeight(tokens: Token[]): number {
+  let h = 0
+  for (const t of tokens) {
+    switch (t.type) {
+      case 'heading':
+        h += (t as Tokens.Heading).depth === 2 ? 96 : 64
+        break
+      case 'paragraph':
+      case 'text':
+        h += 24 + Math.ceil((t as Tokens.Paragraph).text.length / 34) * 33
+        break
+      case 'code': {
+        const c = t as Tokens.Code
+        const f = parseFence(c.lang ?? '')
+        const n = c.text.split('\n').length
+        h += f.lang === 'trace' ? 560 : f.lang === 'input' || f.lang === 'output' ? 48 + n * 26 : 92 + n * 28
+        break
+      }
+      case 'list':
+        h += 24 + (t as Tokens.List).items.length * 42
+        break
+      case 'table':
+        h += 32 + ((t as Tokens.Table).rows.length + 1) * 46
+        break
+      case 'blockquote':
+        h += 70 + Math.ceil((t as Tokens.Blockquote).text.length / 34) * 33
+        break
+      default:
+        h += 20
+    }
+  }
+  return Math.round(h)
 }
+
+export const Markdown = memo(function Markdown({ tokens }: { tokens: Token[] }) {
+  const ids = useMemo(() => headingIds(tokens), [tokens])
+  const groups = useMemo(() => {
+    const g: Token[][] = [[]]
+    for (const t of tokens) {
+      if (t.type === 'heading' && (t as Tokens.Heading).depth === 2 && g[g.length - 1].length > 0) g.push([])
+      g[g.length - 1].push(t)
+    }
+    return g
+  }, [tokens])
+  return (
+    <>
+      {groups.map((g, i) => (
+        <section key={i} className={i === 0 ? 'lsec' : 'lsec lsec-defer'} style={i === 0 ? undefined : { containIntrinsicSize: `auto ${estimateHeight(g)}px` }}>
+          <Blocks tokens={g} ids={ids} />
+        </section>
+      ))}
+    </>
+  )
+})

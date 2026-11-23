@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { ALGOS } from '../algos'
@@ -9,8 +9,35 @@ import { STAGES } from '../data/roadmap'
 import { TRACKS } from '../learn/curriculum'
 import { usePlayer } from '../engine/usePlayer'
 import { EASE_OUT } from '../motion'
+import { prefetchLearning } from '../prefetch'
 
+/** 演示图比较重（柱子、指针、动画）：先把页面的框架画出来，下一帧再让它“动起来”，首屏就不会被它拖慢 */
 function HeroDemo() {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let b = 0
+    const a = requestAnimationFrame(() => {
+      b = requestAnimationFrame(() => setReady(true))
+    })
+    return () => {
+      cancelAnimationFrame(a)
+      cancelAnimationFrame(b)
+    }
+  }, [])
+  if (!ready) {
+    return (
+      <div className="hero-stage" aria-hidden="true">
+        <div className="hero-cap">
+          <span className="live-dot" />
+          冒泡排序 · 自动演示中
+        </div>
+      </div>
+    )
+  }
+  return <HeroDemoLive />
+}
+
+function HeroDemoLive() {
   const frames = useMemo(() => bubbleSort.run([6, 3, 9, 2, 8, 4, 7, 1]), [])
   const p = usePlayer(frames, { autoplay: true, loop: true, baseMs: 560 })
   const f = frames[Math.min(p.index, frames.length - 1)]
@@ -43,6 +70,7 @@ function Reveal({ children, delay = 0, className }: { children: ReactNode; delay
 
 export default function Home() {
   const cpp = TRACKS[0]
+  useEffect(prefetchLearning, [])
   const rise = (i: number) => ({
     initial: { opacity: 0, y: 18 },
     animate: { opacity: 1, y: 0 },

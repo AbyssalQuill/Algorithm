@@ -5,6 +5,7 @@ import { IconArrow } from '../components/icons'
 import { Problems } from '../components/Problems'
 import { pickProblems } from '../data/problems'
 import { loadLesson } from '../learn/content'
+import { whenIdle } from '../prefetch'
 import { findLesson } from '../learn/curriculum'
 import { LessonTree } from '../learn/LessonTree'
 import { extractToc, Markdown, parseLesson, type TocItem } from '../learn/markdown'
@@ -34,6 +35,11 @@ function Toc({ items }: { items: TocItem[] }) {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
     setActive(id)
+    // 屏幕外的段落是按估算的高度占位的，滚过去之后实际高度可能略有不同：到位后再校正一次
+    setTimeout(() => {
+      const top = el.getBoundingClientRect().top
+      if (Math.abs(top - 90) > 24) el.scrollIntoView({ behavior: 'auto', block: 'start' })
+    }, 750)
   }
 
   if (items.length === 0) return null
@@ -70,6 +76,12 @@ export default function Lesson() {
       alive = false
     }
   }, [trackId, slug, found])
+
+  // 读完这一课的时候，顺手把下一课预先下载好
+  const nextSlug = found?.next?.slug
+  useEffect(() => {
+    if (nextSlug) whenIdle(() => void loadLesson(trackId, nextSlug))
+  }, [trackId, nextSlug])
 
   const tokens = doc && doc.slug === slug ? doc.tokens : null
   const toc = useMemo(() => (tokens ? extractToc(tokens) : []), [tokens])
