@@ -4,9 +4,11 @@ import { bracketStack } from './bracketStack'
 import { bit } from './bit'
 import { bst } from './bst'
 import { diffArray } from './diffArray'
+import { dijkstra } from './dijkstra'
 import { bfsGrid } from './bfsGrid'
 import { bubbleSort } from './bubbleSort'
 import { dsu } from './dsu'
+import { graphDfs } from './graphDfs'
 import { hashTable } from './hashTable'
 import { heap } from './heap'
 import { insertionSort } from './insertionSort'
@@ -47,6 +49,8 @@ export const ALGOS: AnyAlgo[] = [
   diffArray,
   sieve,
   bfsGrid,
+  graphDfs,
+  dijkstra,
   lcs,
 ]
 

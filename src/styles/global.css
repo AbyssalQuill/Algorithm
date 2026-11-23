@@ -1526,6 +1526,87 @@ kbd {
   font-weight: 700;
   white-space: nowrap;
 }
+.gr {
+  position: relative;
+  width: 100%;
+  margin: 4px 0;
+}
+.gr-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+.gr-edge {
+  stroke: var(--pencil-soft);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.gr-edge.tone-done,
+.gr-edge.tone-compare,
+.gr-edge.tone-swap,
+.gr-edge.tone-found {
+  stroke: var(--t-bd);
+  stroke-width: 3.6;
+}
+.gr-edge.tone-swap {
+  stroke-dasharray: 2 7;
+}
+.gr-head {
+  fill: var(--pencil-soft);
+}
+.gr-head.tone-done,
+.gr-head.tone-compare,
+.gr-head.tone-swap,
+.gr-head.tone-found {
+  fill: var(--t-bd);
+}
+.gr-w rect {
+  fill: var(--face);
+  stroke: var(--line-2);
+  stroke-width: 1.4;
+}
+.gr-w text {
+  fill: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.gr-w.tone-done rect,
+.gr-w.tone-compare rect,
+.gr-w.tone-swap rect,
+.gr-w.tone-found rect {
+  fill: var(--t-bg);
+  stroke: var(--t-bd);
+}
+.gr-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--t-bd);
+  border-radius: 50%;
+  background-color: var(--t-bg);
+  background-image: repeating-linear-gradient(135deg, var(--t-hatch, transparent) 0 1.5px, transparent 1.5px 6px);
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+}
+.gr-sub {
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 5px;
+  border-radius: 6px;
+  background: var(--face);
+  color: var(--ink-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .hash {
   display: flex;
   flex-direction: column;
