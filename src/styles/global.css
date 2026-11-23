@@ -944,7 +944,7 @@ input {
   min-height: 0;
   max-height: none;
 }
-.code-lg {
+.code-body.code-lg {
   font-size: 17px;
 }
 .code-lg .ln {
