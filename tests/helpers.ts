@@ -1,3 +1,4 @@
+import { expect, it } from 'vitest'
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -50,3 +51,17 @@ export function build(algo: AnyAlgo, lang: Lang): Runner {
   writeFileSync(join(dir, 'main.py'), code)
   return (inp) => run('python', ['-I', join(dir, 'main.py')], inp)
 }
+
+/** 四种语言的程序各跑一遍：对每组输入，输出（按空白归一化）要和期望一致 */
+export function itPrograms(algo: AnyAlgo, makeCases: () => { input: string; expected: string; label?: string }[]) {
+  const norm = (s: string) => s.trim().split(/\s+/).join(' ')
+  for (const lang of LANG_LIST) {
+    it.skipIf(!tools[lang])(`${lang} 程序`, () => {
+      const run = build(algo, lang)
+      for (const c of makeCases()) expect(norm(run(c.input)), c.label ?? c.input).toBe(norm(c.expected))
+    })
+  }
+}
+
+export const rnd = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1))
+export const rndList = (n: number, lo: number, hi: number) => Array.from({ length: n }, () => rnd(lo, hi))
