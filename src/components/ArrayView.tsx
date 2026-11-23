@@ -6,6 +6,8 @@ export interface Cell {
   id: number
   v: number
   tone?: Tone
+  /** 要显示的文字；不写就显示 v（柱状图的高度始终由 v 决定） */
+  label?: string
 }
 export interface Pointer {
   name: string
@@ -22,6 +24,7 @@ export function ArrayView({
   mode = 'bars',
   areaH = 230,
   minSlots = 1,
+  base = 0,
 }: {
   cells: Cell[]
   pointers?: Pointer[]
@@ -29,6 +32,8 @@ export function ArrayView({
   areaH?: number
   /** 至少给指针留几行，避免指针叠起来时整体高度跳动 */
   minSlots?: number
+  /** 下标标签从几开始数（前缀和里的数组从 1 开始） */
+  base?: number
 }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const n = cells.length
@@ -68,13 +73,13 @@ export function ArrayView({
                 transition={spring}
                 style={{ fontSize: cw < 28 ? 11 : 15 }}
               >
-                <span className="av-val">{c.v}</span>
+                <span className="av-val">{c.label ?? c.v}</span>
               </motion.div>
             )
           })}
           {cells.map((_, i) => (
             <div key={`idx${i}`} className="av-idx" style={{ left: xOf(i), width: cw, top: stageH + 8 }}>
-              {i}
+              {i + base}
             </div>
           ))}
           {ptrs.map((p) => (

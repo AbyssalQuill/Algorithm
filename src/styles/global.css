@@ -1323,6 +1323,106 @@ kbd {
   opacity: 0.8;
 }
 
+/* ---------- viz: grid（迷宫、筛法表、DP 表） ---------- */
+.gv-box {
+  width: 100%;
+}
+.gv {
+  display: grid;
+  justify-content: center;
+  margin: 4px 0;
+}
+.gv-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border: 2px solid var(--t-bd);
+  border-radius: 10px 6px 11px 7px / 7px 11px 6px 10px;
+  background-color: var(--t-bg);
+  background-image: repeating-linear-gradient(135deg, var(--t-hatch, transparent) 0 1.5px, transparent 1.5px 6px);
+  transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+}
+.gv-sub {
+  position: absolute;
+  right: 4px;
+  bottom: 1px;
+  font-size: 0.62rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+.gv-wall {
+  --t-bd: var(--pencil);
+  --t-bg: color-mix(in srgb, var(--pencil) 30%, var(--face));
+  --t-hatch: var(--pencil-soft);
+}
+.gv-head {
+  border-color: transparent;
+  background: none;
+  color: var(--ink-3);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 8px 0 2px;
+  color: var(--ink-3);
+  font-size: 0.82rem;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sw {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.8px solid var(--t-bd);
+  border-radius: 4px 3px 5px 3px;
+  background: var(--t-bg);
+}
+.outline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+  margin-bottom: 8px;
+}
+.qrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.86rem;
+}
+.qrow-label {
+  margin-right: 4px;
+  color: var(--ink-3);
+}
+.qrow-end {
+  color: var(--ink-3);
+  font-size: 0.78rem;
+}
+.qrow-empty,
+.qrow-more {
+  color: var(--ink-3);
+}
+.qchip {
+  padding: 0 9px;
+  border: 1.8px solid var(--pencil);
+  border-radius: 9px 6px 10px 6px / 6px 10px 6px 9px;
+  background: var(--yellow-soft);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
 .stats {
   display: flex;
   flex-wrap: wrap;
@@ -1342,6 +1442,14 @@ kbd {
 .stat-v {
   font-family: var(--font-mono);
   font-weight: 700;
+}
+.row-label {
+  margin: 14px 0 2px;
+  color: var(--ink-3);
+  font-size: 0.86rem;
+}
+.row-label:first-child {
+  margin-top: 0;
 }
 .target-row {
   display: flex;
