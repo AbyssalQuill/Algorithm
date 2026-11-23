@@ -24,19 +24,19 @@ export function runBubbleSort(input: number[]): Frame<SortState>[] {
   let sorted = 0
   const snap = (cmp: [number, number] | null, swapped: boolean, round: number): SortState => ({ cells: a, cmp, swapped, sorted, round, compares, swaps })
 
-  rec.push('init', snap(null, false, 0), `准备排序：一共 ${n} 个数。每一轮从左到右，把相邻的两个数比一比，大的往右“冒”。`)
+  rec.push('init', snap(null, false, 0), `准备排序，一共 ${n} 个数。每一轮从左向右比较相邻的两个数，把较大的那个往右推。`)
   for (let i = 0; i < n - 1; i++) {
     let swapped = false
-    rec.push('outer', snap(null, false, i + 1), `第 ${i + 1} 轮开始：这一轮会把剩下的数里最大的那个送到位置 ${n - 1 - i}。`)
+    rec.push('outer', snap(null, false, i + 1), `第 ${i + 1} 轮开始，这一轮会把剩下的数里最大的一个送到位置 ${n - 1 - i}。`)
     for (let j = 0; j < n - 1 - i; j++) {
       compares++
       const need = a[j].v > a[j + 1].v
-      rec.push('cmp', snap([j, j + 1], false, i + 1), `比较 a[${j}]=${a[j].v} 和 a[${j + 1}]=${a[j + 1].v}：${need ? '左边更大，需要交换。' : '顺序没问题，不用动。'}`)
+      rec.push('cmp', snap([j, j + 1], false, i + 1), `比较 a[${j}]=${a[j].v} 和 a[${j + 1}]=${a[j + 1].v}：${need ? '左边更大，需要交换。' : '顺序没有问题，不需要交换。'}`)
       if (need) {
         ;[a[j], a[j + 1]] = [a[j + 1], a[j]]
         swapped = true
         swaps++
-        rec.push('swap', snap([j, j + 1], true, i + 1), `交换！现在 a[${j}]=${a[j].v}，a[${j + 1}]=${a[j + 1].v}。`)
+        rec.push('swap', snap([j, j + 1], true, i + 1), `交换之后，a[${j}]=${a[j].v}，a[${j + 1}]=${a[j + 1].v}。`)
       }
     }
     if (swapped) sorted++
@@ -44,12 +44,12 @@ export function runBubbleSort(input: number[]): Frame<SortState>[] {
     rec.push(
       'pass',
       snap(null, false, i + 1),
-      swapped ? `第 ${i + 1} 轮结束：${a[n - 1 - i].v} 已经站到了最终位置。` : '这一轮一次交换都没发生，说明整个数组已经有序，可以提前结束啦！',
+      swapped ? `第 ${i + 1} 轮结束，${a[n - 1 - i].v} 已经到达最终位置。` : '这一轮没有发生任何交换，说明整个数组已经有序，可以提前结束。',
     )
     if (!swapped) break
   }
   sorted = n
-  rec.push('done', snap(null, false, Math.min(n - 1, rec.frames[rec.frames.length - 1].state.round)), `排序完成！共比较 ${compares} 次，交换 ${swaps} 次。`)
+  rec.push('done', snap(null, false, Math.min(n - 1, rec.frames[rec.frames.length - 1].state.round)), `排序完成，共比较 ${compares} 次，交换 ${swaps} 次。`)
   return rec.frames
 }
 
@@ -96,22 +96,22 @@ function parse(text: string): ParseResult<number[]> {
 export const bubbleSort: AlgoDef<number[], SortState> = {
   id: 'bubble-sort',
   title: '冒泡排序',
-  tagline: '相邻两两比较，大的数像气泡一样一点点“冒”到最右边',
+  tagline: '每一轮比较相邻的两个数，让较大的数一步步移动到最右边',
   kind: '算法',
   intro: [
-    '冒泡排序是最容易理解的排序：每一轮从左到右，把相邻的两个数比一比，如果左边比右边大，就交换它们。大的数就像气泡一样，一点点冒到最右边。',
-    '一轮下来，当前还没排好的数里最大的那个，一定到了它最终的位置。重复 n-1 轮，整个数组就从小到大排好了。',
+    '冒泡排序是最容易理解的排序方法。每一轮从左向右，依次比较相邻的两个数，如果左边的比右边的大，就交换它们的位置。较大的数就像水里的气泡一样，一点一点浮到右端。',
+    '一轮结束之后，尚未排好的数里最大的那个，必定已经来到了它最终的位置。重复 n-1 轮，整个数组就从小到大排好了。',
   ],
   points: [
-    '外层循环控制“轮数”，最多 n-1 轮。',
-    '内层循环每轮只需要比较到 n-1-i：后面 i 个数已经排好，不用再看。',
-    '加一个 swapped 标记：如果某一轮一次交换都没发生，说明已经有序，可以直接结束。',
-    '冒泡排序是稳定的：相等的两个数不会被交换，它们的相对顺序保持不变。',
+    '外层循环控制轮数，最多需要 n-1 轮。',
+    '内层循环每一轮只需比较到 n-1-i 的位置，因为末尾的 i 个数已经就位，不必再看。',
+    '可以增加一个 swapped 标记：如果某一轮一次交换都没有发生，就说明数组已经有序，可以提前结束。',
+    '冒泡排序是稳定的排序，相等的两个数不会交换位置，它们原来的先后顺序得以保留。',
   ],
   pitfalls: [
-    '把比较写成 a[j]>=a[j+1]，会多做无意义的交换，也会破坏稳定性。',
-    '内层上界写成 n-i 会让 a[j+1] 越界（i=0 时访问到了 a[n]）。',
-    'n 很大（比如 10 万）时，O(n²) 会超时：这时要用 sort 或更快的排序（后面会学）。',
+    '把比较条件写成 a[j]>=a[j+1]，会让相等的数也发生交换，既多做了无用功，也破坏了稳定性。',
+    '内层循环的上界写成 n-i，会在 i=0 时访问到 a[n]，造成越界。',
+    '当 n 很大（比如十万）时，O(n²) 的时间会超限，应该改用 sort 等更快的排序方法。',
   ],
   complexity: { time: 'O(n²)', space: 'O(1)', note: '如果加上“一整趟没有交换就提前结束”的优化，最好情况是 O(n)。' },
   inputHint: '输入 2～14 个 1～99 的整数，空格隔开，回车或点“应用”。',

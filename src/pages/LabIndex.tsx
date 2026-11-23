@@ -16,7 +16,7 @@ export default function LabIndex() {
         <h1>
           <span className="mark">动画实验室</span>
         </h1>
-        <p>每个演示都能自己输入数据、单步前进后退、拖动进度条；右边的代码会同步高亮，四种语言随时切换。</p>
+        <p>每个演示都可以自己输入数据，单步前进或后退，也可以拖动进度条；右侧的代码会同步高亮，并且能在四种语言之间切换。</p>
       </header>
 
       {groups.map((g) => (
@@ -42,7 +42,7 @@ export default function LabIndex() {
         </section>
       ))}
 
-      <p className="more-note">更多数据结构与算法的动画会陆续加入，完整计划见「学习路线」。</p>
+      <p className="more-note">更多数据结构与算法的动画会陆续加入，完整的学习计划见“开始学习”页面。</p>
     </div>
   )
 }

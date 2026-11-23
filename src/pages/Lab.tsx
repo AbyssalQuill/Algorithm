@@ -168,13 +168,13 @@ function LabView({ algo }: { algo: AnyAlgo }) {
 
       <section className="learn">
         <article className="learn-card learn-main">
-          <h2>一句话讲清楚</h2>
+          <h2>基本思路</h2>
           {algo.intro.map((t: string, i: number) => (
             <p key={i}>{t}</p>
           ))}
         </article>
         <article className="learn-card">
-          <h2>要点</h2>
+          <h2>关键点</h2>
           <ul>
             {algo.points.map((t: string, i: number) => (
               <li key={i}>{t}</li>
@@ -182,7 +182,7 @@ function LabView({ algo }: { algo: AnyAlgo }) {
           </ul>
         </article>
         <article className="learn-card warn">
-          <h2>容易踩的坑</h2>
+          <h2>常见错误</h2>
           <ul>
             {algo.pitfalls.map((t: string, i: number) => (
               <li key={i}>{t}</li>
@@ -196,7 +196,7 @@ function LabView({ algo }: { algo: AnyAlgo }) {
           <h2 className="section-title">
             <span className="mark">洛谷例题</span>
           </h2>
-          <p className="section-sub">看懂动画后，去原站动手写一写。链接会在新标签页打开洛谷。</p>
+          <p className="section-sub">看懂演示以后，可以去洛谷上亲手写一遍。点击题目会在新的标签页里打开。</p>
           <Problems list={algo.problems} />
         </section>
       )}

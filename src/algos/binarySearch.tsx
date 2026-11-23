@@ -29,27 +29,27 @@ export function runBinarySearch({ arr, target }: BsInput): Frame<BsState>[] {
   let steps = 0
   const snap = (status: BsState['status'] = 'run'): BsState => ({ cells, target, lo, hi, mid, status, steps })
 
-  rec.push('init', snap(), `要在有序数组里找 ${target}。先把整个数组当作候选区间：lo = 0，hi = ${hi}。`)
+  rec.push('init', snap(), `要在有序数组里查找 ${target}，先把整个数组作为候选区间：lo = 0，hi = ${hi}。`)
   while (lo <= hi) {
     mid = null
-    rec.push('loop', snap(), `候选区间是 [${lo}, ${hi}]，还剩 ${hi - lo + 1} 个数，继续找。`)
+    rec.push('loop', snap(), `当前的候选区间是 [${lo}, ${hi}]，还剩 ${hi - lo + 1} 个数。`)
     mid = lo + Math.floor((hi - lo) / 2)
     steps++
-    rec.push('mid', snap(), `取中间位置：mid = ${lo} + (${hi} - ${lo}) / 2 = ${mid}，看看 a[${mid}] = ${a[mid]} 是不是目标。`)
+    rec.push('mid', snap(), `取中间位置 mid = ${lo} + (${hi} - ${lo}) / 2 = ${mid}，检查 a[${mid}] = ${a[mid]} 是不是目标。`)
     if (a[mid] === target) {
-      rec.push('hit', snap('found'), `a[${mid}] = ${a[mid]} 正好等于 ${target}，找到啦！答案是下标 ${mid}。`)
+      rec.push('hit', snap('found'), `a[${mid}] = ${a[mid]} 恰好等于 ${target}，查找成功，答案是下标 ${mid}。`)
       return rec.frames
     }
     if (a[mid] < target) {
       lo = mid + 1
-      rec.push('goRight', snap(), `a[${mid}] = ${a[mid]} 比 ${target} 小：目标只可能在右边，所以 lo = mid + 1 = ${lo}，左半边整个排除。`)
+      rec.push('goRight', snap(), `a[${mid}] = ${a[mid]} 比 ${target} 小，目标只可能在右边，令 lo = mid + 1 = ${lo}，左半部分全部排除。`)
     } else {
       hi = mid - 1
-      rec.push('goLeft', snap(), `a[${mid}] = ${a[mid]} 比 ${target} 大：目标只可能在左边，所以 hi = mid - 1 = ${hi}，右半边整个排除。`)
+      rec.push('goLeft', snap(), `a[${mid}] = ${a[mid]} 比 ${target} 大，目标只可能在左边，令 hi = mid - 1 = ${hi}，右半部分全部排除。`)
     }
   }
   mid = null
-  rec.push('miss', snap('miss'), `lo = ${lo} 已经超过 hi = ${hi}，候选区间空了：数组里没有 ${target}，返回 -1。`)
+  rec.push('miss', snap('miss'), `lo = ${lo} 已经大于 hi = ${hi}，候选区间为空，说明数组里没有 ${target}，返回 -1。`)
   return rec.frames
 }
 
@@ -111,22 +111,22 @@ function parse(text: string): ParseResult<BsInput> {
 export const binarySearch: AlgoDef<BsInput, BsState> = {
   id: 'binary-search',
   title: '二分查找',
-  tagline: '在有序数组里，每次看正中间，一次排掉一半',
+  tagline: '在有序数组里每次查看正中间的元素，一次就能排除一半的候选',
   kind: '算法',
   intro: [
-    '二分查找只能用在“已经排好序”的数据上。每次看区间正中间的数：正好是目标，就找到了；比目标小，目标只可能在右边；比目标大，只可能在左边。',
-    '每看一次，候选范围就缩小一半。n 个数最多只要看大约 log₂n 次：一百万个数也只需要 20 次左右。',
+    '二分查找只能用在已经排好序的数据上。每次先看候选区间正中间的数：如果它恰好是目标，查找就结束了；如果它比目标小，目标只可能在右边；如果比目标大，则只可能在左边。',
+    '每看一次，候选范围就缩小一半，所以 n 个数最多只需要看大约 log₂n 次，一百万个数也不过二十次左右。',
   ],
   points: [
-    '用 lo、hi 表示“还没被排除”的闭区间 [lo, hi]，循环条件是 lo<=hi。',
-    'mid = lo + (hi - lo) / 2，比 (lo + hi) / 2 更不容易溢出。',
-    'a[mid] 比目标小，说明 mid 和它左边都不行，所以 lo = mid + 1；另一边同理 hi = mid - 1。',
-    '循环结束（lo>hi）还没找到，就说明不存在，返回 -1。',
+    '用 lo 和 hi 表示尚未排除的闭区间 [lo, hi]，循环的条件是 lo<=hi。',
+    '中点写成 mid = lo + (hi - lo) / 2，比 (lo + hi) / 2 更不容易溢出。',
+    '如果 a[mid] 比目标小，说明 mid 以及它左边的元素都可以排除，因此令 lo = mid + 1；另一侧同理，令 hi = mid - 1。',
+    '循环结束时 lo 已经大于 hi，仍然没有找到，就说明目标不存在，返回 -1。',
   ],
   pitfalls: [
-    '数组没有排序就用二分，结果是错的。',
-    '写成 lo = mid 或 hi = mid（少了 +1 / -1），在某些情况下会死循环。',
-    '数组里有重复数时，这个写法找到的不一定是第一个。要找“第一个 ≥ x”的位置，需要换成 lower_bound 写法（之后会专门讲）。',
+    '数组没有排好序就使用二分查找，结果是不可靠的。',
+    '把更新写成 lo = mid 或 hi = mid（少了 +1 或 -1），在某些情况下会进入死循环。',
+    '数组里有重复的数时，这种写法找到的不一定是第一个。如果要找“第一个大于等于 x 的位置”，需要使用 lower_bound 的写法，后面会专门介绍。',
   ],
   complexity: { time: 'O(log n)', space: 'O(1)' },
   inputHint: '格式：有序数组 | 目标，例如 1 3 5 7 9 11 | 7（0～99，最多 14 个数）。',

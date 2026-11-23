@@ -29,8 +29,8 @@ export function TraceBlock({ body }: { body: string }) {
   return (
     <div className="trace">
       <div className="trace-cap">
-        <span className="trace-tag">逐步看一遍</span>
-        点播放，或者一步一步点“下一步”
+        <span className="trace-tag">逐步演示</span>
+        点击播放，或者用“下一步”按钮一步一步查看
       </div>
       <div className="trace-grid">
         <div className="code-card trace-code">
@@ -38,7 +38,7 @@ export function TraceBlock({ body }: { body: string }) {
         </div>
         <div className="trace-side">
           <div className="trace-panel">
-            <h4>变量：内存里现在有什么</h4>
+            <h4>变量的当前值</h4>
             <div className="vars">
               {s.vars.length === 0 && <span className="vars-empty">还没有变量</span>}
               {s.vars.map(([name, val]) => (

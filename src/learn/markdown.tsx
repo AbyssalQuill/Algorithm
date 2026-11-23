@@ -49,12 +49,12 @@ export function lessonTitle(tokens: Token[]): string | undefined {
 }
 
 const CALLOUT: Record<string, { cls: string; icon: string; label: string }> = {
-  目标: { cls: 'goal', icon: '🎯', label: '学完这一课，你会' },
-  提示: { cls: 'tip', icon: '💡', label: '小提示' },
+  目标: { cls: 'goal', icon: '🎯', label: '本课目标' },
+  提示: { cls: 'tip', icon: '💡', label: '提示' },
   注意: { cls: 'warn', icon: '⚠️', label: '注意' },
   竞赛: { cls: 'contest', icon: '🏁', label: '算法竞赛里' },
   小结: { cls: 'sum', icon: '📝', label: '小结' },
-  思考: { cls: 'think', icon: '🤔', label: '想一想' },
+  思考: { cls: 'think', icon: '🤔', label: '思考' },
   答案: { cls: 'answer', icon: '✅', label: '答案' },
 }
 

@@ -32,31 +32,31 @@ export function runBracket(input: string): Frame<BrState>[] {
   let uid = 0
   const snap = (pos: number): BrState => ({ chars, pos, stack, pairs, held, verdict })
 
-  rec.push('init', snap(-1), '先准备一个空栈。接下来从左到右，一个字符一个字符地看。')
+  rec.push('init', snap(-1), '先准备一个空栈，然后从左到右逐个读取字符。')
   for (let i = 0; i < chars.length; i++) {
     const c = chars[i]
     held = null
     if (OPEN.includes(c)) {
-      rec.push('read', snap(i), `读到 '${c}'：是左括号，先放进栈里，等着右括号来配对。`)
+      rec.push('read', snap(i), `读到 '${c}'，它是左括号，先放进栈里，等待后面的右括号来和它配对。`)
       stack.push({ id: uid++, ch: c, idx: i })
-      rec.push('push', snap(i), `压栈：'${c}' 进栈。现在栈里有 ${stack.length} 个在等配对的左括号。`)
+      rec.push('push', snap(i), `'${c}' 入栈，目前栈里有 ${stack.length} 个等待配对的左括号。`)
     } else {
-      rec.push('read', snap(i), `读到 '${c}'：是右括号，要看看栈顶是不是它的另一半。`)
+      rec.push('read', snap(i), `读到 '${c}'，它是右括号，需要检查栈顶的左括号是否与它成对。`)
       if (stack.length === 0) {
         verdict = 'bad'
-        rec.push('emptyFail', snap(i), `栈是空的，没有左括号能和 '${c}' 配对 → 匹配失败 ✗`)
+        rec.push('emptyFail', snap(i), `栈已经空了，没有任何左括号可以和 '${c}' 配对，匹配失败。`)
         return rec.frames
       }
       const t = stack.pop()!
       held = t.ch
-      rec.push('pop', snap(i), `弹出栈顶 '${t.ch}'，拿它和 '${c}' 比一比。`)
+      rec.push('pop', snap(i), `取出栈顶的 '${t.ch}'，与当前的 '${c}' 比较。`)
       if (OPEN.indexOf(t.ch) !== CLOSE.indexOf(c)) {
         verdict = 'bad'
-        rec.push('match', snap(i), `'${t.ch}' 和 '${c}' 不是一对 → 匹配失败 ✗`)
+        rec.push('match', snap(i), `'${t.ch}' 和 '${c}' 不是一对括号，匹配失败。`)
         return rec.frames
       }
       pairs.push([t.idx, i])
-      rec.push('match', snap(i), `'${t.ch}' 和 '${c}' 正好一对，配对成功 ✓`)
+      rec.push('match', snap(i), `'${t.ch}' 和 '${c}' 恰好是一对，配对成功。`)
     }
   }
   held = null
@@ -64,7 +64,7 @@ export function runBracket(input: string): Frame<BrState>[] {
   rec.push(
     'final',
     snap(chars.length),
-    stack.length === 0 ? '字符串看完了，栈也空了：所有括号都配上了对 → 匹配成功 ✓' : `字符串看完了，但栈里还剩 ${stack.length} 个左括号没被配上 → 匹配失败 ✗`,
+    stack.length === 0 ? '字符串读完了，栈也恰好为空，说明所有括号都已配对，匹配成功。' : `字符串读完了，但栈里还剩 ${stack.length} 个左括号没有配对，匹配失败。`,
   )
   return rec.frames
 }
@@ -179,22 +179,22 @@ function randomBalanced(pairsN: number): string {
 export const bracketStack: AlgoDef<string, BrState> = {
   id: 'bracket-stack',
   title: '栈：括号匹配',
-  tagline: '后进先出的“一摞盘子”，用来检查括号是否成对',
+  tagline: '栈遵循“后进先出”的规则，最适合用来检查括号是否成对',
   kind: '数据结构',
   intro: [
-    '栈是一种“后进先出”（LIFO）的结构，就像一摞盘子：只能在最上面放（push），也只能从最上面拿（pop）。',
-    '括号匹配是栈最经典的用法：遇到左括号先压栈，等着被配对；遇到右括号，就看栈顶是不是它的另一半，是就弹出。整个字符串看完，栈恰好空了，才说明所有括号都配好了。',
+    '栈是一种“后进先出”（LIFO）的数据结构，就像叠在一起的一摞盘子：新盘子只能放在最上面，取的时候也只能先取最上面的一个。对应的两个基本操作叫作入栈（push）和出栈（pop）。',
+    '括号匹配是栈最典型的应用。遇到左括号，先把它放进栈里等待；遇到右括号，就看栈顶的左括号是否与它成对，成对就取出，不成对则匹配失败。整个字符串读完时，如果栈恰好是空的，说明每个括号都找到了自己的另一半。',
   ],
   points: [
-    'push：放到栈顶；pop：弹出栈顶；top：只看栈顶不弹出；empty：判断栈是不是空的。',
-    '右括号来了，但栈是空的 → 没有左括号可配，失败。',
-    '字符串扫完，栈里还有剩 → 有左括号没被配上，失败。',
-    'C 里用“数组 + top 下标”就能手写一个栈；C++ 有 stack，Python 用 list，Java 用 ArrayDeque。',
+    '栈有四个常用的操作：push 把元素放到栈顶，pop 取出栈顶元素，top 只查看栈顶而不取出，empty 判断栈是否为空。',
+    '遇到右括号时栈已经是空的，说明没有左括号可以和它配对，直接判定失败。',
+    '字符串读完以后栈里还有剩余，说明有些左括号始终没有等到右括号，同样判定失败。',
+    '在 C 里可以用“数组加一个 top 下标”自己实现栈；C++ 有现成的 stack，Python 用列表，Java 则推荐 ArrayDeque。',
   ],
   pitfalls: [
-    '先判断栈是否为空，再看栈顶，否则会越界或报错。',
-    '只数“左括号个数 = 右括号个数”不够：([)] 个数相等，但顺序交叉，依然不合法。',
-    'Java 里做栈，更推荐用 ArrayDeque（push / pop / isEmpty），而不是老的 Stack 类。',
+    '要先判断栈是否为空，再去看栈顶，否则对空栈取栈顶会越界或者报错。',
+    '只统计左括号和右括号的个数是否相等并不够：([)] 中两种括号的个数相同，但顺序交叉，依然不合法。',
+    'Java 里实现栈，更推荐使用 ArrayDeque 的 push、pop 和 isEmpty，而不是历史遗留的 Stack 类。',
   ],
   complexity: { time: 'O(n)', space: 'O(n)' },
   inputHint: '输入由 ( ) [ ] { } 组成的字符串（最多 16 个字符）。',
