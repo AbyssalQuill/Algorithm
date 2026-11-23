@@ -115,6 +115,40 @@ const cpp: Chapter[] = [
       { slug: 'set-map', title: 'set 与 map', summary: 'set 自动去重并排序，map 保存键值对；用它们统计次数、判断元素是否出现过。', minutes: 20, points: ['set 去重排序', 'map 键值对', '统计次数', 'count / find', '遍历'], problems: ['P1059', 'P5266'] },
     ],
   },
+  {
+    id: 'oop-class',
+    title: '类与对象',
+    blurb: '回头看结构体，会发现它只管存数据。类把数据和处理数据的函数放在一起，并且可以保护数据、在创建和销毁时自动做一些事。',
+    tone: 'red',
+    lessons: [
+      { slug: 'class-basic', title: '类与对象', summary: '把数据和处理数据的函数放进同一个类里：定义类、创建对象、调用成员函数，并认识到 string 与 vector 其实就是类。', minutes: 18, points: ['class 与对象', '成员变量与成员函数', '点号访问', '类外定义 ::', 'string / vector 是类'], problems: ['P5740'] },
+      { slug: 'encapsulation', title: '封装与访问控制', summary: '用 private 和 public 保护数据，通过取值、设值函数让类自己保证数据合理，并弄清 class 与 struct 的区别。', minutes: 15, points: ['private / public', '取值与设值函数', '合法性检查', 'class 与 struct'], problems: [] },
+      { slug: 'constructor', title: '构造函数与析构函数', summary: '对象创建时自动执行的构造函数、默认参数与初始化列表，对象销毁时自动执行的析构函数，以及它们的调用顺序。', minutes: 20, points: ['构造函数', '默认参数', '初始化列表', '析构函数', '构造与析构的顺序'], problems: [] },
+      { slug: 'member-more', title: 'this、const 与 static', summary: '用 this 指针区分同名成员并写出连续调用，用 const 保护只读对象，用 static 让所有对象共享数据，并学会通过指针访问对象。', minutes: 20, points: ['this 指针', '链式调用', 'const 成员函数', 'static 成员', '-> 与 new / delete'], problems: [] },
+    ],
+  },
+  {
+    id: 'oop-inherit',
+    title: '继承与多态',
+    blurb: '用继承复用已有的类，再用虚函数让同一句调用在不同的对象上产生不同的行为。',
+    tone: 'blue',
+    lessons: [
+      { slug: 'inherit', title: '继承', summary: '让派生类直接获得基类的成员，学习 protected、派生类构造函数的写法，以及基类与派生类的构造和析构顺序。', minutes: 18, points: ['基类与派生类', 'protected', '调用基类构造函数', '构造与析构顺序', '同名函数的隐藏'], problems: [] },
+      { slug: 'polymorphism', title: '多态与虚函数', summary: '通过基类的指针调用到对象真实类型的函数：virtual 与 override、对象切片、纯虚函数与抽象类，以及虚析构函数。', minutes: 22, points: ['virtual', 'override', '对象切片', '纯虚函数与抽象类', '虚析构函数'], problems: [] },
+    ],
+  },
+  {
+    id: 'oop-more',
+    title: '进阶与实战',
+    blurb: '运算符重载、拷贝与资源管理、模板，最后把它们用在算法竞赛里：把并查集、矩阵写成可以复用的类。',
+    tone: 'green',
+    lessons: [
+      { slug: 'operator', title: '运算符重载', summary: '为自定义类型重载 +、==、<<，为排序规则重载 <，以及重载 () 得到的仿函数；弄清成员函数与友元函数的区别。', minutes: 22, points: ['operator+', '友元与 <<', '重载 < 用于排序', '仿函数', '重载的规则'], problems: ['P1177'] },
+      { slug: 'copy-raii', title: '拷贝与资源管理', summary: '浅拷贝为什么会出错，如何写拷贝构造函数与赋值运算符，什么是 RAII，以及怎样用 vector 和智能指针避免手动管理内存。', minutes: 25, points: ['浅拷贝与深拷贝', '三法则', 'RAII', 'unique_ptr', 'shared_ptr'], problems: [] },
+      { slug: 'template', title: '模板入门', summary: '让同一份代码适用于多种类型：函数模板、类模板、多个类型参数，并看清 vector、pair、map 其实都是类模板。', minutes: 18, points: ['函数模板', '类模板', '实例化', '多个类型参数', '模板报错'], problems: [] },
+      { slug: 'oop-contest', title: '用类封装数据结构', summary: '在算法竞赛里把数据结构写成类：并查集的路径压缩与按大小合并，矩阵类配合快速幂求斐波那契数。', minutes: 25, points: ['并查集类', '路径压缩', '按大小合并', '矩阵与快速幂', '何时写成类'], problems: ['P3367', 'P1962'] },
+    ],
+  },
 ]
 
 export const TRACKS: Track[] = [
