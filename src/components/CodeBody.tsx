@@ -4,7 +4,7 @@ import { tokenize, type Tok } from '../engine/highlight'
 import { toRanges } from '../engine/source'
 import type { Lang } from '../engine/types'
 
-const LH = 28 // 每行高度，必须与 CSS 里 --code-lh 一致
+const DEFAULT_LH = 28 // 默认每行高度（像素）；实际行高通过 style 里的 --code-lh 同步给 CSS
 const PAD = 12 // 代码区上内边距，必须与 .code-inner 的 padding 一致
 const barSpring = { type: 'spring', stiffness: 420, damping: 38 } as const
 
@@ -22,7 +22,24 @@ function renderTokens(toks: Tok[] | undefined, fallback: string) {
  * 动画演示、课文里的代码块、逐步追踪都用它，所以看起来是一致的。
  * active：要高亮的行号（从 1 开始）；scroll：高亮行跑出可视区时自动滚过去。
  */
-export function CodeBody({ lines, lang, active = [], scroll = false, maxHeight }: { lines: string[]; lang: Lang; active?: number[]; scroll?: boolean; maxHeight?: string }) {
+export function CodeBody({
+  lines,
+  lang,
+  active = [],
+  scroll = false,
+  maxHeight,
+  lh: LH = DEFAULT_LH,
+  className,
+}: {
+  lines: string[]
+  lang: Lang
+  active?: number[]
+  scroll?: boolean
+  maxHeight?: string
+  /** 每行高度（像素） */
+  lh?: number
+  className?: string
+}) {
   const colored = useMemo(() => tokenize(lines.join('\n'), lang), [lines, lang])
   const activeKey = active.join(',')
   const ranges = useMemo(() => toRanges(active), [activeKey]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -49,7 +66,7 @@ export function CodeBody({ lines, lang, active = [], scroll = false, maxHeight }
   }, [scroll, first, last, lang])
 
   return (
-    <div className="code-body" ref={bodyRef} style={maxHeight ? { maxHeight } : undefined}>
+    <div className={className ? `code-body ${className}` : 'code-body'} ref={bodyRef} style={{ ...(maxHeight ? { maxHeight } : null), '--code-lh': `${LH}px` } as CSSProperties}>
       <div className="code-inner">
         <AnimatePresence initial={false}>
           {ranges.map(([a, b], i) => (

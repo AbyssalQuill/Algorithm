@@ -48,7 +48,7 @@ export function CodePanel({ sources, step, lang, onLang }: { sources: Record<Lan
           )}
         </button>
       </div>
-      <CodeBody lines={m.lines} lang={lang} active={active} scroll />
+      <CodeBody lines={m.lines} lang={lang} active={active} scroll lh={32} className="code-lg" />
       <div className="code-foot">高亮的行 = 动画当前这一步对应的代码</div>
     </div>
   )
