@@ -170,6 +170,54 @@ int main(){
 
 派生类的版本先调用了基类的版本，再补充自己的内容，这是扩展基类行为的常见写法。不过这里的“同名函数”只是简单的隐藏，调用哪一个，完全取决于对象的类型是什么。如果把派生类的对象当作基类来使用，会是什么结果，这是下一课的主题。
 
+## 多重继承
+
+一个类也可以同时继承多个基类，在冒号后面用逗号隔开。派生类将拥有所有基类的成员。
+
+```cpp title="multi.cpp"
+#include <bits/stdc++.h>
+using namespace std;
+class Flyer{
+public:
+    void move(){
+        cout<<"飞行"<<endl;
+    }
+    void fly(){
+        cout<<"拍动翅膀"<<endl;
+    }
+};
+class Swimmer{
+public:
+    void move(){
+        cout<<"游泳"<<endl;
+    }
+    void swim(){
+        cout<<"划水"<<endl;
+    }
+};
+class Duck: public Flyer, public Swimmer{
+};
+int main(){
+    Duck d;
+    d.fly();
+    d.swim();
+    d.Flyer::move();
+    d.Swimmer::move();
+    return 0;
+}
+```
+
+```output
+拍动翅膀
+划水
+飞行
+游泳
+```
+
+`Flyer` 和 `Swimmer` 各有一个 `move`，对 `Duck` 的对象直接写 `d.move()` 无法确定指的是哪一个，编译器会报“有歧义”的错误，必须像上面那样，用 `类名::` 明确指出。
+
+多重继承还有一个更棘手的情形：如果两个基类又继承自同一个更上层的基类，派生类里就会有两份这个“祖先”的数据，访问起来有歧义，也浪费空间，这叫作“菱形继承”。C++ 提供了**虚继承**来解决它，写成 `class A: virtual public Base`，让所有路径共享同一份祖先。由于这会让类的结构变得复杂，实际使用时要慎重，多数时候让一个类继承一个基类、再把别的功能作为成员，就足够了。
+
 > [!竞赛] 算法竞赛里几乎不需要继承，所有的数据结构直接写成独立的结构体或类。但继承是读懂标准库和大型项目的基础，例如输入输出流 `cin`、`cout` 所属的类就有一套继承关系，理解它们的工作方式，也要从这里开始。
 
 > [!思考] 如果让 `Student` 继承 `Person`，那么 `Person` 的析构函数和 `Student` 的析构函数，哪一个先执行？
