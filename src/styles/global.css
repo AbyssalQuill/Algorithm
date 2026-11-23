@@ -44,6 +44,10 @@
   --hl-bar: rgba(255, 213, 74, 0.5);
   --grain-opacity: 0.5;
   --grain-blend: multiply;
+  /* 页面底纹：淡淡的点阵（笔记本内页），再叠上 bg-paper.svg 里的彩铅色块和随手涂鸦 */
+  --dot: rgba(47, 111, 216, 0.17);
+  --dots: radial-gradient(circle, var(--dot) 1.2px, transparent 1.8px);
+  --veil: color-mix(in srgb, var(--paper) 50%, transparent);
 
   --font: 'LXGW WenKai', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei', serif;
   --font-mono: 'LXGW WenKai Mono', ui-monospace, Consolas, 'Courier New', monospace;
@@ -85,6 +89,7 @@
   --hl-bar: rgba(255, 213, 74, 0.2);
   --grain-opacity: 0.22;
   --grain-blend: screen;
+  --dot: rgba(125, 177, 255, 0.16);
 
   color-scheme: dark;
 }
@@ -101,7 +106,11 @@ html {
 }
 body {
   margin: 0;
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: var(--dots), url('../assets/bg-paper.svg');
+  background-position: 0 0, center top;
+  background-size: 28px 28px, max(100%, 1400px) auto;
+  background-repeat: repeat, repeat-y;
   color: var(--ink);
   font-family: var(--font);
   font-size: 17px;
@@ -109,6 +118,32 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   transition: background-color 0.3s, color 0.3s;
+}
+:root[data-theme='dark'] body {
+  background-image: var(--dots), url('../assets/bg-board.svg');
+}
+/* 窗口不够宽时，两侧的涂鸦会压到正文栏上：盖一层纸色薄雾把背景淡下去，正文优先 */
+@media (max-width: 1500px) {
+  body {
+    background-image: var(--dots), linear-gradient(var(--veil), var(--veil)), url('../assets/bg-paper.svg');
+    background-position: 0 0, 0 0, center top;
+    background-size: 28px 28px, 100% 100%, max(100%, 1400px) auto;
+    background-repeat: repeat, no-repeat, repeat-y;
+  }
+  :root[data-theme='dark'] body {
+    background-image: var(--dots), linear-gradient(var(--veil), var(--veil)), url('../assets/bg-board.svg');
+  }
+}
+@media (max-width: 700px) {
+  body {
+    background-size: 28px 28px, 100% 100%, 820px auto;
+    background-position: 0 0, 0 0, 0 top;
+  }
+}
+/* 背景再丰富，直接落在背景上的标题和说明文字也要读得清：围一圈纸色光晕 */
+:is(.hero h1, .hero-sub, .section-title, .section-sub, .page-head h1, .page-head p, .lab-head h1, .lab-tagline, .group-title,
+  .crumbs, .more-note, .hint, .inputbar label, .kbd-hint) {
+  text-shadow: 0 0 4px var(--paper), 0 0 10px var(--paper), 0 0 18px var(--paper);
 }
 /* 纸纹：固定在最底层的一层细颗粒 */
 body::before {
@@ -798,7 +833,7 @@ input {
   padding: 1px 14px;
   color: var(--ink-3);
   font-size: 0.92rem;
-  --sk-bg: transparent;
+  --sk-bg: color-mix(in srgb, var(--paper) 88%, transparent);
   --sk-bd: var(--pencil-soft);
   --sk-bw: 1.8px;
 }
@@ -947,7 +982,7 @@ input {
   font-size: 0.9rem;
   cursor: pointer;
   transition: transform 0.15s, color 0.2s;
-  --sk-bg: transparent;
+  --sk-bg: color-mix(in srgb, var(--paper) 88%, transparent);
   --sk-bd: var(--pencil-soft);
   --sk-bw: 1.8px;
 }
