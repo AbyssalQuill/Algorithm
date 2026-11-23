@@ -6,6 +6,7 @@ import 'lxgw-wenkai-webfont/lxgwwenkai-regular.css'
 import 'lxgw-wenkai-webfont/lxgwwenkai-bold.css'
 import 'lxgw-wenkai-webfont/lxgwwenkaimono-regular.css'
 import './styles/global.css'
+import './styles/learn.css'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(

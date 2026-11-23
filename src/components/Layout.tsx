@@ -25,23 +25,23 @@ export function Layout() {
             <NavLink to="/" end>
               首页
             </NavLink>
-            <NavLink to="/path">学习路线</NavLink>
+            <NavLink to="/learn">开始学习</NavLink>
             <NavLink to="/lab">动画实验室</NavLink>
           </nav>
           <ThemeToggle />
         </div>
       </header>
-      <motion.main key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+      <motion.main key={pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}>
         <Outlet />
       </motion.main>
       <footer className="site-footer">
         <div className="container">
           <p>
-            <strong>算法笔记本</strong> · 从第一行代码，走到蓝桥杯。讲解与代码为原创；例题来自
+            <strong>算法笔记本</strong> · 从第一行代码一路学到算法竞赛。讲解与代码均为原创，例题来自
             <a href="https://www.luogu.com.cn/" target="_blank" rel="noopener noreferrer">
               洛谷
             </a>
-            ，点击后在原站做题。
+            ，点击题目会在洛谷原站打开。
           </p>
         </div>
       </footer>

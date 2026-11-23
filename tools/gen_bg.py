@@ -1,5 +1,6 @@
 """
-生成页面背景（铅笔涂鸦主题）：src/assets/bg-paper.svg（浅色·纸）、bg-board.svg（暗色·黑板）。
+生成页面背景的矢量源（铅笔涂鸦主题）：tools/svg/bg-paper.svg（浅色·纸）、bg-board.svg（暗色·黑板）。
+再运行 tools/bake_bg.py 把它们烘焙成 WebP 放进 src/assets（网站只用位图：浏览器零重绘成本，滚动不卡）。
 背景 = 淡淡的彩铅晕色 + 彩铅排线色块 + 随手涂鸦（星星、箭头、括号、树、链表、栈、柱状图……）。
 涂鸦主要分布在页面两侧；中间区域只放很淡的几个，保证正文可读。
 竖向可无缝平铺：所有元素都留在上下 100px 安全区内，接缝处是纸色接纸色。
@@ -9,7 +10,7 @@ import math
 import os
 import random
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src', 'assets')
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'svg')  # 矢量源文件放这里，不随网站发布；网站用的是 bake_bg.py 烘焙出来的位图
 os.makedirs(OUT, exist_ok=True)
 W, H = 1600, 2200
 

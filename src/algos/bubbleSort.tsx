@@ -113,7 +113,7 @@ export const bubbleSort: AlgoDef<number[], SortState> = {
     '内层上界写成 n-i 会让 a[j+1] 越界（i=0 时访问到了 a[n]）。',
     'n 很大（比如 10 万）时，O(n²) 会超时：这时要用 sort 或更快的排序（后面会学）。',
   ],
-  complexity: { time: '最好 O(n)，平均与最坏 O(n²)', space: 'O(1)' },
+  complexity: { time: 'O(n²)', space: 'O(1)', note: '如果加上“一整趟没有交换就提前结束”的优化，最好情况是 O(n)。' },
   inputHint: '输入 2～14 个 1～99 的整数，空格隔开，回车或点“应用”。',
   presets: [
     { label: '已经有序', text: '1 2 3 4 5 6 7 8' },

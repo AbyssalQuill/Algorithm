@@ -87,7 +87,7 @@ function LabView({ algo }: { algo: AnyAlgo }) {
   }, [])
 
   return (
-    <div className="container page lab">
+    <div className="container lab-wide page lab">
       <div className="crumbs">
         <Link to="/lab">动画实验室</Link>
         <span aria-hidden="true">/</span>
@@ -95,21 +95,22 @@ function LabView({ algo }: { algo: AnyAlgo }) {
       </div>
 
       <header className="lab-head">
-        <div>
-          <span className="tag tag-kind">{algo.kind}</span>
+        <span className="tag tag-kind">{algo.kind}</span>
+        <div className="lab-titlerow">
           <h1>{algo.title}</h1>
-          <p className="lab-tagline">{algo.tagline}</p>
+          <div className="cx" aria-label="复杂度">
+            <span>
+              <i>时间复杂度</i>
+              {algo.complexity.time}
+            </span>
+            <span>
+              <i>空间复杂度</i>
+              {algo.complexity.space}
+            </span>
+          </div>
         </div>
-        <div className="cx">
-          <span>
-            <i>时间</i>
-            {algo.complexity.time}
-          </span>
-          <span>
-            <i>空间</i>
-            {algo.complexity.space}
-          </span>
-        </div>
+        <p className="lab-tagline">{algo.tagline}</p>
+        {algo.complexity.note && <p className="cx-note">{algo.complexity.note}</p>}
       </header>
 
       <div className="lab-grid">

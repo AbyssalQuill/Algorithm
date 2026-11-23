@@ -6,6 +6,7 @@ import { bubbleSort } from '../algos/bubbleSort'
 import { Arrow, Circled, PencilArt, Sparkle } from '../components/Doodles'
 import { IconArrow } from '../components/icons'
 import { STAGES } from '../data/roadmap'
+import { TRACKS } from '../learn/curriculum'
 import { usePlayer } from '../engine/usePlayer'
 import { EASE_OUT } from '../motion'
 
@@ -41,6 +42,7 @@ function Reveal({ children, delay = 0, className }: { children: ReactNode; delay
 }
 
 export default function Home() {
+  const cpp = TRACKS[0]
   const rise = (i: number) => ({
     initial: { opacity: 0, y: 18 },
     animate: { opacity: 1, y: 0 },
@@ -56,22 +58,22 @@ export default function Home() {
         <div className="container hero-grid">
           <div className="hero-copy">
             <motion.span className="eyebrow" {...rise(0)}>
-              零基础 · 蓝桥杯 B 组 · C / C++ / Python / Java
+              零基础入门 · 算法竞赛 · 从 C++ 学起
             </motion.span>
             <motion.h1 {...rise(1)}>
               从第一行代码，
               <br />
-              走到<Circled>蓝桥杯</Circled>
+              走到<Circled>算法大牛</Circled>
             </motion.h1>
             <motion.p className="hero-sub" {...rise(2)}>
-              每个知识点都有动画演示、四种语言的逐行高亮代码，还有洛谷例题。看一遍动画，读一遍代码，算法是怎么“跑”起来的，一眼就能看见。
+              不要求你先配好开发环境，我们直接从最基础的语法讲起。每一课围绕一个主题展开，除了讲解，还能把程序一步步运行给你看，课后配有洛谷上的练习题。等语法学扎实了，再去看数据结构和算法的动画，理解起来会顺畅得多。
             </motion.p>
             <motion.div className="cta-row" {...rise(3)}>
-              <Link to="/lab/bubble-sort" className="btn btn-primary">
-                看第一个动画 <IconArrow />
+              <Link to="/learn" className="btn btn-primary">
+                开始第一步学习 <IconArrow />
               </Link>
-              <Link to="/path" className="btn btn-ghost">
-                查看学习路线
+              <Link to="/lab" className="btn btn-ghost">
+                先看看动画
               </Link>
             </motion.div>
             <motion.div className="hero-pencil" {...rise(5)}>
@@ -80,7 +82,7 @@ export default function Home() {
           </div>
           <motion.div className="hero-demo" initial={{ opacity: 0, y: 28, rotate: 0 }} animate={{ opacity: 1, y: 0, rotate: 1.2 }} transition={{ duration: 0.8, delay: 0.25, ease: EASE_OUT }}>
             <div className="hero-aside" aria-hidden="true">
-              <span className="scribble-note">它会自己动哦</span>
+              <span className="scribble-note">它会自己动起来</span>
               <Arrow className="hero-arrow" />
             </div>
             <HeroDemo />
@@ -92,14 +94,14 @@ export default function Home() {
         <div className="container">
           <Reveal>
             <h2 className="section-title">
-              <span className="mark">三步</span>学会一个知识点
+              <span className="mark">每一课</span>是这样安排的
             </h2>
           </Reveal>
           <div className="steps">
             {[
-              ['1', '看动画', '一步步前进、后退、拖进度条，还能自己改输入数据，看清每一步发生了什么。'],
-              ['2', '读代码', 'C、C++、Python、Java 随时切换；动画走到哪一步，代码就高亮到哪一行。'],
-              ['3', '刷例题', '每个知识点配洛谷例题，看懂了就去原站动手写一写。'],
+              ['1', '先读讲解', '每一课只讲一个主题，借助日常生活里的例子把概念讲清楚。左侧有完整的目录，想跳到哪里都可以。'],
+              ['2', '再看运行过程', '遇到不容易想象的地方，会附上逐步演示：代码一行一行地高亮，变量的值和屏幕输出同步变化，不必在脑子里一遍遍模拟。'],
+              ['3', '最后动手练习', '每一课后面有对应的洛谷题目，只会用到当天学过的内容。读懂以后亲手写一遍，印象会深刻得多。'],
             ].map(([no, title, text], i) => (
               <Reveal key={no} delay={0.08 * i} className="step">
                 <span className="step-no">{no}</span>
@@ -114,8 +116,35 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <Reveal>
-            <h2 className="section-title">已经可以玩的动画</h2>
-            <p className="section-sub">先从这几个开始，更多的会陆续加入。</p>
+            <h2 className="section-title">从 C++ 语法开始</h2>
+            <p className="section-sub">整套教程分为 {cpp.chapters.length} 章、{cpp.chapters.reduce((n, c) => n + c.lessons.length, 0)} 节，按顺序学习即可。每学完一章，你就能解决一类新的问题。</p>
+          </Reveal>
+          <div className="stage-strip home-chapters">
+            {cpp.chapters.map((c, i) => (
+              <Reveal key={c.id} delay={0.05 * i}>
+                <Link to={`/learn/cpp/${c.lessons[0].slug}`} className={`mini-stage tone-${c.tone}`}>
+                  <span className="mini-no">{i + 1}</span>
+                  <h3>{c.title.split('：')[0]}</h3>
+                  <p>{c.lessons.map((l) => l.title).join(' · ')}</p>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal>
+            <p className="home-more">
+              <Link to="/learn" className="btn btn-ghost btn-sm">
+                查看完整目录和思维导图 <IconArrow />
+              </Link>
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <Reveal>
+            <h2 className="section-title">动画实验室</h2>
+            <p className="section-sub">数据结构和算法会配上逐步演示的动画，代码同步高亮。内容还在持续增加。</p>
           </Reveal>
           <div className="lab-cards">
             {ALGOS.map((a, i) => (
@@ -140,13 +169,13 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <Reveal>
-            <h2 className="section-title">学习路线</h2>
-            <p className="section-sub">从零基础语法，一路走到蓝桥杯冲刺。</p>
+            <h2 className="section-title">完整的学习路线</h2>
+            <p className="section-sub">从零基础的语法，到数据结构与算法，再到面向比赛的综合训练。</p>
           </Reveal>
           <div className="stage-strip">
             {STAGES.map((s, i) => (
               <Reveal key={s.no} delay={0.06 * i}>
-                <Link to="/path" className="mini-stage">
+                <Link to="/learn" className="mini-stage">
                   <span className="mini-no">{s.no}</span>
                   <h3>{s.name}</h3>
                   <p>{s.blurb}</p>

@@ -40,7 +40,7 @@ export interface AlgoDef<I, S> {
   intro: string[]
   points: string[]
   pitfalls: string[]
-  complexity: { time: string; space: string }
+  complexity: { time: string; space: string; note?: string }
   inputHint: string
   presets?: Preset[]
   defaultInput: I
