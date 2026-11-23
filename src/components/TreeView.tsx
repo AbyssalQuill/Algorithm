@@ -65,6 +65,7 @@ export function TreeView({
   mode = 'binary',
   levels = 4,
   maxSlots = 8,
+  hideRoot = false,
 }: {
   nodes: TNode[]
   root: number | null
@@ -73,6 +74,8 @@ export function TreeView({
   levels?: number
   /** 至少按几个横向位置留宽，避免树变宽时结点缩小 */
   maxSlots?: number
+  /** 不画根结点：用来把一片“森林”画成几棵并排的树（并查集），此时根只是个看不见的总根 */
+  hideRoot?: boolean
 }) {
   const [ref, w] = useWidth<HTMLDivElement>()
   const map = new Map(nodes.map((n) => [n.id, n]))
@@ -82,15 +85,17 @@ export function TreeView({
   const total = slots * sw
   const x0 = Math.max(0, (w - total) / 2)
   const r = Math.min(20, sw * 0.42)
-  const lv = Math.max(depth + 1, levels)
+  const off = hideRoot ? 1 : 0
+  const lv = Math.max(depth + 1 - off, levels - off, 1)
   const levelH = Math.min(70, Math.max(46, 300 / lv))
   const px = (id: number) => x0 + ((pos.get(id)?.x ?? 0) + 0.5) * sw
-  const py = (id: number) => r + 6 + (pos.get(id)?.d ?? 0) * levelH
+  const py = (id: number) => r + 6 + ((pos.get(id)?.d ?? 0) - off) * levelH
   const height = r * 2 + 12 + (lv - 1) * levelH + 18
 
   const edges: { from: number; to: number; tone: Tone }[] = []
   for (const n of nodes) {
     const kids = mode === 'binary' ? [n.left, n.right] : n.kids ?? []
+    if (hideRoot && n.id === root) continue
     for (const k of kids) if (k != null && map.has(k) && pos.has(k)) edges.push({ from: n.id, to: k, tone: map.get(k)!.edge ?? 'idle' })
   }
 
@@ -110,7 +115,7 @@ export function TreeView({
             ))}
           </svg>
           {nodes
-            .filter((n) => pos.has(n.id))
+            .filter((n) => pos.has(n.id) && !(hideRoot && n.id === root))
             .map((n) => (
               <motion.div
                 key={n.id}

@@ -178,7 +178,7 @@ function SegView({ frame }: { frame: Frame<SegState> }) {
       )}
       <TreeView nodes={tn} root={1} mode="tidy" levels={4} maxSlots={8} />
       <div className="row-label">数组 a（下标从 1 开始）</div>
-      <ArrayView cells={cells} mode="boxes" base={1} />
+      <ArrayView cells={cells} mode="boxes" base={1} minSlots={0} />
       <div className="legend">
         <span><i className="sw tone-compare" />需要拆开</span>
         <span><i className="sw tone-found" />整段取用</span>

@@ -155,7 +155,7 @@ function MsView({ frame }: { frame: Frame<MsState> }) {
       <div className="row-label">原数组{active ? `（当前处理 [${s.l}, ${s.r}]，浅黄色是右半）` : ''}</div>
       <ArrayView cells={cells} pointers={pointers} mode="bars" areaH={150} minSlots={2} />
       <div className="row-label">辅助数组 tmp</div>
-      <ArrayView cells={tmpCells} pointers={tmpPtr} mode="boxes" minSlots={1} />
+      <ArrayView cells={tmpCells} pointers={tmpPtr} mode="boxes" minSlots={tmpPtr.length > 0 ? 1 : 0} />
       <Stats
         items={[
           ['递归层数', s.depth],

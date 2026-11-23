@@ -70,7 +70,7 @@ function PsView({ frame }: { frame: Frame<PsState> }) {
   return (
     <div className="viz">
       <div className="row-label">原数组 a（下标从 1 开始）</div>
-      <ArrayView cells={top} mode="boxes" base={0} />
+      <ArrayView cells={top} mode="boxes" base={0} minSlots={0} />
       <div className="row-label">前缀和 s</div>
       <ArrayView cells={bottom} pointers={bottomPtr} mode="boxes" minSlots={2} />
       {s.answer !== null && (

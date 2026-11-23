@@ -1456,6 +1456,127 @@ kbd {
   font-weight: 400;
   white-space: nowrap;
 }
+.lv {
+  position: relative;
+  width: 100%;
+  margin: 4px 0;
+}
+.lv-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+.lv-arrow {
+  fill: none;
+  stroke: var(--pencil);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.lv-arrow.tone-done,
+.lv-arrow.tone-swap,
+.lv-arrow.tone-compare {
+  stroke: var(--t-bd);
+  stroke-width: 3;
+}
+.lv-head {
+  fill: var(--pencil);
+}
+.lv-head.tone-done,
+.lv-head.tone-swap,
+.lv-head.tone-compare {
+  fill: var(--t-bd);
+}
+.lv-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--t-bd);
+  border-radius: 10px 6px 11px 7px / 7px 11px 6px 10px;
+  background-color: var(--t-bg);
+  background-image: repeating-linear-gradient(135deg, var(--t-hatch, transparent) 0 1.5px, transparent 1.5px 6px);
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.lv-null {
+  position: absolute;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  line-height: 20px;
+}
+.lv-ptr {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  width: 0;
+}
+.lv-ptr span {
+  padding: 0 8px;
+  border: 1.8px solid var(--t-bd);
+  border-radius: 9px 6px 10px 6px / 6px 10px 6px 9px;
+  background: var(--t-bg);
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.hash {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0;
+}
+.hash-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hash-idx {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--pencil);
+  border-radius: 8px 5px 9px 5px / 5px 9px 5px 8px;
+  background: var(--paper-2);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.hash-row.is-cur .hash-idx {
+  border-color: var(--yellow-edge);
+  background: var(--yellow-soft);
+}
+.hash-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+}
+.hash-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.hash-arrow {
+  color: var(--ink-3);
+  font-style: normal;
+}
+.hash-item .qchip {
+  padding: 2px 11px;
+  border-color: var(--t-bd);
+  background-color: var(--t-bg);
+  color: var(--t-fg);
+  font-size: 0.92rem;
+}
 .trav-row {
   display: flex;
   align-items: center;

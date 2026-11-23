@@ -1,14 +1,18 @@
 import type { AnyAlgo } from '../engine/types'
 import { binarySearch } from './binarySearch'
 import { bracketStack } from './bracketStack'
+import { bit } from './bit'
 import { bst } from './bst'
 import { diffArray } from './diffArray'
 import { bfsGrid } from './bfsGrid'
 import { bubbleSort } from './bubbleSort'
+import { dsu } from './dsu'
+import { hashTable } from './hashTable'
 import { heap } from './heap'
 import { insertionSort } from './insertionSort'
 import { josephusQueue } from './josephusQueue'
 import { lcs } from './lcs'
+import { linkedList } from './linkedList'
 import { mergeSort } from './mergeSort'
 import { prefixSum } from './prefixSum'
 import { quickSort } from './quickSort'
@@ -23,6 +27,10 @@ import { twoPointers } from './twoPointers'
 export const ALGOS: AnyAlgo[] = [
   bracketStack,
   josephusQueue,
+  linkedList,
+  hashTable,
+  dsu,
+  bit,
   bst,
   treeTraversal,
   heap,

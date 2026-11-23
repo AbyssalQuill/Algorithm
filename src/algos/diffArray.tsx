@@ -98,11 +98,11 @@ function DiffView({ frame }: { frame: Frame<DiffState> }) {
   return (
     <div className="viz">
       <div className="row-label">原数组 a（下标从 1 开始）{s.op ? `　第 ${s.opNo} 次操作：[${s.op.l}, ${s.op.r}] 加 ${s.op.k}` : ''}</div>
-      <ArrayView cells={orig} mode="boxes" base={1} />
+      <ArrayView cells={orig} mode="boxes" base={1} minSlots={0} />
       <div className="row-label">差分数组 d</div>
-      <ArrayView cells={diff} pointers={dPtr} mode="boxes" base={1} minSlots={1} />
+      <ArrayView cells={diff} pointers={dPtr} mode="boxes" base={1} minSlots={0} />
       <div className="row-label">还原的结果</div>
-      <ArrayView cells={res} mode="boxes" base={1} />
+      <ArrayView cells={res} mode="boxes" base={1} minSlots={0} />
       <Stats
         items={[
           ['区间修改', s.opNo + ' 次'],
