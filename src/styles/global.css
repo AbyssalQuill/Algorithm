@@ -1403,6 +1403,88 @@ kbd {
   min-height: 28px;
   margin-bottom: 8px;
 }
+.tv {
+  position: relative;
+  width: 100%;
+  margin: 4px 0 6px;
+}
+.tv-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+.tv-edge {
+  stroke: var(--pencil-soft);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.tv-edge.tone-compare,
+.tv-edge.tone-swap,
+.tv-edge.tone-done,
+.tv-edge.tone-found {
+  stroke: var(--t-bd);
+  stroke-width: 3.2;
+}
+.tv-node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--t-bd);
+  border-radius: 50%;
+  background-color: var(--t-bg);
+  background-image: repeating-linear-gradient(135deg, var(--t-hatch, transparent) 0 1.5px, transparent 1.5px 6px);
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  line-height: 1;
+  will-change: transform;
+  transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+}
+.tv-ring {
+  box-shadow: 0 0 0 3px var(--face), 0 0 0 5px var(--t-bd);
+}
+.tv-sub {
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--ink-3);
+  font-size: 0.66rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.trav-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  font-size: 0.88rem;
+}
+.trav-name {
+  flex: none;
+  min-width: 11.5em;
+  color: var(--ink-3);
+}
+.trav-row.is-now .trav-name {
+  color: var(--ink);
+  font-weight: 700;
+}
+.trav-out {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 26px;
+}
+@media (max-width: 560px) {
+  .trav-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
 .qrow {
   display: flex;
   flex-wrap: wrap;
