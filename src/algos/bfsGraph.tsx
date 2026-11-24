@@ -184,17 +184,17 @@ int main(){
     scanf("%d",&s);
     for (int i=1;i<=n;i++) dist[i]=-1;
     dist[s]=0;
-    q[tail++]=s;                                   //@init
+    q[tail++]=s;                              // 起点的距离是 0，先放进队列        //@init
     while (head<tail){
-        int u=q[head++];                           //@pop
+        int u=q[head++];                      // 取出队头，处理它的每个邻居         //@pop
         for (int k=0;k<deg[u];k++){
             int v=adj[u][k];
-            if (dist[v]!=-1) continue;             //@skip
-            dist[v]=dist[u]+1;                     //@push
-            q[tail++]=v;                           //@push
+            if (dist[v]!=-1) continue;        // 已经有距离了，说明更早被发现过，跳过    //@skip
+            dist[v]=dist[u]+1;                // 第一次发现：距离比 u 多 1，放进队尾  //@push
+            q[tail++]=v;                                               //@push
         }
     }
-    for (int i=1;i<=n;i++) printf("%d ",dist[i]);  //@done
+    for (int i=1;i<=n;i++) printf("%d ",dist[i]);  // 输出到每个车站的最少站数     //@done
     printf("\n");
     return 0;
 }
@@ -216,17 +216,17 @@ int main(){
     fill(dist_,dist_+n+1,-1);
     queue<int> q;
     dist_[s]=0;
-    q.push(s);                                   //@init
+    q.push(s);                                // 起点的距离是 0，先放进队列        //@init
     while (!q.empty()){
         int u=q.front();
-        q.pop();                                 //@pop
+        q.pop();                              // 取出队头，处理它的每个邻居         //@pop
         for (int v:adj[u]){
-            if (dist_[v]!=-1) continue;          //@skip
-            dist_[v]=dist_[u]+1;                 //@push
-            q.push(v);                           //@push
+            if (dist_[v]!=-1) continue;       // 已经有距离了，说明更早被发现过，跳过    //@skip
+            dist_[v]=dist_[u]+1;              // 第一次发现：距离比 u 多 1，放进队尾  //@push
+            q.push(v);                                                 //@push
         }
     }
-    for (int i=1;i<=n;i++) cout<<dist_[i]<<" ";  //@done
+    for (int i=1;i<=n;i++) cout<<dist_[i]<<" ";  // 输出到每个车站的最少站数       //@done
     cout<<endl;
     return 0;
 }
@@ -242,15 +242,15 @@ for _ in range(m):
 s=int(input())
 dist=[-1]*(n+1)
 dist[s]=0
-q=deque([s])                                #@init
+q=deque([s])               # 起点的距离是 0，先放进队列        #@init
 while q:
-    u=q.popleft()                           #@pop
+    u=q.popleft()          # 取出队头，处理它的每个邻居         #@pop
     for v in adj[u]:
         if dist[v]!=-1:
-            continue                        #@skip
-        dist[v]=dist[u]+1                   #@push
-        q.append(v)                         #@push
-print(*dist[1:])                            #@done
+            continue       # 已经有距离了，说明更早被发现过，跳过    #@skip
+        dist[v]=dist[u]+1  # 第一次发现：距离比 u 多 1，放进队尾  #@push
+        q.append(v)                                #@push
+print(*dist[1:])           # 输出到每个车站的最少站数          #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -271,18 +271,18 @@ public class Main{
         Arrays.fill(dist,-1);
         dist[s]=0;
         Deque<Integer> q=new ArrayDeque<>();
-        q.add(s);                           //@init
+        q.add(s);                           // 起点的距离是 0，先放进队列        //@init
         while (!q.isEmpty()){
-            int u=q.poll();                 //@pop
+            int u=q.poll();                 // 取出队头，处理它的每个邻居         //@pop
             for (int v:adj.get(u)){
-                if (dist[v]!=-1) continue;  //@skip
-                dist[v]=dist[u]+1;          //@push
-                q.add(v);                   //@push
+                if (dist[v]!=-1) continue;  // 已经有距离了，说明更早被发现过，跳过    //@skip
+                dist[v]=dist[u]+1;          // 第一次发现：距离比 u 多 1，放进队尾  //@push
+                q.add(v);                                            //@push
             }
         }
         StringBuilder sb=new StringBuilder();
         for (int i=1;i<=n;i++) sb.append(dist[i]).append(' ');
-        System.out.println(sb);             //@done
+        System.out.println(sb);             // 输出到每个车站的最少站数          //@done
     }
 }
 `,

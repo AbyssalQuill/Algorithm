@@ -1161,6 +1161,31 @@ input {
   transition: left 0.3s;
 }
 
+/* ---------- 基础演示 ---------- */
+.problem-lead {
+  color: var(--ink-3);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.fmt-fold {
+  margin-top: 14px;
+}
+.fmt-fold summary {
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.fmt-fold .fmt {
+  margin-top: 10px;
+}
+.ex-tab.base b {
+  background: var(--green-soft, var(--yellow-soft));
+}
+.ex-tab.base.on b {
+  background: var(--blue);
+}
+
 /* ---------- 题目卡片 ---------- */
 .problem {
   display: grid;
@@ -2410,8 +2435,9 @@ kbd {
 :root[data-theme='dark'] .tok {
   color: var(--td);
 }
+/* 注释用淡一点的颜色，字形保持直立：中文的“假斜体”读起来很吃力，代码里又会有不少中文注释 */
 .tok.it {
-  font-style: italic;
+  font-style: normal;
 }
 .code-foot {
   padding: 8px 14px;
@@ -2490,6 +2516,7 @@ kbd {
   font-weight: 700;
 }
 .prob-title {
+  margin-top: 8px;
   font-weight: 700;
 }
 .prob-go {
@@ -2502,41 +2529,46 @@ kbd {
   font-weight: 700;
   white-space: nowrap;
 }
-.prob-meta {
+/* 难度颜色和洛谷一致：入门红、普及−橙、普及/提高−黄、普及+/提高绿、提高+/省选−蓝、省选/NOI−紫、NOI 黑 */
+.diff-tag,
+.prob {
+  --dc: #bfbfbf;
+}
+.d1 { --dc: #fe4c61; }
+.d2 { --dc: #f39c11; }
+.d3 { --dc: #ffc116; }
+.d4 { --dc: #52c41a; }
+.d5 { --dc: #3498db; }
+.d6 { --dc: #9d3dcf; }
+.d7 { --dc: #0e1d69; }
+:root[data-theme='dark'] .d7 {
+  --dc: #6a78d1;
+}
+.diff-tag {
+  display: inline-block;
+  padding: 0 10px;
+  border: 1.5px solid var(--dc);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--dc) 16%, transparent);
+  color: color-mix(in srgb, var(--dc) 78%, var(--ink));
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.prob .prob-pid {
+  background: color-mix(in srgb, var(--dc) 16%, transparent);
+  color: color-mix(in srgb, var(--dc) 78%, var(--ink));
+}
+:root[data-theme='dark'] .diff-tag,
+:root[data-theme='dark'] .prob .prob-pid {
+  color: color-mix(in srgb, var(--dc) 70%, #fff);
+}
+.diff-legend {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-  color: var(--ink-3);
-  font-size: 0.84rem;
-}
-.diff-dots {
-  display: inline-flex;
-  gap: 4px;
-}
-.diff-dots i {
-  width: 8px;
-  height: 8px;
-  border: 1.5px solid var(--pencil-soft);
-  border-radius: 50%;
-}
-.diff-dots i.on {
-  border-color: transparent;
-}
-.diff-dots i.on.d1,
-.diff-dots i.on.d2 {
-  background: var(--green);
-}
-.diff-dots i.on.d3,
-.diff-dots i.on.d4 {
-  background: var(--yellow-edge);
-}
-.diff-dots i.on.d5,
-.diff-dots i.on.d6 {
-  background: var(--red);
-}
-.diff-dots i.on.d7 {
-  background: var(--pencil);
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 22px;
 }
 .prob-why {
   margin-top: 8px;

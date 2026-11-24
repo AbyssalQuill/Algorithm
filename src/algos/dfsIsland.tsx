@@ -189,27 +189,27 @@ char g[10][12];
 int vis[10][10];
 int dx[4]={1,-1,0,0},dy[4]={0,0,1,-1};
 void dfs(int x,int y){
-    vis[x][y]=1;                            //@visit
+    vis[x][y]=1;         // 来到这个格子，先标记走过         //@visit
     for (int d=0;d<4;d++){
         int nx=x+dx[d],ny=y+dy[d];
         if (nx<0||nx>=n||ny<0||ny>=m) continue;
         if (g[nx][ny]!='#'||vis[nx][ny]) continue;
         dfs(nx,ny);
     }
-}                                           //@back
+}                        // 四个方向都看完了，返回上一层       //@back
 int main(){
-    int cnt=0;                              //@init
+    int cnt=0;           // cnt 是岛屿的个数           //@init
     scanf("%d %d",&n,&m);
     for (int i=0;i<n;i++) scanf("%s",g[i]);
     for (int i=0;i<n;i++){
         for (int j=0;j<m;j++){
             if (g[i][j]=='#'&&!vis[i][j]){
-                cnt++;                      //@start
+                cnt++;   // 发现一块没访问过的陆地，这是一座新的岛  //@start
                 dfs(i,j);
             }
         }
     }
-    printf("%d\n",cnt);                     //@done
+    printf("%d\n",cnt);  // 输出岛屿的数量              //@done
     return 0;
 }
 `,
@@ -221,27 +221,27 @@ string g[10];
 bool vis[10][10];
 int dx[4]={1,-1,0,0},dy[4]={0,0,1,-1};
 void dfs(int x,int y){
-    vis[x][y]=true;                         //@visit
+    vis[x][y]=true;     // 来到这个格子，先标记走过         //@visit
     for (int d=0;d<4;d++){
         int nx=x+dx[d],ny=y+dy[d];
         if (nx<0||nx>=n||ny<0||ny>=m) continue;
         if (g[nx][ny]!='#'||vis[nx][ny]) continue;
         dfs(nx,ny);
     }
-}                                           //@back
+}                       // 四个方向都看完了，返回上一层       //@back
 int main(){
-    int cnt=0;                              //@init
+    int cnt=0;          // cnt 是岛屿的个数           //@init
     cin>>n>>m;
     for (int i=0;i<n;i++) cin>>g[i];
     for (int i=0;i<n;i++){
         for (int j=0;j<m;j++){
             if (g[i][j]=='#'&&!vis[i][j]){
-                cnt++;                      //@start
+                cnt++;  // 发现一块没访问过的陆地，这是一座新的岛  //@start
                 dfs(i,j);
             }
         }
     }
-    cout<<cnt<<endl;                        //@done
+    cout<<cnt<<endl;    // 输出岛屿的数量              //@done
     return 0;
 }
 `,
@@ -251,7 +251,7 @@ g=[input() for _ in range(n)]
 vis=[[False]*m for _ in range(n)]
 DIRS=[(1,0),(-1,0),(0,1),(0,-1)]
 def dfs(x,y):
-    vis[x][y]=True                          #@visit
+    vis[x][y]=True  # 来到这个格子，先标记走过          #@visit
     for dx,dy in DIRS:
         nx,ny=x+dx,y+dy
         if nx<0 or nx>=n or ny<0 or ny>=m:
@@ -259,14 +259,14 @@ def dfs(x,y):
         if g[nx][ny]!='#' or vis[nx][ny]:
             continue
         dfs(nx,ny)
-    return                                  #@back
-cnt=0                                       #@init
+    return          # 四个方向都看完了，返回上一层        #@back
+cnt=0               # cnt 是岛屿的个数            #@init
 for i in range(n):
     for j in range(m):
         if g[i][j]=='#' and not vis[i][j]:
-            cnt+=1                          #@start
+            cnt+=1  # 发现一块没访问过的陆地，这是一座新的岛   #@start
             dfs(i,j)
-print(cnt)                                  #@done
+print(cnt)          # 输出岛屿的数量               #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -278,14 +278,14 @@ public class Main{
     static int[] dx={1,-1,0,0},dy={0,0,1,-1};
 
     static void dfs(int x,int y){
-        vis[x][y]=true;                     //@visit
+        vis[x][y]=true;           // 来到这个格子，先标记走过         //@visit
         for (int d=0;d<4;d++){
             int nx=x+dx[d],ny=y+dy[d];
             if (nx<0||nx>=n||ny<0||ny>=m) continue;
             if (g[nx].charAt(ny)!='#'||vis[nx][ny]) continue;
             dfs(nx,ny);
         }
-    }                                       //@back
+    }                             // 四个方向都看完了，返回上一层       //@back
 
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
@@ -293,16 +293,16 @@ public class Main{
         m=sc.nextInt();
         g=new String[n];
         for (int i=0;i<n;i++) g[i]=sc.next();
-        int cnt=0;                          //@init
+        int cnt=0;                // cnt 是岛屿的个数           //@init
         for (int i=0;i<n;i++){
             for (int j=0;j<m;j++){
                 if (g[i].charAt(j)=='#'&&!vis[i][j]){
-                    cnt++;                  //@start
+                    cnt++;        // 发现一块没访问过的陆地，这是一座新的岛  //@start
                     dfs(i,j);
                 }
             }
         }
-        System.out.println(cnt);            //@done
+        System.out.println(cnt);  // 输出岛屿的数量              //@done
     }
 }
 `,

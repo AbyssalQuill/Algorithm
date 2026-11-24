@@ -163,18 +163,18 @@ int q[100005];
 int main(){
     int n,m,head=0,tail=0,cnt=0;
     scanf("%d %d",&n,&m);
-    for (int i=1;i<=n;i++) q[tail++]=i;     //@init
+    for (int i=1;i<=n;i++) q[tail++]=i;  // 1 到 n 号依次排进队列         //@init
     while (head<tail){
-        int x=q[head++];                    //@pop
-        cnt++;                              //@pop
-        if (cnt==m){                        //@out
-            printf("%d ",x);                //@out
-            cnt=0;                          //@out
+        int x=q[head++];                 // 队头的人出来报数              //@pop
+        cnt++;                                                    //@pop
+        if (cnt==m){                     // 报到 m 的人出列，报数重新从 1 开始  //@out
+            printf("%d ",x);                                      //@out
+            cnt=0;                                                //@out
         }else{
-            q[tail++]=x;                    //@back
+            q[tail++]=x;                 // 没报到 m 的，回到队尾继续排队      //@back
         }
     }
-    printf("\n");                           //@done
+    printf("\n");                        // 输出出列的顺序               //@done
     return 0;
 }
 `,
@@ -185,20 +185,20 @@ int main(){
     int n,m;
     cin>>n>>m;
     queue<int> q;
-    for (int i=1;i<=n;i++) q.push(i);       //@init
+    for (int i=1;i<=n;i++) q.push(i);  // 1 到 n 号依次排进队列         //@init
     int cnt=0;
     while (!q.empty()){
-        int x=q.front();                    //@pop
-        q.pop();                            //@pop
-        cnt++;                              //@pop
-        if (cnt==m){                        //@out
-            cout<<x<<" ";                   //@out
-            cnt=0;                          //@out
+        int x=q.front();               // 队头的人出来报数              //@pop
+        q.pop();                                                //@pop
+        cnt++;                                                  //@pop
+        if (cnt==m){                   // 报到 m 的人出列，报数重新从 1 开始  //@out
+            cout<<x<<" ";                                       //@out
+            cnt=0;                                              //@out
         }else{
-            q.push(x);                      //@back
+            q.push(x);                 // 没报到 m 的，回到队尾继续排队      //@back
         }
     }
-    cout<<endl;                             //@done
+    cout<<endl;                        // 输出出列的顺序               //@done
     return 0;
 }
 `,
@@ -206,18 +206,18 @@ int main(){
 from collections import deque
 
 n,m=map(int,input().split())
-q=deque(range(1,n+1))                       #@init
+q=deque(range(1,n+1))  # 1 到 n 号依次排进队列         #@init
 cnt=0
 res=[]
 while q:
-    x=q.popleft()                           #@pop
-    cnt+=1                                  #@pop
-    if cnt==m:                              #@out
-        res.append(x)                       #@out
-        cnt=0                               #@out
+    x=q.popleft()      # 队头的人出来报数              #@pop
+    cnt+=1                                     #@pop
+    if cnt==m:         # 报到 m 的人出列，报数重新从 1 开始  #@out
+        res.append(x)                          #@out
+        cnt=0                                  #@out
     else:
-        q.append(x)                         #@back
-print(*res)                                 #@done
+        q.append(x)    # 没报到 m 的，回到队尾继续排队      #@back
+print(*res)            # 输出出列的顺序               #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -227,19 +227,19 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt(),m=sc.nextInt();
         Queue<Integer> q=new ArrayDeque<>();
-        for (int i=1;i<=n;i++) q.add(i);    //@init
+        for (int i=1;i<=n;i++) q.add(i);  // 1 到 n 号依次排进队列         //@init
         int cnt=0;
         while (!q.isEmpty()){
-            int x=q.poll();                 //@pop
-            cnt++;                          //@pop
-            if (cnt==m){                    //@out
-                System.out.print(x+" ");    //@out
-                cnt=0;                      //@out
+            int x=q.poll();               // 队头的人出来报数              //@pop
+            cnt++;                                                 //@pop
+            if (cnt==m){                  // 报到 m 的人出列，报数重新从 1 开始  //@out
+                System.out.print(x+" ");                           //@out
+                cnt=0;                                             //@out
             }else{
-                q.add(x);                   //@back
+                q.add(x);                 // 没报到 m 的，回到队尾继续排队      //@back
             }
         }
-        System.out.println();               //@done
+        System.out.println();             // 输出出列的顺序               //@done
     }
 }
 `,

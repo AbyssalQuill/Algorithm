@@ -188,20 +188,20 @@ int main(){
     scanf("%d",&n);
     for (int i=1;i<=n;i++){
         scanf("%d",&a[i]);
-        st[0][i]=a[i];                                       //@init
+        st[0][i]=a[i];                        // st[0][i] 就是只有一个数的区间 [i, i] 的最小值          //@init
     }
     lg[1]=0;
     for (int i=2;i<=n;i++) lg[i]=lg[i/2]+1;
     for (int k=1;(1<<k)<=n;k++)
         for (int i=1;i+(1<<k)-1<=n;i++)
-            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  //@fill
+            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  // 长度翻倍：两个长度为 2^(k-1) 的区间，取较小值  //@fill
     scanf("%d",&m);
     while (m--){
         scanf("%d %d",&l,&r);
-        int k=lg[r-l+1];                                     //@qLevel
-        printf("%d ",min(st[k][l],st[k][r-(1<<k)+1]));       //@qAns
+        int k=lg[r-l+1];                      // 找到不超过区间长度的最大的 2 的幂                       //@qLevel
+        printf("%d ",min(st[k][l],st[k][r-(1<<k)+1]));  // 两个可能重叠的区间正好盖住查询区间，取较小值         //@qAns
     }
-    printf("\n");                                            //@done
+    printf("\n");                             // 输出所有查询的结果                                //@done
     return 0;
 }
 `,
@@ -214,27 +214,27 @@ int main(){
     cin>>n;
     for (int i=1;i<=n;i++){
         cin>>a[i];
-        st[0][i]=a[i];                                       //@init
+        st[0][i]=a[i];                        // st[0][i] 就是只有一个数的区间 [i, i] 的最小值          //@init
     }
     lg[1]=0;
     for (int i=2;i<=n;i++) lg[i]=lg[i/2]+1;
     for (int k=1;(1<<k)<=n;k++)
         for (int i=1;i+(1<<k)-1<=n;i++)
-            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  //@fill
+            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  // 长度翻倍：两个长度为 2^(k-1) 的区间，取较小值  //@fill
     cin>>m;
     while (m--){
         cin>>l>>r;
-        int k=lg[r-l+1];                                     //@qLevel
-        cout<<min(st[k][l],st[k][r-(1<<k)+1])<<" ";          //@qAns
+        int k=lg[r-l+1];                      // 找到不超过区间长度的最大的 2 的幂                       //@qLevel
+        cout<<min(st[k][l],st[k][r-(1<<k)+1])<<" ";  // 两个可能重叠的区间正好盖住查询区间，取较小值            //@qAns
     }
-    cout<<endl;                                              //@done
+    cout<<endl;                               // 输出所有查询的结果                                //@done
     return 0;
 }
 `,
     python: String.raw`
 n=int(input())
 a=[0]+list(map(int,input().split()))
-st=[a[:]]                                        #@init
+st=[a[:]]                                     # st[0][i] 就是只有一个数的区间 [i, i] 的最小值  #@init
 lg=[0]*(n+2)
 for i in range(2,n+1):
     lg[i]=lg[i//2]+1
@@ -243,15 +243,15 @@ while (1<<k)<=n:
     prev=st[k-1]
     row=[0]*(n+1)
     for i in range(1,n-(1<<k)+2):
-        row[i]=min(prev[i],prev[i+(1<<(k-1))])   #@fill
+        row[i]=min(prev[i],prev[i+(1<<(k-1))])  # 长度翻倍：两个长度为 2^(k-1) 的区间，取较小值    #@fill
     st.append(row)
     k+=1
 res=[]
 for _ in range(int(input())):
     l,r=map(int,input().split())
-    k=lg[r-l+1]                                  #@qLevel
-    res.append(min(st[k][l],st[k][r-(1<<k)+1]))  #@qAns
-print(*res)                                      #@done
+    k=lg[r-l+1]                               # 找到不超过区间长度的最大的 2 的幂               #@qLevel
+    res.append(min(st[k][l],st[k][r-(1<<k)+1]))  # 两个可能重叠的区间正好盖住查询区间，取较小值        #@qAns
+print(*res)                                   # 输出所有查询的结果                        #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -263,20 +263,20 @@ public class Main{
         int[][] st=new int[8][n+2];
         int[] lg=new int[n+2];
         for (int i=1;i<=n;i++){
-            st[0][i]=sc.nextInt();                              //@init
+            st[0][i]=sc.nextInt();            // st[0][i] 就是只有一个数的区间 [i, i] 的最小值          //@init
         }
         for (int i=2;i<=n;i++) lg[i]=lg[i/2]+1;
         for (int k=1;(1<<k)<=n;k++)
             for (int i=1;i+(1<<k)-1<=n;i++)
-                st[k][i]=Math.min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  //@fill
+                st[k][i]=Math.min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  // 长度翻倍：两个长度为 2^(k-1) 的区间，取较小值  //@fill
         int m=sc.nextInt();
         StringBuilder sb=new StringBuilder();
         while (m-- > 0){
             int l=sc.nextInt(),r=sc.nextInt();
-            int k=lg[r-l+1];                                    //@qLevel
-            sb.append(Math.min(st[k][l],st[k][r-(1<<k)+1])).append(' ');  //@qAns
+            int k=lg[r-l+1];                  // 找到不超过区间长度的最大的 2 的幂                       //@qLevel
+            sb.append(Math.min(st[k][l],st[k][r-(1<<k)+1])).append(' ');  // 两个可能重叠的区间正好盖住查询区间，取较小值  //@qAns
         }
-        System.out.println(sb);                                 //@done
+        System.out.println(sb);               // 输出所有查询的结果                                //@done
     }
 }
 `,

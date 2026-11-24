@@ -178,16 +178,16 @@ int main(){
     int a[105]={0},b[105]={0},c[105]={0};
     scanf("%s %s",s1,s2);
     int l1=strlen(s1),l2=strlen(s2);
-    for (int i=0;i<l1;i++) a[i]=s1[l1-1-i]-'0';    //@init
+    for (int i=0;i<l1;i++) a[i]=s1[l1-1-i]-'0';  // 把两个数的各位倒过来，让个位放在最前面  //@init
     for (int i=0;i<l2;i++) b[i]=s2[l2-1-i]-'0';
     int len=l1>l2?l1:l2,carry=0;
     for (int i=0;i<len;i++){
-        int s=a[i]+b[i]+carry;                     //@sum
-        c[i]=s%10;                                 //@digit
-        carry=s/10;                                //@carry
+        int s=a[i]+b[i]+carry;                // 这一位的和 = 两个数字 + 进位       //@sum
+        c[i]=s%10;                            // 这一位写下和的个位               //@digit
+        carry=s/10;                           // 和除以 10，得到新的进位           //@carry
     }
-    if (carry) c[len++]=carry;                     //@last
-    for (int i=len-1;i>=0;i--) printf("%d",c[i]);  //@done
+    if (carry) c[len++]=carry;                // 最后还剩一个进位，它成了最高位         //@last
+    for (int i=len-1;i>=0;i--) printf("%d",c[i]);  // 把结果倒回来输出           //@done
     printf("\n");
     return 0;
 }
@@ -198,38 +198,38 @@ using namespace std;
 int main(){
     string s1,s2;
     cin>>s1>>s2;
-    reverse(s1.begin(),s1.end());                //@init
+    reverse(s1.begin(),s1.end());             // 把两个数的各位倒过来，让个位放在最前面  //@init
     reverse(s2.begin(),s2.end());
     int len=max(s1.size(),s2.size()),carry=0;
     vector<int> c;
     for (int i=0;i<len;i++){
         int x=i<(int)s1.size()?s1[i]-'0':0;
         int y=i<(int)s2.size()?s2[i]-'0':0;
-        int s=x+y+carry;                         //@sum
-        c.push_back(s%10);                       //@digit
-        carry=s/10;                              //@carry
+        int s=x+y+carry;                      // 这一位的和 = 两个数字 + 进位    //@sum
+        c.push_back(s%10);                    // 这一位写下和的个位            //@digit
+        carry=s/10;                           // 和除以 10，得到新的进位        //@carry
     }
-    if (carry) c.push_back(carry);               //@last
-    for (int i=c.size()-1;i>=0;i--) cout<<c[i];  //@done
+    if (carry) c.push_back(carry);            // 最后还剩一个进位，它成了最高位      //@last
+    for (int i=c.size()-1;i>=0;i--) cout<<c[i];  // 把结果倒回来输出          //@done
     cout<<endl;
     return 0;
 }
 `,
     python: String.raw`
 s1,s2=input().split()
-a=[int(ch) for ch in reversed(s1)]          #@init
+a=[int(ch) for ch in reversed(s1)]    # 把两个数的各位倒过来，让个位放在最前面  #@init
 b=[int(ch) for ch in reversed(s2)]
 c=[]
 carry=0
 for i in range(max(len(a),len(b))):
     x=a[i] if i<len(a) else 0
     y=b[i] if i<len(b) else 0
-    s=x+y+carry                             #@sum
-    c.append(s%10)                          #@digit
-    carry=s//10                             #@carry
+    s=x+y+carry                       # 这一位的和 = 两个数字 + 进位    #@sum
+    c.append(s%10)                    # 这一位写下和的个位            #@digit
+    carry=s//10                       # 和除以 10，得到新的进位        #@carry
 if carry:
-    c.append(carry)                         #@last
-print(''.join(map(str,reversed(c))))        #@done
+    c.append(carry)                   # 最后还剩一个进位，它成了最高位      #@last
+print(''.join(map(str,reversed(c))))  # 把结果倒回来输出             #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -237,19 +237,19 @@ import java.util.*;
 public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
-        String s1=new StringBuilder(sc.next()).reverse().toString();  //@init
+        String s1=new StringBuilder(sc.next()).reverse().toString();  // 把两个数的各位倒过来，让个位放在最前面  //@init
         String s2=new StringBuilder(sc.next()).reverse().toString();
         int len=Math.max(s1.length(),s2.length()),carry=0;
         StringBuilder c=new StringBuilder();
         for (int i=0;i<len;i++){
             int x=i<s1.length()?s1.charAt(i)-'0':0;
             int y=i<s2.length()?s2.charAt(i)-'0':0;
-            int s=x+y+carry;                                    //@sum
-            c.append(s%10);                                     //@digit
-            carry=s/10;                                         //@carry
+            int s=x+y+carry;                  // 这一位的和 = 两个数字 + 进位                        //@sum
+            c.append(s%10);                   // 这一位写下和的个位                                //@digit
+            carry=s/10;                       // 和除以 10，得到新的进位                            //@carry
         }
-        if (carry>0) c.append(carry);                           //@last
-        System.out.println(c.reverse());                        //@done
+        if (carry>0) c.append(carry);         // 最后还剩一个进位，它成了最高位                          //@last
+        System.out.println(c.reverse());      // 把结果倒回来输出                                 //@done
     }
 }
 `,

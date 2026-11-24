@@ -145,14 +145,14 @@ export const hanoi: AlgoDef<number, HanoiState> = {
 void hanoi(int n,char a,char b,char c){
     if (n==0) return;
     hanoi(n-1,a,c,b);
-    printf("%d %c %c\n",n,a,c);             //@move
+    printf("%d %c %c\n",n,a,c);  // 把 n 号盘子从 a 搬到 c   //@move
     hanoi(n-1,b,a,c);
 }
 int main(){
     int n;
     scanf("%d",&n);
-    hanoi(n,'A','B','C');                   //@init
-    printf("%d\n",(1<<n)-1);                //@done
+    hanoi(n,'A','B','C');        // 把 n 个盘子从 A 搬到 C   //@init
+    printf("%d\n",(1<<n)-1);     // 输出移动的总次数 2^n - 1  //@done
     return 0;
 }
 `,
@@ -162,14 +162,14 @@ using namespace std;
 void hanoi(int n,char a,char b,char c){
     if (n==0) return;
     hanoi(n-1,a,c,b);
-    cout<<n<<" "<<a<<" "<<c<<endl;          //@move
+    cout<<n<<" "<<a<<" "<<c<<endl;  // 把 n 号盘子从 a 搬到 c   //@move
     hanoi(n-1,b,a,c);
 }
 int main(){
     int n;
     cin>>n;
-    hanoi(n,'A','B','C');                   //@init
-    cout<<(1<<n)-1<<endl;                   //@done
+    hanoi(n,'A','B','C');           // 把 n 个盘子从 A 搬到 C   //@init
+    cout<<(1<<n)-1<<endl;           // 输出移动的总次数 2^n - 1  //@done
     return 0;
 }
 `,
@@ -178,12 +178,12 @@ def hanoi(n,a,b,c):
     if n==0:
         return
     hanoi(n-1,a,c,b)
-    print(n,a,c)                            #@move
+    print(n,a,c)      # 把 n 号盘子从 a 搬到 c     #@move
     hanoi(n-1,b,a,c)
 
 n=int(input())
-hanoi(n,'A','B','C')                        #@init
-print((1<<n)-1)                             #@done
+hanoi(n,'A','B','C')  # 把 n 个盘子从 A 搬到 C     #@init
+print((1<<n)-1)       # 输出移动的总次数 2^n - 1    #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -192,14 +192,14 @@ public class Main{
     static void hanoi(int n,char a,char b,char c){
         if (n==0) return;
         hanoi(n-1,a,c,b);
-        System.out.println(n+" "+a+" "+c);  //@move
+        System.out.println(n+" "+a+" "+c);  // 把 n 号盘子从 a 搬到 c   //@move
         hanoi(n-1,b,a,c);
     }
 
     public static void main(String[] args){
         int n=new Scanner(System.in).nextInt();
-        hanoi(n,'A','B','C');               //@init
-        System.out.println((1<<n)-1);       //@done
+        hanoi(n,'A','B','C');               // 把 n 个盘子从 A 搬到 C   //@init
+        System.out.println((1<<n)-1);       // 输出移动的总次数 2^n - 1  //@done
     }
 }
 `,

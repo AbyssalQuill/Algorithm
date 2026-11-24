@@ -264,20 +264,20 @@ int main(){
             dist[i][j]=-1;
         }
     }
-    dist[sx][sy]=0;                                          //@init
-    qx[tail]=sx; qy[tail++]=sy;                              //@init
+    dist[sx][sy]=0;                   // 起点的距离是 0，放进队列              //@init
+    qx[tail]=sx; qy[tail++]=sy;                                     //@init
     while (head<tail){
-        int x=qx[head],y=qy[head++];                         //@pop
-        if (x==tx&&y==ty) break;                             //@found
-        for (int d=0;d<4;d++){                               //@expand
-            int nx=x+dx[d],ny=y+dy[d];                       //@expand
-            if (nx<0||nx>=n||ny<0||ny>=m) continue;          //@expand
-            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;  //@expand
-            dist[nx][ny]=dist[x][y]+1;                       //@expand
-            qx[tail]=nx; qy[tail++]=ny;                      //@expand
+        int x=qx[head],y=qy[head++];  // 取出队头的格子                    //@pop
+        if (x==tx&&y==ty) break;      // 走到终点了，BFS 第一次到达的，一定是最短的    //@found
+        for (int d=0;d<4;d++){        // 向上下左右四个方向走一步，越界、是墙、走过的都跳过  //@expand
+            int nx=x+dx[d],ny=y+dy[d];                              //@expand
+            if (nx<0||nx>=n||ny<0||ny>=m) continue;                 //@expand
+            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;         //@expand
+            dist[nx][ny]=dist[x][y]+1;                              //@expand
+            qx[tail]=nx; qy[tail++]=ny;                             //@expand
         }
     }
-    printf("%d\n",dist[tx][ty]);                             //@done
+    printf("%d\n",dist[tx][ty]);      // 输出终点的距离，没到过就是 -1           //@done
     return 0;
 }
 `,
@@ -298,21 +298,21 @@ int main(){
         }
     }
     queue<pair<int,int>> q;
-    dist[sx][sy]=0;                                          //@init
-    q.push({sx,sy});                                         //@init
+    dist[sx][sy]=0;               // 起点的距离是 0，放进队列              //@init
+    q.push({sx,sy});                                            //@init
     while (!q.empty()){
-        auto [x,y]=q.front();                                //@pop
-        q.pop();                                             //@pop
-        if (x==tx&&y==ty) break;                             //@found
-        for (int d=0;d<4;d++){                               //@expand
-            int nx=x+dx[d],ny=y+dy[d];                       //@expand
-            if (nx<0||nx>=n||ny<0||ny>=m) continue;          //@expand
-            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;  //@expand
-            dist[nx][ny]=dist[x][y]+1;                       //@expand
-            q.push({nx,ny});                                 //@expand
+        auto [x,y]=q.front();     // 取出队头的格子                    //@pop
+        q.pop();                                                //@pop
+        if (x==tx&&y==ty) break;  // 走到终点了，BFS 第一次到达的，一定是最短的    //@found
+        for (int d=0;d<4;d++){    // 向上下左右四个方向走一步，越界、是墙、走过的都跳过  //@expand
+            int nx=x+dx[d],ny=y+dy[d];                          //@expand
+            if (nx<0||nx>=n||ny<0||ny>=m) continue;             //@expand
+            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;     //@expand
+            dist[nx][ny]=dist[x][y]+1;                          //@expand
+            q.push({nx,ny});                                    //@expand
         }
     }
-    cout<<dist[tx][ty]<<endl;                                //@done
+    cout<<dist[tx][ty]<<endl;     // 输出终点的距离，没到过就是 -1           //@done
     return 0;
 }
 `,
@@ -331,21 +331,21 @@ for i in range(n):
 dx=[1,-1,0,0]
 dy=[0,0,1,-1]
 q=deque()
-dist[sx][sy]=0                                  #@init
-q.append((sx,sy))                               #@init
+dist[sx][sy]=0          # 起点的距离是 0，放进队列              #@init
+q.append((sx,sy))                                    #@init
 while q:
-    x,y=q.popleft()                             #@pop
-    if (x,y)==(tx,ty):                          #@found
-        break                                   #@found
-    for d in range(4):                          #@expand
-        nx,ny=x+dx[d],y+dy[d]                   #@expand
-        if nx<0 or nx>=n or ny<0 or ny>=m:      #@expand
-            continue                            #@expand
-        if g[nx][ny]=='#' or dist[nx][ny]!=-1:  #@expand
-            continue                            #@expand
-        dist[nx][ny]=dist[x][y]+1               #@expand
-        q.append((nx,ny))                       #@expand
-print(dist[tx][ty])                             #@done
+    x,y=q.popleft()     # 取出队头的格子                    #@pop
+    if (x,y)==(tx,ty):  # 走到终点了，BFS 第一次到达的，一定是最短的    #@found
+        break                                        #@found
+    for d in range(4):  # 向上下左右四个方向走一步，越界、是墙、走过的都跳过  #@expand
+        nx,ny=x+dx[d],y+dy[d]                        #@expand
+        if nx<0 or nx>=n or ny<0 or ny>=m:           #@expand
+            continue                                 #@expand
+        if g[nx][ny]=='#' or dist[nx][ny]!=-1:       #@expand
+            continue                                 #@expand
+        dist[nx][ny]=dist[x][y]+1                    #@expand
+        q.append((nx,ny))                            #@expand
+print(dist[tx][ty])     # 输出终点的距离，没到过就是 -1           #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -373,21 +373,21 @@ public class Main{
             }
         }
         Queue<int[]> q=new ArrayDeque<>();
-        dist[sx][sy]=0;                                         //@init
-        q.add(new int[]{sx,sy});                                //@init
+        dist[sx][sy]=0;                    // 起点的距离是 0，放进队列              //@init
+        q.add(new int[]{sx,sy});                                         //@init
         while (!q.isEmpty()){
-            int[] cur=q.poll();                                 //@pop
-            int x=cur[0],y=cur[1];                              //@pop
-            if (x==tx&&y==ty) break;                            //@found
-            for (int d=0;d<4;d++){                              //@expand
-                int nx=x+dx[d],ny=y+dy[d];                      //@expand
-                if (nx<0||nx>=n||ny<0||ny>=m) continue;         //@expand
-                if (g[nx].charAt(ny)=='#'||dist[nx][ny]!=-1) continue;  //@expand
-                dist[nx][ny]=dist[x][y]+1;                      //@expand
-                q.add(new int[]{nx,ny});                        //@expand
+            int[] cur=q.poll();            // 取出队头的格子                    //@pop
+            int x=cur[0],y=cur[1];                                       //@pop
+            if (x==tx&&y==ty) break;       // 走到终点了，BFS 第一次到达的，一定是最短的    //@found
+            for (int d=0;d<4;d++){         // 向上下左右四个方向走一步，越界、是墙、走过的都跳过  //@expand
+                int nx=x+dx[d],ny=y+dy[d];                               //@expand
+                if (nx<0||nx>=n||ny<0||ny>=m) continue;                  //@expand
+                if (g[nx].charAt(ny)=='#'||dist[nx][ny]!=-1) continue;   //@expand
+                dist[nx][ny]=dist[x][y]+1;                               //@expand
+                q.add(new int[]{nx,ny});                                 //@expand
             }
         }
-        System.out.println(dist[tx][ty]);                       //@done
+        System.out.println(dist[tx][ty]);  // 输出终点的距离，没到过就是 -1           //@done
     }
 }
 `,

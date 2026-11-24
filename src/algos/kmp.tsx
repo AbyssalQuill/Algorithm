@@ -233,22 +233,22 @@ int main(){
     int nxt[105],res[105],rc=0;
     scanf("%s %s",t,p);
     int n=strlen(t),m=strlen(p);
-    nxt[0]=0;                                     //@init
+    nxt[0]=0;                                 // nxt[i]：模式串前 i+1 个字符里，最长的相等前后缀的长度  //@init
     for (int i=1,j=0;i<m;i++){
-        while (j>0&&p[i]!=p[j]) j=nxt[j-1];       //@pFall
-        if (p[i]==p[j]) j++;                      //@pExtend
-        nxt[i]=j;                                 //@pSet
+        while (j>0&&p[i]!=p[j]) j=nxt[j-1];   // 失配了，退到更短的相等前后缀再试                  //@pFall
+        if (p[i]==p[j]) j++;                  // 字符相同，相等的前后缀长了一位                   //@pExtend
+        nxt[i]=j;                             // 记下 nxt[i]                         //@pSet
     }
     for (int i=0,j=0;i<n;i++){
-        while (j>0&&t[i]!=p[j]) j=nxt[j-1];       //@fall
-        if (t[i]==p[j]) j++;                      //@hit,miss
+        while (j>0&&t[i]!=p[j]) j=nxt[j-1];   // 文本里的字符和模式串失配，j 退回到 nxt[j-1]       //@fall
+        if (t[i]==p[j]) j++;                  // 字符相同，匹配的长度加一                      //@hit,miss
         if (j==m){
-            res[rc++]=i-m+1;                      //@found
+            res[rc++]=i-m+1;                  // 完整匹配了，记下它的起始位置                    //@found
             j=nxt[j-1];
         }
     }
     if (rc==0) printf("-1");
-    for (int i=0;i<rc;i++) printf("%d ",res[i]);  //@done
+    for (int i=0;i<rc;i++) printf("%d ",res[i]);  // 输出所有匹配的位置                     //@done
     printf("\n");
     return 0;
 }
@@ -260,22 +260,22 @@ int main(){
     string t,p;
     cin>>t>>p;
     int n=t.size(),m=p.size();
-    vector<int> nxt(m,0),res;                //@init
+    vector<int> nxt(m,0),res;                // nxt[i]：模式串前 i+1 个字符里，最长的相等前后缀的长度  //@init
     for (int i=1,j=0;i<m;i++){
-        while (j>0&&p[i]!=p[j]) j=nxt[j-1];  //@pFall
-        if (p[i]==p[j]) j++;                 //@pExtend
-        nxt[i]=j;                            //@pSet
+        while (j>0&&p[i]!=p[j]) j=nxt[j-1];  // 失配了，退到更短的相等前后缀再试                  //@pFall
+        if (p[i]==p[j]) j++;                 // 字符相同，相等的前后缀长了一位                   //@pExtend
+        nxt[i]=j;                            // 记下 nxt[i]                         //@pSet
     }
     for (int i=0,j=0;i<n;i++){
-        while (j>0&&t[i]!=p[j]) j=nxt[j-1];  //@fall
-        if (t[i]==p[j]) j++;                 //@hit,miss
+        while (j>0&&t[i]!=p[j]) j=nxt[j-1];  // 文本里的字符和模式串失配，j 退回到 nxt[j-1]       //@fall
+        if (t[i]==p[j]) j++;                 // 字符相同，匹配的长度加一                      //@hit,miss
         if (j==m){
-            res.push_back(i-m+1);            //@found
+            res.push_back(i-m+1);            // 完整匹配了，记下它的起始位置                    //@found
             j=nxt[j-1];
         }
     }
     if (res.empty()) cout<<-1;
-    for (int x:res) cout<<x<<" ";            //@done
+    for (int x:res) cout<<x<<" ";            // 输出所有匹配的位置                         //@done
     cout<<endl;
     return 0;
 }
@@ -283,25 +283,25 @@ int main(){
     python: String.raw`
 t,p=input().split()
 n,m=len(t),len(p)
-nxt=[0]*m                                   #@init
+nxt=[0]*m                       # nxt[i]：模式串前 i+1 个字符里，最长的相等前后缀的长度  #@init
 j=0
 for i in range(1,m):
     while j>0 and p[i]!=p[j]:
-        j=nxt[j-1]                          #@pFall
+        j=nxt[j-1]              # 失配了，退到更短的相等前后缀再试                  #@pFall
     if p[i]==p[j]:
-        j+=1                                #@pExtend
-    nxt[i]=j                                #@pSet
+        j+=1                    # 字符相同，相等的前后缀长了一位                   #@pExtend
+    nxt[i]=j                    # 记下 nxt[i]                         #@pSet
 res=[]
 j=0
 for i in range(n):
     while j>0 and t[i]!=p[j]:
-        j=nxt[j-1]                          #@fall
+        j=nxt[j-1]              # 文本里的字符和模式串失配，j 退回到 nxt[j-1]       #@fall
     if t[i]==p[j]:
-        j+=1                                #@hit,miss
+        j+=1                    # 字符相同，匹配的长度加一                      #@hit,miss
     if j==m:
-        res.append(i-m+1)                   #@found
+        res.append(i-m+1)       # 完整匹配了，记下它的起始位置                    #@found
         j=nxt[j-1]
-print(*(res if res else [-1]))              #@done
+print(*(res if res else [-1]))  # 输出所有匹配的位置                         #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -311,24 +311,24 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         String t=sc.next(),p=sc.next();
         int n=t.length(),m=p.length();
-        int[] nxt=new int[m];                                  //@init
+        int[] nxt=new int[m];                 // nxt[i]：模式串前 i+1 个字符里，最长的相等前后缀的长度         //@init
         for (int i=1,j=0;i<m;i++){
-            while (j>0&&p.charAt(i)!=p.charAt(j)) j=nxt[j-1];  //@pFall
-            if (p.charAt(i)==p.charAt(j)) j++;                 //@pExtend
-            nxt[i]=j;                                          //@pSet
+            while (j>0&&p.charAt(i)!=p.charAt(j)) j=nxt[j-1];  // 失配了，退到更短的相等前后缀再试        //@pFall
+            if (p.charAt(i)==p.charAt(j)) j++;  // 字符相同，相等的前后缀长了一位                        //@pExtend
+            nxt[i]=j;                         // 记下 nxt[i]                                //@pSet
         }
         List<Integer> res=new ArrayList<>();
         for (int i=0,j=0;i<n;i++){
-            while (j>0&&t.charAt(i)!=p.charAt(j)) j=nxt[j-1];  //@fall
-            if (t.charAt(i)==p.charAt(j)) j++;                 //@hit,miss
+            while (j>0&&t.charAt(i)!=p.charAt(j)) j=nxt[j-1];  // 文本里的字符和模式串失配，j 退回到 nxt[j-1]  //@fall
+            if (t.charAt(i)==p.charAt(j)) j++;  // 字符相同，匹配的长度加一                           //@hit,miss
             if (j==m){
-                res.add(i-m+1);                                //@found
+                res.add(i-m+1);               // 完整匹配了，记下它的起始位置                           //@found
                 j=nxt[j-1];
             }
         }
         StringBuilder sb=new StringBuilder();
         if (res.isEmpty()) sb.append(-1);
-        for (int x:res) sb.append(x).append(' ');              //@done
+        for (int x:res) sb.append(x).append(' ');  // 输出所有匹配的位置                           //@done
         System.out.println(sb);
     }
 }

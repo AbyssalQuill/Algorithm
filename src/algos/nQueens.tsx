@@ -195,21 +195,21 @@ int ok(int r,int c){
     return 1;
 }
 void dfs(int r){
-    if (r==n){                              //@solution
-        cnt++;                              //@solution
-        return;                             //@solution
-    }                                       //@solution
+    if (r==n){                   // 摆到了最后一行，又找到一种放法     //@solution
+        cnt++;                                          //@solution
+        return;                                         //@solution
+    }                                                   //@solution
     for (int c=0;c<n;c++){
-        if (!ok(r,c)) continue;             //@conflict
-        col[r]=c;                           //@place
+        if (!ok(r,c)) continue;  // 和前面的皇后冲突，换下一列       //@conflict
+        col[r]=c;                // 这一列没问题，放下皇后，继续放下一行  //@place
         dfs(r+1);
-        // 撤销这一行的选择，试下一列                    //@back
+        // 撤销这一行的选择，试下一列                                //@back
     }
 }
 int main(){
     scanf("%d",&n);
-    dfs(0);                                 //@init
-    printf("%d\n",cnt);                     //@done
+    dfs(0);                      // 从第 0 行开始放           //@init
+    printf("%d\n",cnt);          // 输出放法的总数             //@done
     return 0;
 }
 `,
@@ -223,21 +223,21 @@ bool ok(int r,int c){
     return true;
 }
 void dfs(int r){
-    if (r==n){                              //@solution
-        cnt++;                              //@solution
-        return;                             //@solution
-    }                                       //@solution
+    if (r==n){                   // 摆到了最后一行，又找到一种放法     //@solution
+        cnt++;                                          //@solution
+        return;                                         //@solution
+    }                                                   //@solution
     for (int c=0;c<n;c++){
-        if (!ok(r,c)) continue;             //@conflict
-        col[r]=c;                           //@place
+        if (!ok(r,c)) continue;  // 和前面的皇后冲突，换下一列       //@conflict
+        col[r]=c;                // 这一列没问题，放下皇后，继续放下一行  //@place
         dfs(r+1);
-        // 撤销这一行的选择，试下一列                    //@back
+        // 撤销这一行的选择，试下一列                                //@back
     }
 }
 int main(){
     cin>>n;
-    dfs(0);                                 //@init
-    cout<<cnt<<endl;                        //@done
+    dfs(0);                      // 从第 0 行开始放           //@init
+    cout<<cnt<<endl;             // 输出放法的总数             //@done
     return 0;
 }
 `,
@@ -248,20 +248,20 @@ def ok(r,c):
 def dfs(r):
     global cnt
     if r==n:
-        cnt+=1                              #@solution
+        cnt+=1        # 摆到了最后一行，又找到一种放法     #@solution
         return
     for c in range(n):
         if not ok(r,c):
-            continue                        #@conflict
-        col[r]=c                            #@place
+            continue  # 和前面的皇后冲突，换下一列       #@conflict
+        col[r]=c      # 这一列没问题，放下皇后，继续放下一行  #@place
         dfs(r+1)
         # 撤销这一行的选择，试下一列                     #@back
 
 n=int(input())
 cnt=0
 col=[0]*n
-dfs(0)                                      #@init
-print(cnt)                                  #@done
+dfs(0)                # 从第 0 行开始放           #@init
+print(cnt)            # 输出放法的总数             #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -277,22 +277,22 @@ public class Main{
     }
 
     static void dfs(int r){
-        if (r==n){                          //@solution
-            cnt++;                          //@solution
-            return;                         //@solution
-        }                                   //@solution
+        if (r==n){                   // 摆到了最后一行，又找到一种放法     //@solution
+            cnt++;                                          //@solution
+            return;                                         //@solution
+        }                                                   //@solution
         for (int c=0;c<n;c++){
-            if (!ok(r,c)) continue;         //@conflict
-            col[r]=c;                       //@place
+            if (!ok(r,c)) continue;  // 和前面的皇后冲突，换下一列       //@conflict
+            col[r]=c;                // 这一列没问题，放下皇后，继续放下一行  //@place
             dfs(r+1);
-            // 撤销这一行的选择，试下一列                //@back
+            // 撤销这一行的选择，试下一列                                //@back
         }
     }
 
     public static void main(String[] args){
         n=new Scanner(System.in).nextInt();
-        dfs(0);                             //@init
-        System.out.println(cnt);            //@done
+        dfs(0);                      // 从第 0 行开始放           //@init
+        System.out.println(cnt);     // 输出放法的总数             //@done
     }
 }
 `,

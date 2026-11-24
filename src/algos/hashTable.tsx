@@ -195,17 +195,17 @@ export const hashTable: AlgoDef<HashInput, HashState> = {
     c: String.raw`
 #include <stdio.h>
 #define M 7
-int table[M][105],cnt[M];                   //@init
+int table[M][105],cnt[M];              // 7 个桶，每个桶里是一条链         //@init
 void insert(int x){
-    int h=x%M;                              //@hash
-    table[h][cnt[h]++]=x;                   //@append
+    int h=x%M;                         // 用 x 除以 7 的余数，决定放进哪个桶  //@hash
+    table[h][cnt[h]++]=x;              // 接到这个桶的链尾              //@append
 }
 int search(int x){
-    int h=x%M;                              //@sHash
-    for (int i=0;i<cnt[h];i++){             //@sProbe
-        if (table[h][i]==x) return 1;       //@sHit
+    int h=x%M;                         // 查找时，也先算出它应该在哪个桶       //@sHash
+    for (int i=0;i<cnt[h];i++){        // 只翻开这一个桶，逐个比较          //@sProbe
+        if (table[h][i]==x) return 1;  // 找到了                   //@sHit
     }
-    return 0;                               //@sMiss
+    return 0;                          // 桶里没有，说明不在表里           //@sMiss
 }
 int main(){
     int n,t,x;
@@ -223,17 +223,17 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 const int M=7;
-vector<int> table_[M];                      //@init
+vector<int> table_[M];          // 7 个桶，每个桶里是一条链         //@init
 void insert(int x){
-    int h=x%M;                              //@hash
-    table_[h].push_back(x);                 //@append
+    int h=x%M;                  // 用 x 除以 7 的余数，决定放进哪个桶  //@hash
+    table_[h].push_back(x);     // 接到这个桶的链尾              //@append
 }
 bool search(int x){
-    int h=x%M;                              //@sHash
-    for (int y:table_[h]){                  //@sProbe
-        if (y==x) return true;              //@sHit
+    int h=x%M;                  // 查找时，也先算出它应该在哪个桶       //@sHash
+    for (int y:table_[h]){      // 只翻开这一个桶，逐个比较          //@sProbe
+        if (y==x) return true;  // 找到了                   //@sHit
     }
-    return false;                           //@sMiss
+    return false;               // 桶里没有，说明不在表里           //@sMiss
 }
 int main(){
     int n,t,x;
@@ -249,18 +249,18 @@ int main(){
 `,
     python: String.raw`
 M=7
-table=[[] for _ in range(M)]                #@init
+table=[[] for _ in range(M)]  # 7 个桶，每个桶里是一条链         #@init
 
 def insert(x):
-    h=x%M                                   #@hash
-    table[h].append(x)                      #@append
+    h=x%M                     # 用 x 除以 7 的余数，决定放进哪个桶  #@hash
+    table[h].append(x)        # 接到这个桶的链尾              #@append
 
 def search(x):
-    h=x%M                                   #@sHash
-    for y in table[h]:                      #@sProbe
+    h=x%M                     # 查找时，也先算出它应该在哪个桶       #@sHash
+    for y in table[h]:        # 只翻开这一个桶，逐个比较          #@sProbe
         if y==x:
-            return True                     #@sHit
-    return False                            #@sMiss
+            return True       # 找到了                   #@sHit
+    return False              # 桶里没有，说明不在表里           #@sMiss
 
 n=int(input())
 for x in map(int,input().split()):
@@ -273,19 +273,19 @@ import java.util.*;
 
 public class Main{
     static final int M=7;
-    static List<List<Integer>> table=new ArrayList<>();  //@init
+    static List<List<Integer>> table=new ArrayList<>();  // 7 个桶，每个桶里是一条链  //@init
 
     static void insert(int x){
-        int h=x%M;                                       //@hash
-        table.get(h).add(x);                             //@append
+        int h=x%M;                            // 用 x 除以 7 的余数，决定放进哪个桶      //@hash
+        table.get(h).add(x);                  // 接到这个桶的链尾                  //@append
     }
 
     static boolean search(int x){
-        int h=x%M;                                       //@sHash
-        for (int y:table.get(h)){                        //@sProbe
-            if (y==x) return true;                       //@sHit
+        int h=x%M;                            // 查找时，也先算出它应该在哪个桶           //@sHash
+        for (int y:table.get(h)){             // 只翻开这一个桶，逐个比较              //@sProbe
+            if (y==x) return true;            // 找到了                       //@sHit
         }
-        return false;                                    //@sMiss
+        return false;                         // 桶里没有，说明不在表里               //@sMiss
     }
 
     public static void main(String[] args){

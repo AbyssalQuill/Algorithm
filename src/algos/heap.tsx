@@ -229,29 +229,29 @@ export const heap: AlgoDef<HeapInput, HeapState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int h[1005],n=0;                            //@init
+int h[1005],n=0;                // 用数组存小根堆，下标从 1 开始   //@init
 void push(int x){
-    h[++n]=x;                               //@push
+    h[++n]=x;                   // 新来的数先放在最后一个位置      //@push
     int i=n;
-    while (i>1&&h[i]<h[i/2]){               //@up
-        int t=h[i];                         //@swapUp
-        h[i]=h[i/2];                        //@swapUp
-        h[i/2]=t;                           //@swapUp
-        i/=2;                               //@swapUp
+    while (i>1&&h[i]<h[i/2]){   // 比父结点小，就还要往上走       //@up
+        int t=h[i];             // 和父结点交换，再看上一层       //@swapUp
+        h[i]=h[i/2];                                  //@swapUp
+        h[i/2]=t;                                     //@swapUp
+        i/=2;                                         //@swapUp
     }
 }
 int pop(){
-    int top=h[1];                           //@pop
-    h[1]=h[n--];                            //@moveLast
+    int top=h[1];               // 堆顶就是最小的数，先记下来      //@pop
+    h[1]=h[n--];                // 把最后一个数挪到堆顶，堆的大小减一  //@moveLast
     int i=1;
     while (2*i<=n){
-        int c=2*i;                          //@pickChild
-        if (c+1<=n&&h[c+1]<h[c]) c++;       //@pickChild
-        if (h[c]>=h[i]) break;              //@down
-        int t=h[i];                         //@swapDown
-        h[i]=h[c];                          //@swapDown
-        h[c]=t;                             //@swapDown
-        i=c;                                //@swapDown
+        int c=2*i;              // 找出左右两个孩子里较小的一个     //@pickChild
+        if (c+1<=n&&h[c+1]<h[c]) c++;                 //@pickChild
+        if (h[c]>=h[i]) break;  // 孩子不比它小了，就停下        //@down
+        int t=h[i];             // 和较小的孩子交换，继续往下      //@swapDown
+        h[i]=h[c];                                    //@swapDown
+        h[c]=t;                                       //@swapDown
+        i=c;                                          //@swapDown
     }
     return top;
 }
@@ -263,32 +263,32 @@ int main(){
         push(x);
     }
     for (int i=0;i<k;i++) printf("%d ",pop());
-    printf("\n");                           //@done
+    printf("\n");               // 输出依次弹出的数           //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int h[1005],n=0;                            //@init
+int h[1005],n=0;                // 用数组存小根堆，下标从 1 开始   //@init
 void push(int x){
-    h[++n]=x;                               //@push
+    h[++n]=x;                   // 新来的数先放在最后一个位置      //@push
     int i=n;
-    while (i>1&&h[i]<h[i/2]){               //@up
-        swap(h[i],h[i/2]);                  //@swapUp
-        i/=2;                               //@swapUp
+    while (i>1&&h[i]<h[i/2]){   // 比父结点小，就还要往上走       //@up
+        swap(h[i],h[i/2]);      // 和父结点交换，再看上一层       //@swapUp
+        i/=2;                                         //@swapUp
     }
 }
 int pop(){
-    int top=h[1];                           //@pop
-    h[1]=h[n--];                            //@moveLast
+    int top=h[1];               // 堆顶就是最小的数，先记下来      //@pop
+    h[1]=h[n--];                // 把最后一个数挪到堆顶，堆的大小减一  //@moveLast
     int i=1;
     while (2*i<=n){
-        int c=2*i;                          //@pickChild
-        if (c+1<=n&&h[c+1]<h[c]) c++;       //@pickChild
-        if (h[c]>=h[i]) break;              //@down
-        swap(h[i],h[c]);                    //@swapDown
-        i=c;                                //@swapDown
+        int c=2*i;              // 找出左右两个孩子里较小的一个     //@pickChild
+        if (c+1<=n&&h[c+1]<h[c]) c++;                 //@pickChild
+        if (h[c]>=h[i]) break;  // 孩子不比它小了，就停下        //@down
+        swap(h[i],h[c]);        // 和较小的孩子交换，继续往下      //@swapDown
+        i=c;                                          //@swapDown
     }
     return top;
 }
@@ -300,71 +300,71 @@ int main(){
         push(x);
     }
     for (int i=0;i<k;i++) cout<<pop()<<" ";
-    cout<<endl;                             //@done
+    cout<<endl;                 // 输出依次弹出的数           //@done
     return 0;
 }
 `,
     python: String.raw`
-h=[0]                                       #@init
+h=[0]                              # 用数组存小根堆，下标从 1 开始   #@init
 
 def push(x):
-    h.append(x)                             #@push
+    h.append(x)                    # 新来的数先放在最后一个位置      #@push
     i=len(h)-1
-    while i>1 and h[i]<h[i//2]:             #@up
-        h[i],h[i//2]=h[i//2],h[i]           #@swapUp
-        i//=2                               #@swapUp
+    while i>1 and h[i]<h[i//2]:    # 比父结点小，就还要往上走       #@up
+        h[i],h[i//2]=h[i//2],h[i]  # 和父结点交换，再看上一层       #@swapUp
+        i//=2                                           #@swapUp
 
 def pop():
-    top=h[1]                                #@pop
-    h[1]=h[-1]                              #@moveLast
-    h.pop()                                 #@moveLast
+    top=h[1]                       # 堆顶就是最小的数，先记下来      #@pop
+    h[1]=h[-1]                     # 把最后一个数挪到堆顶，堆的大小减一  #@moveLast
+    h.pop()                                             #@moveLast
     n=len(h)-1
     i=1
     while 2*i<=n:
-        c=2*i                               #@pickChild
-        if c+1<=n and h[c+1]<h[c]:          #@pickChild
-            c+=1                            #@pickChild
-        if h[c]>=h[i]:                      #@down
+        c=2*i                      # 找出左右两个孩子里较小的一个     #@pickChild
+        if c+1<=n and h[c+1]<h[c]:                      #@pickChild
+            c+=1                                        #@pickChild
+        if h[c]>=h[i]:             # 孩子不比它小了，就停下        #@down
             break
-        h[i],h[c]=h[c],h[i]                 #@swapDown
-        i=c                                 #@swapDown
+        h[i],h[c]=h[c],h[i]        # 和较小的孩子交换，继续往下      #@swapDown
+        i=c                                             #@swapDown
     return top
 
 m,k=map(int,input().split())
 for x in map(int,input().split()):
     push(x)
-print(*[pop() for _ in range(k)])           #@done
+print(*[pop() for _ in range(k)])  # 输出依次弹出的数           #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
     static int[] h=new int[1005];
-    static int n=0;                         //@init
+    static int n=0;                 // 用数组存小根堆，下标从 1 开始   //@init
 
     static void push(int x){
-        h[++n]=x;                           //@push
+        h[++n]=x;                   // 新来的数先放在最后一个位置      //@push
         int i=n;
-        while (i>1&&h[i]<h[i/2]){           //@up
-            int t=h[i];                     //@swapUp
-            h[i]=h[i/2];                    //@swapUp
-            h[i/2]=t;                       //@swapUp
-            i/=2;                           //@swapUp
+        while (i>1&&h[i]<h[i/2]){   // 比父结点小，就还要往上走       //@up
+            int t=h[i];             // 和父结点交换，再看上一层       //@swapUp
+            h[i]=h[i/2];                                  //@swapUp
+            h[i/2]=t;                                     //@swapUp
+            i/=2;                                         //@swapUp
         }
     }
 
     static int pop(){
-        int top=h[1];                       //@pop
-        h[1]=h[n--];                        //@moveLast
+        int top=h[1];               // 堆顶就是最小的数，先记下来      //@pop
+        h[1]=h[n--];                // 把最后一个数挪到堆顶，堆的大小减一  //@moveLast
         int i=1;
         while (2*i<=n){
-            int c=2*i;                      //@pickChild
-            if (c+1<=n&&h[c+1]<h[c]) c++;   //@pickChild
-            if (h[c]>=h[i]) break;          //@down
-            int t=h[i];                     //@swapDown
-            h[i]=h[c];                      //@swapDown
-            h[c]=t;                         //@swapDown
-            i=c;                            //@swapDown
+            int c=2*i;              // 找出左右两个孩子里较小的一个     //@pickChild
+            if (c+1<=n&&h[c+1]<h[c]) c++;                 //@pickChild
+            if (h[c]>=h[i]) break;  // 孩子不比它小了，就停下        //@down
+            int t=h[i];             // 和较小的孩子交换，继续往下      //@swapDown
+            h[i]=h[c];                                    //@swapDown
+            h[c]=t;                                       //@swapDown
+            i=c;                                          //@swapDown
         }
         return top;
     }
@@ -375,7 +375,7 @@ public class Main{
         for (int i=0;i<m;i++) push(sc.nextInt());
         StringBuilder sb=new StringBuilder();
         for (int i=0;i<k;i++) sb.append(pop()).append(' ');
-        System.out.println(sb);             //@done
+        System.out.println(sb);     // 输出依次弹出的数           //@done
     }
 }
 `,

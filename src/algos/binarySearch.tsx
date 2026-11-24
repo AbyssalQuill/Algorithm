@@ -161,14 +161,14 @@ export const binarySearch: AlgoDef<BsInput, BsState> = {
     c: String.raw`
 #include <stdio.h>
 int binarySearch(int a[],int n,int target){
-    int lo=0,hi=n-1;                        //@init
-    while (lo<=hi){                         //@loop
-        int mid=lo+(hi-lo)/2;               //@mid
-        if (a[mid]==target) return mid;     //@hit
-        else if (a[mid]<target) lo=mid+1;   //@goRight
-        else hi=mid-1;                      //@goLeft
+    int lo=0,hi=n-1;                       // 候选的区间是整个数组 [lo, hi]  //@init
+    while (lo<=hi){                        // 区间里还有数，就继续找          //@loop
+        int mid=lo+(hi-lo)/2;              // 看正中间的数               //@mid
+        if (a[mid]==target) return mid;    // 正好是目标，找到了            //@hit
+        else if (a[mid]<target) lo=mid+1;  // 中间的数太小，目标只可能在右边      //@goRight
+        else hi=mid-1;                     // 中间的数太大，目标只可能在左边      //@goLeft
     }
-    return -1;                              //@miss
+    return -1;                             // 区间空了，说明数组里没有         //@miss
 }
 int main(){
     int n,target,a[1005];
@@ -183,14 +183,14 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 int binarySearch(int a[],int n,int target){
-    int lo=0,hi=n-1;                        //@init
-    while (lo<=hi){                         //@loop
-        int mid=lo+(hi-lo)/2;               //@mid
-        if (a[mid]==target) return mid;     //@hit
-        else if (a[mid]<target) lo=mid+1;   //@goRight
-        else hi=mid-1;                      //@goLeft
+    int lo=0,hi=n-1;                       // 候选的区间是整个数组 [lo, hi]  //@init
+    while (lo<=hi){                        // 区间里还有数，就继续找          //@loop
+        int mid=lo+(hi-lo)/2;              // 看正中间的数               //@mid
+        if (a[mid]==target) return mid;    // 正好是目标，找到了            //@hit
+        else if (a[mid]<target) lo=mid+1;  // 中间的数太小，目标只可能在右边      //@goRight
+        else hi=mid-1;                     // 中间的数太大，目标只可能在左边      //@goLeft
     }
-    return -1;                              //@miss
+    return -1;                             // 区间空了，说明数组里没有         //@miss
 }
 int main(){
     int n,target,a[1005];
@@ -203,16 +203,16 @@ int main(){
 `,
     python: String.raw`
 def binary_search(a,target):
-    lo,hi=0,len(a)-1                        #@init
-    while lo<=hi:                           #@loop
-        mid=lo+(hi-lo)//2                   #@mid
-        if a[mid]==target:                  #@hit
-            return mid                      #@hit
-        elif a[mid]<target:                 #@goRight
-            lo=mid+1                        #@goRight
-        else:                               #@goLeft
-            hi=mid-1                        #@goLeft
-    return -1                               #@miss
+    lo,hi=0,len(a)-1         # 候选的区间是整个数组 [lo, hi]  #@init
+    while lo<=hi:            # 区间里还有数，就继续找          #@loop
+        mid=lo+(hi-lo)//2    # 看正中间的数               #@mid
+        if a[mid]==target:   # 正好是目标，找到了            #@hit
+            return mid                              #@hit
+        elif a[mid]<target:  # 中间的数太小，目标只可能在右边      #@goRight
+            lo=mid+1                                #@goRight
+        else:                # 中间的数太大，目标只可能在左边      #@goLeft
+            hi=mid-1                                #@goLeft
+    return -1                # 区间空了，说明数组里没有         #@miss
 
 n=int(input())
 a=list(map(int,input().split()))
@@ -224,14 +224,14 @@ import java.util.*;
 
 public class Main{
     static int binarySearch(int[] a,int target){
-        int lo=0,hi=a.length-1;                //@init
-        while (lo<=hi){                        //@loop
-            int mid=lo+(hi-lo)/2;              //@mid
-            if (a[mid]==target) return mid;    //@hit
-            else if (a[mid]<target) lo=mid+1;  //@goRight
-            else hi=mid-1;                     //@goLeft
+        int lo=0,hi=a.length-1;               // 候选的区间是整个数组 [lo, hi]  //@init
+        while (lo<=hi){                       // 区间里还有数，就继续找          //@loop
+            int mid=lo+(hi-lo)/2;             // 看正中间的数               //@mid
+            if (a[mid]==target) return mid;   // 正好是目标，找到了            //@hit
+            else if (a[mid]<target) lo=mid+1;  // 中间的数太小，目标只可能在右边     //@goRight
+            else hi=mid-1;                    // 中间的数太大，目标只可能在左边      //@goLeft
         }
-        return -1;                             //@miss
+        return -1;                            // 区间空了，说明数组里没有         //@miss
     }
 
     public static void main(String[] args){

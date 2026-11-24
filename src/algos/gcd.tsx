@@ -144,17 +144,17 @@ export const gcd: AlgoDef<GcdInput, GcdState> = {
 #include <stdio.h>
 int gcd(int a,int b){
     while (b){
-        int t=a%b;                          //@step
-        a=b;                                //@step
-        b=t;                                //@step
+        int t=a%b;              // 辗转相除：(a, b) 变成 (b, a%b)    //@step
+        a=b;                                                  //@step
+        b=t;                                                  //@step
     }
     return a;
 }
 int main(){
     int a,b;
     scanf("%d %d",&a,&b);
-    int g=gcd(a,b);                         //@init
-    printf("%d %d\n",g,a/g*b);              //@done
+    int g=gcd(a,b);             // 用辗转相除法求最大公约数               //@init
+    printf("%d %d\n",g,a/g*b);  // 最小公倍数 = a/gcd*b，先除后乘，避免溢出  //@done
     return 0;
 }
 `,
@@ -163,31 +163,31 @@ int main(){
 using namespace std;
 int gcd_(int a,int b){
     while (b){
-        int t=a%b;                          //@step
-        a=b;                                //@step
-        b=t;                                //@step
+        int t=a%b;              // 辗转相除：(a, b) 变成 (b, a%b)    //@step
+        a=b;                                                  //@step
+        b=t;                                                  //@step
     }
     return a;
 }
 int main(){
     int a,b;
     cin>>a>>b;
-    int g=gcd_(a,b);                        //@init
-    cout<<g<<" "<<a/g*b<<endl;              //@done
+    int g=gcd_(a,b);            // 用辗转相除法求最大公约数               //@init
+    cout<<g<<" "<<a/g*b<<endl;  // 最小公倍数 = a/gcd*b，先除后乘，避免溢出  //@done
     return 0;
 }
 `,
     python: String.raw`
 def gcd(a,b):
     while b:
-        t=a%b                               #@step
-        a=b                                 #@step
-        b=t                                 #@step
+        t=a%b    # 辗转相除：(a, b) 变成 (b, a%b)    #@step
+        a=b                                   #@step
+        b=t                                   #@step
     return a
 
 a,b=map(int,input().split())
-g=gcd(a,b)                                  #@init
-print(g,a//g*b)                             #@done
+g=gcd(a,b)       # 用辗转相除法求最大公约数               #@init
+print(g,a//g*b)  # 最小公倍数 = a/gcd*b，先除后乘，避免溢出  #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -195,9 +195,9 @@ import java.util.*;
 public class Main{
     static int gcd(int a,int b){
         while (b!=0){
-            int t=a%b;                      //@step
-            a=b;                            //@step
-            b=t;                            //@step
+            int t=a%b;                    // 辗转相除：(a, b) 变成 (b, a%b)    //@step
+            a=b;                                                        //@step
+            b=t;                                                        //@step
         }
         return a;
     }
@@ -205,8 +205,8 @@ public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
         int a=sc.nextInt(),b=sc.nextInt();
-        int g=gcd(a,b);                     //@init
-        System.out.println(g+" "+a/g*b);    //@done
+        int g=gcd(a,b);                   // 用辗转相除法求最大公约数               //@init
+        System.out.println(g+" "+a/g*b);  // 最小公倍数 = a/gcd*b，先除后乘，避免溢出  //@done
     }
 }
 `,

@@ -268,28 +268,28 @@ Node* newNode(int v){
 }
 void pre(Node* r){
     if (!r) return;
-    printf("%d ",r->val);                   //@pre
+    printf("%d ",r->val);      // 前序：先访问根，再左，再右   //@pre
     pre(r->l);
     pre(r->r);
 }
 void in(Node* r){
     if (!r) return;
     in(r->l);
-    printf("%d ",r->val);                   //@in
+    printf("%d ",r->val);      // 中序：先左，再访问根，最后右  //@in
     in(r->r);
 }
 void post(Node* r){
     if (!r) return;
     post(r->l);
     post(r->r);
-    printf("%d ",r->val);                   //@post
+    printf("%d ",r->val);      // 后序：先左，再右，最后访问根  //@post
 }
 int main(){
     int n,a[105];
     Node* q[105];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    Node* root=newNode(a[0]);               //@init
+    Node* root=newNode(a[0]);  // 根据层序序列建树        //@init
     int head=0,tail=0,p=1;
     q[tail++]=root;
     while (head<tail&&p<n){
@@ -309,11 +309,11 @@ int main(){
     q[tail++]=root;
     while (head<tail){
         Node* u=q[head++];
-        printf("%d ",u->val);               //@level
+        printf("%d ",u->val);  // 层序：用队列，一层一层地访问  //@level
         if (u->l) q[tail++]=u->l;
         if (u->r) q[tail++]=u->r;
     }
-    printf("\n");                           //@done
+    printf("\n");                                 //@done
     return 0;
 }
 `,
@@ -327,28 +327,28 @@ struct Node{
 };
 void pre(Node* r){
     if (!r) return;
-    cout<<r->val<<" ";                      //@pre
+    cout<<r->val<<" ";          // 前序：先访问根，再左，再右   //@pre
     pre(r->l);
     pre(r->r);
 }
 void in(Node* r){
     if (!r) return;
     in(r->l);
-    cout<<r->val<<" ";                      //@in
+    cout<<r->val<<" ";          // 中序：先左，再访问根，最后右  //@in
     in(r->r);
 }
 void post(Node* r){
     if (!r) return;
     post(r->l);
     post(r->r);
-    cout<<r->val<<" ";                      //@post
+    cout<<r->val<<" ";          // 后序：先左，再右，最后访问根  //@post
 }
 int main(){
     int n;
     cin>>n;
     vector<int> a(n);
     for (int &x:a) cin>>x;
-    Node* root=new Node(a[0]);              //@init
+    Node* root=new Node(a[0]);  // 根据层序序列建树        //@init
     queue<Node*> q;
     q.push(root);
     int p=1;
@@ -377,11 +377,11 @@ int main(){
     while (!q.empty()){
         Node* u=q.front();
         q.pop();
-        cout<<u->val<<" ";                  //@level
+        cout<<u->val<<" ";      // 层序：用队列，一层一层地访问  //@level
         if (u->l) q.push(u->l);
         if (u->r) q.push(u->r);
     }
-    cout<<endl;                             //@done
+    cout<<endl;                                    //@done
     return 0;
 }
 `,
@@ -397,7 +397,7 @@ class Node:
 def pre(r,out):
     if r is None:
         return
-    out.append(r.val)                       #@pre
+    out.append(r.val)  # 前序：先访问根，再左，再右      #@pre
     pre(r.l,out)
     pre(r.r,out)
 
@@ -405,7 +405,7 @@ def inorder(r,out):
     if r is None:
         return
     inorder(r.l,out)
-    out.append(r.val)                       #@in
+    out.append(r.val)  # 中序：先左，再访问根，最后右     #@in
     inorder(r.r,out)
 
 def post(r,out):
@@ -413,11 +413,11 @@ def post(r,out):
         return
     post(r.l,out)
     post(r.r,out)
-    out.append(r.val)                       #@post
+    out.append(r.val)  # 后序：先左，再右，最后访问根     #@post
 
 n=int(input())
 a=list(map(int,input().split()))
-root=Node(a[0])                             #@init
+root=Node(a[0])        # 根据层序序列建树           #@init
 q=deque([root])
 p=1
 while q and p<n:
@@ -438,7 +438,7 @@ q=deque([root])
 out=[]
 while q:
     u=q.popleft()
-    out.append(u.val)                       #@level
+    out.append(u.val)  # 层序：用队列，一层一层地访问     #@level
     if u.l:
         q.append(u.l)
     if u.r:
@@ -461,7 +461,7 @@ public class Main{
 
     static void pre(Node r){
         if (r==null) return;
-        sb.append(r.val).append(' ');       //@pre
+        sb.append(r.val).append(' ');      // 前序：先访问根，再左，再右   //@pre
         pre(r.l);
         pre(r.r);
     }
@@ -469,7 +469,7 @@ public class Main{
     static void in(Node r){
         if (r==null) return;
         in(r.l);
-        sb.append(r.val).append(' ');       //@in
+        sb.append(r.val).append(' ');      // 中序：先左，再访问根，最后右  //@in
         in(r.r);
     }
 
@@ -477,7 +477,7 @@ public class Main{
         if (r==null) return;
         post(r.l);
         post(r.r);
-        sb.append(r.val).append(' ');       //@post
+        sb.append(r.val).append(' ');      // 后序：先左，再右，最后访问根  //@post
     }
 
     public static void main(String[] args){
@@ -485,7 +485,7 @@ public class Main{
         int n=sc.nextInt();
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
-        Node root=new Node(a[0]);           //@init
+        Node root=new Node(a[0]);          // 根据层序序列建树        //@init
         Queue<Node> q=new ArrayDeque<>();
         q.add(root);
         int p=1;
@@ -512,11 +512,11 @@ public class Main{
         q.add(root);
         while (!q.isEmpty()){
             Node u=q.poll();
-            sb.append(u.val).append(' ');   //@level
+            sb.append(u.val).append(' ');  // 层序：用队列，一层一层地访问  //@level
             if (u.l!=null) q.add(u.l);
             if (u.r!=null) q.add(u.r);
         }
-        System.out.println(sb);             //@done
+        System.out.println(sb);                               //@done
     }
 }
 `,

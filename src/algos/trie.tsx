@@ -219,25 +219,25 @@ export const trie: AlgoDef<TrieInput, TrieState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int ch[1005][26],cnt=1;                     //@init
+int ch[1005][26],cnt=1;                 // ch[p][c] 是结点 p 沿着字母 c 走到的孩子  //@init
 int isEnd[1005];
 void insert(char *s){
-    int p=0;                                //@insStart
+    int p=0;                            // 插入单词：从根（0 号结点）出发             //@insStart
     for (int i=0;s[i];i++){
         int x=s[i]-'a';
-        if (!ch[p][x]) ch[p][x]=cnt++;      //@create
-        p=ch[p][x];                         //@walk
+        if (!ch[p][x]) ch[p][x]=cnt++;  // 这条路还不存在，就新建一个结点              //@create
+        p=ch[p][x];                     // 沿着字母往下走一步                    //@walk
     }
-    isEnd[p]=1;                             //@mark
+    isEnd[p]=1;                         // 单词的最后一个字母，标记“到这里是一个完整的单词”    //@mark
 }
 int query(char *s){
-    int p=0;                                //@qStart
+    int p=0;                            // 查询单词：同样从根出发                  //@qStart
     for (int i=0;s[i];i++){
         int x=s[i]-'a';
-        if (!ch[p][x]) return 0;            //@qMiss
-        p=ch[p][x];                         //@qWalk
+        if (!ch[p][x]) return 0;        // 路断了，单词不存在                    //@qMiss
+        p=ch[p][x];                     // 沿着字母往下走                      //@qWalk
     }
-    return isEnd[p];                        //@qEnd
+    return isEnd[p];                    // 走完了，还要看这里是不是一个完整的单词          //@qEnd
 }
 int main(){
     int n;
@@ -255,25 +255,25 @@ int main(){
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int ch[1005][26],cnt=1;                     //@init
+int ch[1005][26],cnt=1;                 // ch[p][c] 是结点 p 沿着字母 c 走到的孩子  //@init
 bool isEnd[1005];
 void insert(const string &s){
-    int p=0;                                //@insStart
+    int p=0;                            // 插入单词：从根（0 号结点）出发             //@insStart
     for (char c:s){
         int x=c-'a';
-        if (!ch[p][x]) ch[p][x]=cnt++;      //@create
-        p=ch[p][x];                         //@walk
+        if (!ch[p][x]) ch[p][x]=cnt++;  // 这条路还不存在，就新建一个结点              //@create
+        p=ch[p][x];                     // 沿着字母往下走一步                    //@walk
     }
-    isEnd[p]=true;                          //@mark
+    isEnd[p]=true;                      // 单词的最后一个字母，标记“到这里是一个完整的单词”    //@mark
 }
 bool query(const string &s){
-    int p=0;                                //@qStart
+    int p=0;                            // 查询单词：同样从根出发                  //@qStart
     for (char c:s){
         int x=c-'a';
-        if (!ch[p][x]) return false;        //@qMiss
-        p=ch[p][x];                         //@qWalk
+        if (!ch[p][x]) return false;    // 路断了，单词不存在                    //@qMiss
+        p=ch[p][x];                     // 沿着字母往下走                      //@qWalk
     }
-    return isEnd[p];                        //@qEnd
+    return isEnd[p];                    // 走完了，还要看这里是不是一个完整的单词          //@qEnd
 }
 int main(){
     int n;
@@ -289,26 +289,26 @@ int main(){
 }
 `,
     python: String.raw`
-ch=[{}]                                     #@init
+ch=[{}]                    # ch[p][c] 是结点 p 沿着字母 c 走到的孩子  #@init
 is_end=[False]
 
 def insert(s):
-    p=0                                     #@insStart
+    p=0                    # 插入单词：从根（0 号结点）出发             #@insStart
     for c in s:
         if c not in ch[p]:
-            ch.append({})                   #@create
-            is_end.append(False)            #@create
-            ch[p][c]=len(ch)-1              #@create
-        p=ch[p][c]                          #@walk
-    is_end[p]=True                          #@mark
+            ch.append({})  # 这条路还不存在，就新建一个结点              #@create
+            is_end.append(False)                          #@create
+            ch[p][c]=len(ch)-1                            #@create
+        p=ch[p][c]         # 沿着字母往下走一步                    #@walk
+    is_end[p]=True         # 单词的最后一个字母，标记“到这里是一个完整的单词”    #@mark
 
 def query(s):
-    p=0                                     #@qStart
+    p=0                    # 查询单词：同样从根出发                  #@qStart
     for c in s:
         if c not in ch[p]:
-            return False                    #@qMiss
-        p=ch[p][c]                          #@qWalk
-    return is_end[p]                        #@qEnd
+            return False   # 路断了，单词不存在                    #@qMiss
+        p=ch[p][c]         # 沿着字母往下走                      #@qWalk
+    return is_end[p]       # 走完了，还要看这里是不是一个完整的单词          #@qEnd
 
 n=int(input())
 for w in input().split():
@@ -321,26 +321,26 @@ import java.util.*;
 public class Main{
     static int[][] ch=new int[1005][26];
     static boolean[] isEnd=new boolean[1005];
-    static int cnt=1;                         //@init
+    static int cnt=1;                         // ch[p][c] 是结点 p 沿着字母 c 走到的孩子  //@init
 
     static void insert(String s){
-        int p=0;                              //@insStart
+        int p=0;                              // 插入单词：从根（0 号结点）出发             //@insStart
         for (char c:s.toCharArray()){
             int x=c-'a';
-            if (ch[p][x]==0) ch[p][x]=cnt++;  //@create
-            p=ch[p][x];                       //@walk
+            if (ch[p][x]==0) ch[p][x]=cnt++;  // 这条路还不存在，就新建一个结点              //@create
+            p=ch[p][x];                       // 沿着字母往下走一步                    //@walk
         }
-        isEnd[p]=true;                        //@mark
+        isEnd[p]=true;                        // 单词的最后一个字母，标记“到这里是一个完整的单词”    //@mark
     }
 
     static boolean query(String s){
-        int p=0;                              //@qStart
+        int p=0;                              // 查询单词：同样从根出发                  //@qStart
         for (char c:s.toCharArray()){
             int x=c-'a';
-            if (ch[p][x]==0) return false;    //@qMiss
-            p=ch[p][x];                       //@qWalk
+            if (ch[p][x]==0) return false;    // 路断了，单词不存在                    //@qMiss
+            p=ch[p][x];                       // 沿着字母往下走                      //@qWalk
         }
-        return isEnd[p];                      //@qEnd
+        return isEnd[p];                      // 走完了，还要看这里是不是一个完整的单词          //@qEnd
     }
 
     public static void main(String[] args){

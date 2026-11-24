@@ -143,17 +143,17 @@ int main(){
     int n,t,a[10];
     scanf("%d %d",&n,&t);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    int cnt=0;                              //@init
+    int cnt=0;           // cnt 记录满足条件的选法有几种  //@init
     for (int mask=0;mask<(1<<n);mask++){
         int sum=0;
         for (int i=0;i<n;i++){
             if ((mask>>i)&1) sum+=a[i];
         }
-        if (sum==t){                        //@mask
-            cnt++;                          //@hit
+        if (sum==t){     // 这一种选法的和，正好等于目标吗   //@mask
+            cnt++;       // 又找到一种选法           //@hit
         }
     }
-    printf("%d\n",cnt);                     //@done
+    printf("%d\n",cnt);  // 输出选法的个数           //@done
     return 0;
 }
 `,
@@ -164,32 +164,32 @@ int main(){
     int n,t,a[10];
     cin>>n>>t;
     for (int i=0;i<n;i++) cin>>a[i];
-    int cnt=0;                              //@init
+    int cnt=0;        // cnt 记录满足条件的选法有几种   //@init
     for (int mask=0;mask<(1<<n);mask++){
         int sum=0;
         for (int i=0;i<n;i++){
             if ((mask>>i)&1) sum+=a[i];
         }
-        if (sum==t){                        //@mask
-            cnt++;                          //@hit
+        if (sum==t){  // 这一种选法的和，正好等于目标吗    //@mask
+            cnt++;    // 又找到一种选法            //@hit
         }
     }
-    cout<<cnt<<endl;                        //@done
+    cout<<cnt<<endl;  // 输出选法的个数            //@done
     return 0;
 }
 `,
     python: String.raw`
 n,t=map(int,input().split())
 a=list(map(int,input().split()))
-cnt=0                                       #@init
+cnt=0           # cnt 记录满足条件的选法有几种          #@init
 for mask in range(1<<n):
     s=0
     for i in range(n):
         if (mask>>i)&1:
             s+=a[i]
-    if s==t:                                #@mask
-        cnt+=1                              #@hit
-print(cnt)                                  #@done
+    if s==t:    # 这一种选法的和，正好等于目标吗           #@mask
+        cnt+=1  # 又找到一种选法                   #@hit
+print(cnt)      # 输出选法的个数                   #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -200,17 +200,17 @@ public class Main{
         int n=sc.nextInt(),t=sc.nextInt();
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
-        int cnt=0;                          //@init
+        int cnt=0;                // cnt 记录满足条件的选法有几种  //@init
         for (int mask=0;mask<(1<<n);mask++){
             int sum=0;
             for (int i=0;i<n;i++){
                 if (((mask>>i)&1)==1) sum+=a[i];
             }
-            if (sum==t){                    //@mask
-                cnt++;                      //@hit
+            if (sum==t){          // 这一种选法的和，正好等于目标吗   //@mask
+                cnt++;            // 又找到一种选法           //@hit
             }
         }
-        System.out.println(cnt);            //@done
+        System.out.println(cnt);  // 输出选法的个数           //@done
     }
 }
 `,

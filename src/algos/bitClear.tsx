@@ -126,12 +126,12 @@ export const bitClear: AlgoDef<number, BitClearState> = {
 #include <stdio.h>
 int main(){
     int n,cnt=0;
-    scanf("%d",&n);                         //@init
+    scanf("%d",&n);      // 读入 n                    //@init
     while (n){
-        n&=(n-1);                           //@clear
-        cnt++;                              //@clear
+        n&=(n-1);        // n&(n-1) 会消掉最低位的 1，次数加一  //@clear
+        cnt++;                                      //@clear
     }
-    printf("%d\n",cnt);                     //@done
+    printf("%d\n",cnt);  // 消了几次，就有几个 1             //@done
     return 0;
 }
 `,
@@ -140,35 +140,35 @@ int main(){
 using namespace std;
 int main(){
     int n,cnt=0;
-    cin>>n;                                 //@init
+    cin>>n;           // 读入 n                    //@init
     while (n){
-        n&=(n-1);                           //@clear
-        cnt++;                              //@clear
+        n&=(n-1);     // n&(n-1) 会消掉最低位的 1，次数加一  //@clear
+        cnt++;                                   //@clear
     }
-    cout<<cnt<<endl;                        //@done
+    cout<<cnt<<endl;  // 消了几次，就有几个 1             //@done
     return 0;
 }
 `,
     python: String.raw`
-n=int(input())                              #@init
+n=int(input())  # 读入 n                      #@init
 cnt=0
 while n:
-    n&=n-1                                  #@clear
+    n&=n-1      # n&(n-1) 会消掉最低位的 1，次数加一    #@clear
     cnt+=1                                  #@clear
-print(cnt)                                  #@done
+print(cnt)      # 消了几次，就有几个 1               #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
     public static void main(String[] args){
-        int n=new Scanner(System.in).nextInt();  //@init
+        int n=new Scanner(System.in).nextInt();  // 读入 n                 //@init
         int cnt=0;
         while (n!=0){
-            n&=(n-1);                            //@clear
-            cnt++;                               //@clear
+            n&=(n-1);                         // n&(n-1) 会消掉最低位的 1，次数加一  //@clear
+            cnt++;                                                       //@clear
         }
-        System.out.println(cnt);                 //@done
+        System.out.println(cnt);              // 消了几次，就有几个 1             //@done
     }
 }
 `,

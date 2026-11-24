@@ -273,22 +273,22 @@ typedef struct Node{
     struct Node *l,*r;
 } Node;
 Node* insert(Node* root,int x){
-    if (!root){                                       //@place
-        Node* p=(Node*)malloc(sizeof(Node));          //@place
-        p->val=x;                                     //@place
-        p->l=p->r=NULL;                               //@place
-        return p;                                     //@place
+    if (!root){                               // 走到空位了，新结点就放在这里        //@place
+        Node* p=(Node*)malloc(sizeof(Node));                           //@place
+        p->val=x;                                                      //@place
+        p->l=p->r=NULL;                                                //@place
+        return p;                                                      //@place
     }
-    if (x<root->val) root->l=insert(root->l,x);       //@goLeft
-    else if (x>root->val) root->r=insert(root->r,x);  //@goRight
+    if (x<root->val) root->l=insert(root->l,x);  // 比当前结点小，往左子树走       //@goLeft
+    else if (x>root->val) root->r=insert(root->r,x);  // 比当前结点大，往右子树走  //@goRight
     return root;
 }
 int search(Node* root,int x){
     while (root){
-        if (x==root->val) return 1;                   //@hit
-        root=x<root->val?root->l:root->r;             //@sgo
+        if (x==root->val) return 1;           // 找到了                   //@hit
+        root=x<root->val?root->l:root->r;     // 小了往左走，大了往右走           //@sgo
     }
-    return 0;                                         //@miss
+    return 0;                                 // 走到头也没找到，说明不在树里        //@miss
 }
 void preorder(Node* root){
     if (!root) return;
@@ -298,16 +298,16 @@ void preorder(Node* root){
 }
 int main(){
     int n,t,x;
-    Node* root=NULL;                                  //@init
+    Node* root=NULL;                          // 一开始是一棵空树              //@init
     scanf("%d",&n);
     for (int i=0;i<n;i++){
         scanf("%d",&x);
-        root=insert(root,x);                          //@ins
+        root=insert(root,x);                  // 把每个数插进树里              //@ins
     }
     scanf("%d",&t);
-    int found=search(root,t);                         //@sStart
+    int found=search(root,t);                 // 建好以后，查找目标数            //@sStart
     preorder(root);
-    printf("\n%s\n",found?"YES":"NO");                //@done
+    printf("\n%s\n",found?"YES":"NO");        // 先输出前序遍历，再输出有没有找到      //@done
     return 0;
 }
 `,
@@ -320,17 +320,17 @@ struct Node{
     Node(int v):val(v),l(nullptr),r(nullptr){}
 };
 Node* insert(Node* root,int x){
-    if (!root) return new Node(x);                    //@place
-    if (x<root->val) root->l=insert(root->l,x);       //@goLeft
-    else if (x>root->val) root->r=insert(root->r,x);  //@goRight
+    if (!root) return new Node(x);            // 走到空位了，新结点就放在这里        //@place
+    if (x<root->val) root->l=insert(root->l,x);  // 比当前结点小，往左子树走       //@goLeft
+    else if (x>root->val) root->r=insert(root->r,x);  // 比当前结点大，往右子树走  //@goRight
     return root;
 }
 bool search(Node* root,int x){
     while (root){
-        if (x==root->val) return true;                //@hit
-        root=x<root->val?root->l:root->r;             //@sgo
+        if (x==root->val) return true;        // 找到了                   //@hit
+        root=x<root->val?root->l:root->r;     // 小了往左走，大了往右走           //@sgo
     }
-    return false;                                     //@miss
+    return false;                             // 走到头也没找到，说明不在树里        //@miss
 }
 void preorder(Node* root){
     if (!root) return;
@@ -340,16 +340,16 @@ void preorder(Node* root){
 }
 int main(){
     int n,t,x;
-    Node* root=nullptr;                               //@init
+    Node* root=nullptr;                       // 一开始是一棵空树              //@init
     cin>>n;
     for (int i=0;i<n;i++){
         cin>>x;
-        root=insert(root,x);                          //@ins
+        root=insert(root,x);                  // 把每个数插进树里              //@ins
     }
     cin>>t;
-    bool found=search(root,t);                        //@sStart
+    bool found=search(root,t);                // 建好以后，查找目标数            //@sStart
     preorder(root);
-    cout<<endl<<(found?"YES":"NO")<<endl;             //@done
+    cout<<endl<<(found?"YES":"NO")<<endl;     // 先输出前序遍历，再输出有没有找到      //@done
     return 0;
 }
 `,
@@ -362,19 +362,19 @@ class Node:
 
 def insert(root,x):
     if root is None:
-        return Node(x)                         #@place
+        return Node(x)                        # 走到空位了，新结点就放在这里    #@place
     if x<root.val:
-        root.l=insert(root.l,x)                #@goLeft
+        root.l=insert(root.l,x)               # 比当前结点小，往左子树走      #@goLeft
     elif x>root.val:
-        root.r=insert(root.r,x)                #@goRight
+        root.r=insert(root.r,x)               # 比当前结点大，往右子树走      #@goRight
     return root
 
 def search(root,x):
     while root is not None:
         if x==root.val:
-            return True                        #@hit
-        root=root.l if x<root.val else root.r  #@sgo
-    return False                               #@miss
+            return True                       # 找到了               #@hit
+        root=root.l if x<root.val else root.r  # 小了往左走，大了往右走      #@sgo
+    return False                              # 走到头也没找到，说明不在树里    #@miss
 
 def preorder(root,out):
     if root is None:
@@ -386,14 +386,14 @@ def preorder(root,out):
 n=int(input())
 nums=list(map(int,input().split()))
 t=int(input())
-root=None                                      #@init
+root=None                                     # 一开始是一棵空树          #@init
 for x in nums:
-    root=insert(root,x)                        #@ins
-found=search(root,t)                           #@sStart
+    root=insert(root,x)                       # 把每个数插进树里          #@ins
+found=search(root,t)                          # 建好以后，查找目标数        #@sStart
 out=[]
 preorder(root,out)
 print(*out)
-print("YES" if found else "NO")                #@done
+print("YES" if found else "NO")               # 先输出前序遍历，再输出有没有找到  #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -408,18 +408,18 @@ public class Main{
     }
 
     static Node insert(Node root,int x){
-        if (root==null) return new Node(x);            //@place
-        if (x<root.val) root.l=insert(root.l,x);       //@goLeft
-        else if (x>root.val) root.r=insert(root.r,x);  //@goRight
+        if (root==null) return new Node(x);   // 走到空位了，新结点就放在这里         //@place
+        if (x<root.val) root.l=insert(root.l,x);  // 比当前结点小，往左子树走       //@goLeft
+        else if (x>root.val) root.r=insert(root.r,x);  // 比当前结点大，往右子树走  //@goRight
         return root;
     }
 
     static boolean search(Node root,int x){
         while (root!=null){
-            if (x==root.val) return true;              //@hit
-            root=x<root.val?root.l:root.r;             //@sgo
+            if (x==root.val) return true;     // 找到了                    //@hit
+            root=x<root.val?root.l:root.r;    // 小了往左走，大了往右走            //@sgo
         }
-        return false;                                  //@miss
+        return false;                         // 走到头也没找到，说明不在树里         //@miss
     }
 
     static void preorder(Node root,StringBuilder sb){
@@ -432,16 +432,16 @@ public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt();
-        Node root=null;                                //@init
+        Node root=null;                       // 一开始是一棵空树               //@init
         for (int i=0;i<n;i++){
-            root=insert(root,sc.nextInt());            //@ins
+            root=insert(root,sc.nextInt());   // 把每个数插进树里               //@ins
         }
         int t=sc.nextInt();
-        boolean found=search(root,t);                  //@sStart
+        boolean found=search(root,t);         // 建好以后，查找目标数             //@sStart
         StringBuilder sb=new StringBuilder();
         preorder(root,sb);
         System.out.println(sb);
-        System.out.println(found?"YES":"NO");          //@done
+        System.out.println(found?"YES":"NO");  // 先输出前序遍历，再输出有没有找到      //@done
     }
 }
 `,

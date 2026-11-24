@@ -199,20 +199,20 @@ int main(){
     scanf("%d",&n);
     for (int i=1;i<=n;i++){
         scanf("%d",&a[i]);
-        d[i]=a[i]-a[i-1];                   //@build
+        d[i]=a[i]-a[i-1];  // 差分数组：每个数和前一个数的差    //@build
     }
-    scanf("%d",&m);                         //@init
+    scanf("%d",&m);        // 读入操作的次数            //@init
     while (m--){
         int l,r,k;
         scanf("%d %d %d",&l,&r,&k);
-        d[l]+=k;                            //@addL
-        d[r+1]-=k;                          //@subR
+        d[l]+=k;           // 从 l 开始，后面的数都要加上 k  //@addL
+        d[r+1]-=k;         // 到 r+1 这里，把这个影响抵消掉  //@subR
     }
     for (int i=1;i<=n;i++){
-        d[i]+=d[i-1];                       //@restore
+        d[i]+=d[i-1];      // 对差分数组求前缀和，还原出每个数   //@restore
         printf("%d ",d[i]);
     }
-    printf("\n");                           //@done
+    printf("\n");          // 输出最终的数组            //@done
     return 0;
 }
 `,
@@ -225,20 +225,20 @@ int main(){
     vector<int> a(n+2),d(n+2);
     for (int i=1;i<=n;i++){
         cin>>a[i];
-        d[i]=a[i]-a[i-1];                   //@build
+        d[i]=a[i]-a[i-1];  // 差分数组：每个数和前一个数的差    //@build
     }
-    cin>>m;                                 //@init
+    cin>>m;                // 读入操作的次数            //@init
     while (m--){
         int l,r,k;
         cin>>l>>r>>k;
-        d[l]+=k;                            //@addL
-        d[r+1]-=k;                          //@subR
+        d[l]+=k;           // 从 l 开始，后面的数都要加上 k  //@addL
+        d[r+1]-=k;         // 到 r+1 这里，把这个影响抵消掉  //@subR
     }
     for (int i=1;i<=n;i++){
-        d[i]+=d[i-1];                       //@restore
+        d[i]+=d[i-1];      // 对差分数组求前缀和，还原出每个数   //@restore
         cout<<d[i]<<" ";
     }
-    cout<<endl;                             //@done
+    cout<<endl;            // 输出最终的数组            //@done
     return 0;
 }
 `,
@@ -247,15 +247,15 @@ n=int(input())
 a=[0]+list(map(int,input().split()))
 d=[0]*(n+2)
 for i in range(1,n+1):
-    d[i]=a[i]-a[i-1]                        #@build
-m=int(input())                              #@init
+    d[i]=a[i]-a[i-1]  # 差分数组：每个数和前一个数的差     #@build
+m=int(input())        # 读入操作的次数             #@init
 for _ in range(m):
     l,r,k=map(int,input().split())
-    d[l]+=k                                 #@addL
-    d[r+1]-=k                               #@subR
+    d[l]+=k           # 从 l 开始，后面的数都要加上 k   #@addL
+    d[r+1]-=k         # 到 r+1 这里，把这个影响抵消掉   #@subR
 for i in range(1,n+1):
-    d[i]+=d[i-1]                            #@restore
-print(*d[1:n+1])                            #@done
+    d[i]+=d[i-1]      # 对差分数组求前缀和，还原出每个数    #@restore
+print(*d[1:n+1])      # 输出最终的数组             #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -267,20 +267,20 @@ public class Main{
         int[] a=new int[n+2],d=new int[n+2];
         for (int i=1;i<=n;i++){
             a[i]=sc.nextInt();
-            d[i]=a[i]-a[i-1];               //@build
+            d[i]=a[i]-a[i-1];    // 差分数组：每个数和前一个数的差    //@build
         }
-        int m=sc.nextInt();                 //@init
+        int m=sc.nextInt();      // 读入操作的次数            //@init
         while (m-- > 0){
             int l=sc.nextInt(),r=sc.nextInt(),k=sc.nextInt();
-            d[l]+=k;                        //@addL
-            d[r+1]-=k;                      //@subR
+            d[l]+=k;             // 从 l 开始，后面的数都要加上 k  //@addL
+            d[r+1]-=k;           // 到 r+1 这里，把这个影响抵消掉  //@subR
         }
         StringBuilder sb=new StringBuilder();
         for (int i=1;i<=n;i++){
-            d[i]+=d[i-1];                   //@restore
+            d[i]+=d[i-1];        // 对差分数组求前缀和，还原出每个数   //@restore
             sb.append(d[i]).append(' ');
         }
-        System.out.println(sb);             //@done
+        System.out.println(sb);  // 输出最终的数组            //@done
     }
 }
 `,

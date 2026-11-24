@@ -126,16 +126,16 @@ export const insertionSort: AlgoDef<number[], InsState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-void insertionSort(int a[],int n){             //@init
-    for (int i=1;i<n;i++){                     //@pick
-        int j=i;                               //@pick
-        while (j>0 && a[j-1]>a[j]){            //@cmp
-            int t=a[j-1];                      //@swap
-            a[j-1]=a[j];                       //@swap
-            a[j]=t;                            //@swap
-            j--;                               //@swap
+void insertionSort(int a[],int n){            // 插入排序：像整理扑克牌，一张张插进前面已经排好的部分  //@init
+    for (int i=1;i<n;i++){                    // 拿起第 i 个数，准备往前插              //@pick
+        int j=i;                                                             //@pick
+        while (j>0 && a[j-1]>a[j]){           // 前面的数更大，就还得再往前               //@cmp
+            int t=a[j-1];                     // 前面的数往后挪一位，自己往前一位            //@swap
+            a[j-1]=a[j];                                                     //@swap
+            a[j]=t;                                                          //@swap
+            j--;                                                             //@swap
         }
-        // 此时 a[0..i] 已经有序                     //@place
+        // 此时 a[0..i] 已经有序                                                   //@place
     }
 }
 int main(){
@@ -143,21 +143,21 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     insertionSort(a,n);
-    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  // 输出排好序的数组                   //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-void insertionSort(int a[],int n){          //@init
-    for (int i=1;i<n;i++){                  //@pick
-        int j=i;                            //@pick
-        while (j>0 && a[j-1]>a[j]){         //@cmp
-            swap(a[j-1],a[j]);              //@swap
-            j--;                            //@swap
+void insertionSort(int a[],int n){          // 插入排序：像整理扑克牌，一张张插进前面已经排好的部分  //@init
+    for (int i=1;i<n;i++){                  // 拿起第 i 个数，准备往前插              //@pick
+        int j=i;                                                           //@pick
+        while (j>0 && a[j-1]>a[j]){         // 前面的数更大，就还得再往前               //@cmp
+            swap(a[j-1],a[j]);              // 前面的数往后挪一位，自己往前一位            //@swap
+            j--;                                                           //@swap
         }
-        // 此时 a[0..i] 已经有序                  //@place
+        // 此时 a[0..i] 已经有序                                                 //@place
     }
 }
 int main(){
@@ -165,39 +165,39 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     insertionSort(a,n);
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  // 输出排好序的数组                    //@done
     return 0;
 }
 `,
     python: String.raw`
-def insertion_sort(a):                      #@init
-    for i in range(1,len(a)):               #@pick
-        j=i                                 #@pick
-        while j>0 and a[j-1]>a[j]:          #@cmp
-            a[j-1],a[j]=a[j],a[j-1]         #@swap
-            j-=1                            #@swap
-        # 此时 a[0..i] 已经有序                   #@place
+def insertion_sort(a):               # 插入排序：像整理扑克牌，一张张插进前面已经排好的部分  #@init
+    for i in range(1,len(a)):        # 拿起第 i 个数，准备往前插              #@pick
+        j=i                                                        #@pick
+        while j>0 and a[j-1]>a[j]:   # 前面的数更大，就还得再往前               #@cmp
+            a[j-1],a[j]=a[j],a[j-1]  # 前面的数往后挪一位，自己往前一位            #@swap
+            j-=1                                                   #@swap
+        # 此时 a[0..i] 已经有序                                          #@place
 
 n=int(input())
 a=list(map(int,input().split()))
 insertion_sort(a)
-print(*a)                                   #@done
+print(*a)                            # 输出排好序的数组                    #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
-    static void insertionSort(int[] a){         //@init
+    static void insertionSort(int[] a){       // 插入排序：像整理扑克牌，一张张插进前面已经排好的部分  //@init
         int n=a.length;
-        for (int i=1;i<n;i++){                  //@pick
-            int j=i;                            //@pick
-            while (j>0&&a[j-1]>a[j]){           //@cmp
-                int t=a[j-1];                   //@swap
-                a[j-1]=a[j];                    //@swap
-                a[j]=t;                         //@swap
-                j--;                            //@swap
+        for (int i=1;i<n;i++){                // 拿起第 i 个数，准备往前插              //@pick
+            int j=i;                                                         //@pick
+            while (j>0&&a[j-1]>a[j]){         // 前面的数更大，就还得再往前               //@cmp
+                int t=a[j-1];                 // 前面的数往后挪一位，自己往前一位            //@swap
+                a[j-1]=a[j];                                                 //@swap
+                a[j]=t;                                                      //@swap
+                j--;                                                         //@swap
             }
-            // 此时 a[0..i] 已经有序                  //@place
+            // 此时 a[0..i] 已经有序                                               //@place
         }
     }
 
@@ -207,7 +207,7 @@ public class Main{
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
         insertionSort(a);
-        for (int x:a) System.out.print(x+" ");  //@done
+        for (int x:a) System.out.print(x+" ");  // 输出排好序的数组                  //@done
     }
 }
 `,

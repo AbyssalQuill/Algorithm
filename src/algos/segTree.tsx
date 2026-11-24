@@ -288,32 +288,32 @@ export const segTree: AlgoDef<SegInput, SegState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int a[1005],t[4005];                           //@init
+int a[1005],t[4005];                          // a 是原数组，t 是线段树，每个结点管着一段  //@init
 void build(int o,int l,int r){
-    if (l==r){                                 //@build
-        t[o]=a[l];                             //@build
-        return;                                //@build
-    }                                          //@build
+    if (l==r){                                // 叶子直接放数，其他结点等于左右孩子之和     //@build
+        t[o]=a[l];                                                       //@build
+        return;                                                          //@build
+    }                                                                    //@build
     int m=(l+r)/2;
     build(2*o,l,m);
     build(2*o+1,m+1,r);
-    t[o]=t[2*o]+t[2*o+1];                      //@build
+    t[o]=t[2*o]+t[2*o+1];                     // 叶子直接放数，其他结点等于左右孩子之和     //@build
 }
 int query(int o,int l,int r,int ql,int qr){
-    if (qr<l||r<ql) return 0;                  //@qOut
-    if (ql<=l&&r<=qr) return t[o];             //@qIn
-    int m=(l+r)/2;                             //@qSplit
+    if (qr<l||r<ql) return 0;                 // 这一段和查询区间没有交集，贡献是 0      //@qOut
+    if (ql<=l&&r<=qr) return t[o];            // 这一段完全落在查询区间里，直接用现成的和    //@qIn
+    int m=(l+r)/2;                            // 只重合了一部分，分成左右两半分别查       //@qSplit
     return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr);
 }
 void update(int o,int l,int r,int i,int v){
-    if (l==r){                                 //@uLeaf
-        t[o]=v;                                //@uLeaf
-        return;                                //@uLeaf
-    }                                          //@uLeaf
-    int m=(l+r)/2;                             //@uDown
+    if (l==r){                                // 找到要修改的叶子，改成新值           //@uLeaf
+        t[o]=v;                                                          //@uLeaf
+        return;                                                          //@uLeaf
+    }                                                                    //@uLeaf
+    int m=(l+r)/2;                            // 先判断要改的位置在左半还是右半         //@uDown
     if (i<=m) update(2*o,l,m,i,v);
     else update(2*o+1,m+1,r,i,v);
-    t[o]=t[2*o]+t[2*o+1];                      //@uUp
+    t[o]=t[2*o]+t[2*o+1];                     // 改完以后，沿路更新每个祖先的和         //@uUp
 }
 int main(){
     int n,m,res[1005],rc=0;
@@ -324,43 +324,43 @@ int main(){
     while (m--){
         int z,x,y;
         scanf("%d %d %d",&z,&x,&y);
-        if (z==1) res[rc++]=query(1,1,n,x,y);  //@qStart
-        else update(1,1,n,x,y);                //@uStart
+        if (z==1) res[rc++]=query(1,1,n,x,y);  // 操作 1：查询区间和             //@qStart
+        else update(1,1,n,x,y);               // 操作 2：把一个位置改成新值          //@uStart
     }
     for (int i=0;i<rc;i++) printf("%d ",res[i]);
-    printf("\n");                              //@done
+    printf("\n");                             // 输出所有查询的结果               //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int a[1005],t[4005];                                //@init
+int a[1005],t[4005];                          // a 是原数组，t 是线段树，每个结点管着一段  //@init
 void build(int o,int l,int r){
-    if (l==r){                                      //@build
-        t[o]=a[l];                                  //@build
-        return;                                     //@build
-    }                                               //@build
+    if (l==r){                                // 叶子直接放数，其他结点等于左右孩子之和     //@build
+        t[o]=a[l];                                                       //@build
+        return;                                                          //@build
+    }                                                                    //@build
     int m=(l+r)/2;
     build(2*o,l,m);
     build(2*o+1,m+1,r);
-    t[o]=t[2*o]+t[2*o+1];                           //@build
+    t[o]=t[2*o]+t[2*o+1];                     // 叶子直接放数，其他结点等于左右孩子之和     //@build
 }
 int query(int o,int l,int r,int ql,int qr){
-    if (qr<l||r<ql) return 0;                       //@qOut
-    if (ql<=l&&r<=qr) return t[o];                  //@qIn
-    int m=(l+r)/2;                                  //@qSplit
+    if (qr<l||r<ql) return 0;                 // 这一段和查询区间没有交集，贡献是 0      //@qOut
+    if (ql<=l&&r<=qr) return t[o];            // 这一段完全落在查询区间里，直接用现成的和    //@qIn
+    int m=(l+r)/2;                            // 只重合了一部分，分成左右两半分别查       //@qSplit
     return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr);
 }
 void update(int o,int l,int r,int i,int v){
-    if (l==r){                                      //@uLeaf
-        t[o]=v;                                     //@uLeaf
-        return;                                     //@uLeaf
-    }                                               //@uLeaf
-    int m=(l+r)/2;                                  //@uDown
+    if (l==r){                                // 找到要修改的叶子，改成新值           //@uLeaf
+        t[o]=v;                                                          //@uLeaf
+        return;                                                          //@uLeaf
+    }                                                                    //@uLeaf
+    int m=(l+r)/2;                            // 先判断要改的位置在左半还是右半         //@uDown
     if (i<=m) update(2*o,l,m,i,v);
     else update(2*o+1,m+1,r,i,v);
-    t[o]=t[2*o]+t[2*o+1];                           //@uUp
+    t[o]=t[2*o]+t[2*o+1];                     // 改完以后，沿路更新每个祖先的和         //@uUp
 }
 int main(){
     int n,m;
@@ -372,11 +372,11 @@ int main(){
     while (m--){
         int z,x,y;
         cin>>z>>x>>y;
-        if (z==1) res.push_back(query(1,1,n,x,y));  //@qStart
-        else update(1,1,n,x,y);                     //@uStart
+        if (z==1) res.push_back(query(1,1,n,x,y));  // 操作 1：查询区间和        //@qStart
+        else update(1,1,n,x,y);               // 操作 2：把一个位置改成新值          //@uStart
     }
     for (int x:res) cout<<x<<" ";
-    cout<<endl;                                     //@done
+    cout<<endl;                               // 输出所有查询的结果               //@done
     return 0;
 }
 `,
@@ -384,35 +384,35 @@ int main(){
 import sys
 sys.setrecursionlimit(10000)
 a=[0]
-t=[0]*4005                                  #@init
+t=[0]*4005                            # a 是原数组，t 是线段树，每个结点管着一段  #@init
 
 def build(o,l,r):
     if l==r:
-        t[o]=a[l]                           #@build
+        t[o]=a[l]                     # 叶子直接放数，其他结点等于左右孩子之和     #@build
         return
     m=(l+r)//2
     build(2*o,l,m)
     build(2*o+1,m+1,r)
-    t[o]=t[2*o]+t[2*o+1]                    #@build
+    t[o]=t[2*o]+t[2*o+1]              # 叶子直接放数，其他结点等于左右孩子之和     #@build
 
 def query(o,l,r,ql,qr):
     if qr<l or r<ql:
-        return 0                            #@qOut
+        return 0                      # 这一段和查询区间没有交集，贡献是 0      #@qOut
     if ql<=l and r<=qr:
-        return t[o]                         #@qIn
-    m=(l+r)//2                              #@qSplit
+        return t[o]                   # 这一段完全落在查询区间里，直接用现成的和    #@qIn
+    m=(l+r)//2                        # 只重合了一部分，分成左右两半分别查       #@qSplit
     return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr)
 
 def update(o,l,r,i,v):
     if l==r:
-        t[o]=v                              #@uLeaf
+        t[o]=v                        # 找到要修改的叶子，改成新值           #@uLeaf
         return
-    m=(l+r)//2                              #@uDown
+    m=(l+r)//2                        # 先判断要改的位置在左半还是右半         #@uDown
     if i<=m:
         update(2*o,l,m,i,v)
     else:
         update(2*o+1,m+1,r,i,v)
-    t[o]=t[2*o]+t[2*o+1]                    #@uUp
+    t[o]=t[2*o]+t[2*o+1]              # 改完以后，沿路更新每个祖先的和         #@uUp
 
 n=int(input())
 a+=list(map(int,input().split()))
@@ -421,44 +421,44 @@ res=[]
 for _ in range(int(input())):
     z,x,y=map(int,input().split())
     if z==1:
-        res.append(query(1,1,n,x,y))        #@qStart
+        res.append(query(1,1,n,x,y))  # 操作 1：查询区间和              #@qStart
     else:
-        update(1,1,n,x,y)                   #@uStart
-print(*res)                                 #@done
+        update(1,1,n,x,y)             # 操作 2：把一个位置改成新值          #@uStart
+print(*res)                           # 输出所有查询的结果               #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
-    static int[] a=new int[1005],t=new int[4005];               //@init
+    static int[] a=new int[1005],t=new int[4005];  // a 是原数组，t 是线段树，每个结点管着一段   //@init
 
     static void build(int o,int l,int r){
-        if (l==r){                                              //@build
-            t[o]=a[l];                                          //@build
-            return;                                             //@build
-        }                                                       //@build
+        if (l==r){                            // 叶子直接放数，其他结点等于左右孩子之和           //@build
+            t[o]=a[l];                                                         //@build
+            return;                                                            //@build
+        }                                                                      //@build
         int m=(l+r)/2;
         build(2*o,l,m);
         build(2*o+1,m+1,r);
-        t[o]=t[2*o]+t[2*o+1];                                   //@build
+        t[o]=t[2*o]+t[2*o+1];                 // 叶子直接放数，其他结点等于左右孩子之和           //@build
     }
 
     static int query(int o,int l,int r,int ql,int qr){
-        if (qr<l||r<ql) return 0;                               //@qOut
-        if (ql<=l&&r<=qr) return t[o];                          //@qIn
-        int m=(l+r)/2;                                          //@qSplit
+        if (qr<l||r<ql) return 0;             // 这一段和查询区间没有交集，贡献是 0            //@qOut
+        if (ql<=l&&r<=qr) return t[o];        // 这一段完全落在查询区间里，直接用现成的和          //@qIn
+        int m=(l+r)/2;                        // 只重合了一部分，分成左右两半分别查             //@qSplit
         return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr);
     }
 
     static void update(int o,int l,int r,int i,int v){
-        if (l==r){                                              //@uLeaf
-            t[o]=v;                                             //@uLeaf
-            return;                                             //@uLeaf
-        }                                                       //@uLeaf
-        int m=(l+r)/2;                                          //@uDown
+        if (l==r){                            // 找到要修改的叶子，改成新值                 //@uLeaf
+            t[o]=v;                                                            //@uLeaf
+            return;                                                            //@uLeaf
+        }                                                                      //@uLeaf
+        int m=(l+r)/2;                        // 先判断要改的位置在左半还是右半               //@uDown
         if (i<=m) update(2*o,l,m,i,v);
         else update(2*o+1,m+1,r,i,v);
-        t[o]=t[2*o]+t[2*o+1];                                   //@uUp
+        t[o]=t[2*o]+t[2*o+1];                 // 改完以后，沿路更新每个祖先的和               //@uUp
     }
 
     public static void main(String[] args){
@@ -470,10 +470,10 @@ public class Main{
         StringBuilder sb=new StringBuilder();
         while (m-- > 0){
             int z=sc.nextInt(),x=sc.nextInt(),y=sc.nextInt();
-            if (z==1) sb.append(query(1,1,n,x,y)).append(' ');  //@qStart
-            else update(1,1,n,x,y);                             //@uStart
+            if (z==1) sb.append(query(1,1,n,x,y)).append(' ');  // 操作 1：查询区间和  //@qStart
+            else update(1,1,n,x,y);           // 操作 2：把一个位置改成新值                //@uStart
         }
-        System.out.println(sb);                                 //@done
+        System.out.println(sb);               // 输出所有查询的结果                     //@done
     }
 }
 `,

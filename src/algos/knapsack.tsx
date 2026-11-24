@@ -185,7 +185,7 @@ export const knapsack: AlgoDef<KnapInput, KnapState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int n,W,w[15],v[15],dp[15][105];                                //@init
+int n,W,w[15],v[15],dp[15][105];              // dp[i][j]：只考虑前 i 件物品、容量为 j 时的最大价值  //@init
 int max(int a,int b){
     return a>b?a:b;
 }
@@ -196,20 +196,20 @@ int main(){
     for (int i=1;i<=n;i++){
         for (int j=0;j<=W;j++){
             if (w[i]>j){
-                dp[i][j]=dp[i-1][j];                            //@tooHeavy
+                dp[i][j]=dp[i-1][j];          // 放不下，只能不选                          //@tooHeavy
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  //@choose
+                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  // 选还是不选，取价值更大的    //@choose
             }
         }
     }
-    printf("%d\n",dp[n][W]);                                    //@done
+    printf("%d\n",dp[n][W]);                  // 右下角，就是最终的答案                       //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int n,W,w[15],v[15],dp[15][105];                                //@init
+int n,W,w[15],v[15],dp[15][105];              // dp[i][j]：只考虑前 i 件物品、容量为 j 时的最大价值  //@init
 int main(){
     cin>>n>>W;
     for (int i=1;i<=n;i++) cin>>w[i];
@@ -217,13 +217,13 @@ int main(){
     for (int i=1;i<=n;i++){
         for (int j=0;j<=W;j++){
             if (w[i]>j){
-                dp[i][j]=dp[i-1][j];                            //@tooHeavy
+                dp[i][j]=dp[i-1][j];          // 放不下，只能不选                          //@tooHeavy
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  //@choose
+                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  // 选还是不选，取价值更大的    //@choose
             }
         }
     }
-    cout<<dp[n][W]<<endl;                                       //@done
+    cout<<dp[n][W]<<endl;                     // 右下角，就是最终的答案                       //@done
     return 0;
 }
 `,
@@ -231,14 +231,14 @@ int main(){
 n,W=map(int,input().split())
 w=[0]+list(map(int,input().split()))
 v=[0]+list(map(int,input().split()))
-dp=[[0]*(W+1) for _ in range(n+1)]                         #@init
+dp=[[0]*(W+1) for _ in range(n+1)]            # dp[i][j]：只考虑前 i 件物品、容量为 j 时的最大价值  #@init
 for i in range(1,n+1):
     for j in range(W+1):
         if w[i]>j:
-            dp[i][j]=dp[i-1][j]                            #@tooHeavy
+            dp[i][j]=dp[i-1][j]               # 放不下，只能不选                          #@tooHeavy
         else:
-            dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i])  #@choose
-print(dp[n][W])                                            #@done
+            dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i])  # 选还是不选，取价值更大的         #@choose
+print(dp[n][W])                               # 右下角，就是最终的答案                       #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -250,17 +250,17 @@ public class Main{
         int[] w=new int[n+1],v=new int[n+1];
         for (int i=1;i<=n;i++) w[i]=sc.nextInt();
         for (int i=1;i<=n;i++) v[i]=sc.nextInt();
-        int[][] dp=new int[n+1][W+1];                           //@init
+        int[][] dp=new int[n+1][W+1];         // dp[i][j]：只考虑前 i 件物品、容量为 j 时的最大价值         //@init
         for (int i=1;i<=n;i++){
             for (int j=0;j<=W;j++){
                 if (w[i]>j){
-                    dp[i][j]=dp[i-1][j];                        //@tooHeavy
+                    dp[i][j]=dp[i-1][j];      // 放不下，只能不选                                 //@tooHeavy
                 }else{
-                    dp[i][j]=Math.max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  //@choose
+                    dp[i][j]=Math.max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  // 选还是不选，取价值更大的  //@choose
                 }
             }
         }
-        System.out.println(dp[n][W]);                           //@done
+        System.out.println(dp[n][W]);         // 右下角，就是最终的答案                              //@done
     }
 }
 `,

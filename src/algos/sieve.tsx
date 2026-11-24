@@ -163,18 +163,18 @@ export const sieve: AlgoDef<number, SvState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int comp[1005];                             //@init
+int comp[1005];                        // comp[i] 为真，表示 i 是合数      //@init
 int main(){
     int n;
     scanf("%d",&n);
     for (int i=2;i*i<=n;i++){
-        if (!comp[i]){                      //@check
-            for (int j=i*i;j<=n;j+=i)       //@cross
-                comp[j]=1;                  //@cross
+        if (!comp[i]){                 // i 还没被划掉，它是质数             //@check
+            for (int j=i*i;j<=n;j+=i)  // 把 i 的倍数全部划掉，从 i*i 开始就够了  //@cross
+                comp[j]=1;                                         //@cross
         }
     }
-    for (int i=2;i<=n;i++)                  //@done
-        if (!comp[i]) printf("%d ",i);      //@done
+    for (int i=2;i<=n;i++)             // 没被划掉的，就是质数               //@done
+        if (!comp[i]) printf("%d ",i);                             //@done
     printf("\n");
     return 0;
 }
@@ -182,34 +182,34 @@ int main(){
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-bool comp[1005];                            //@init
+bool comp[1005];                       // comp[i] 为真，表示 i 是合数      //@init
 int main(){
     int n;
     cin>>n;
     for (int i=2;i*i<=n;i++){
-        if (!comp[i]){                      //@check
-            for (int j=i*i;j<=n;j+=i)       //@cross
-                comp[j]=true;               //@cross
+        if (!comp[i]){                 // i 还没被划掉，它是质数             //@check
+            for (int j=i*i;j<=n;j+=i)  // 把 i 的倍数全部划掉，从 i*i 开始就够了  //@cross
+                comp[j]=true;                                      //@cross
         }
     }
-    for (int i=2;i<=n;i++)                  //@done
-        if (!comp[i]) cout<<i<<" ";         //@done
+    for (int i=2;i<=n;i++)             // 没被划掉的，就是质数               //@done
+        if (!comp[i]) cout<<i<<" ";                                //@done
     cout<<endl;
     return 0;
 }
 `,
     python: String.raw`
 n=int(input())
-comp=[False]*(n+1)                          #@init
+comp=[False]*(n+1)                  # comp[i] 为真，表示 i 是合数      #@init
 i=2
 while i*i<=n:
-    if not comp[i]:                         #@check
-        for j in range(i*i,n+1,i):          #@cross
-            comp[j]=True                    #@cross
+    if not comp[i]:                 # i 还没被划掉，它是质数             #@check
+        for j in range(i*i,n+1,i):  # 把 i 的倍数全部划掉，从 i*i 开始就够了  #@cross
+            comp[j]=True                                       #@cross
     i+=1
-for i in range(2,n+1):                      #@done
-    if not comp[i]:                         #@done
-        print(i,end=' ')                    #@done
+for i in range(2,n+1):              # 没被划掉的，就是质数               #@done
+    if not comp[i]:                                            #@done
+        print(i,end=' ')                                       #@done
 print()
 `,
     java: String.raw`
@@ -219,15 +219,15 @@ public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt();
-        boolean[] comp=new boolean[n+1];            //@init
+        boolean[] comp=new boolean[n+1];   // comp[i] 为真，表示 i 是合数      //@init
         for (int i=2;i*i<=n;i++){
-            if (!comp[i]){                          //@check
-                for (int j=i*i;j<=n;j+=i)           //@cross
-                    comp[j]=true;                   //@cross
+            if (!comp[i]){                 // i 还没被划掉，它是质数             //@check
+                for (int j=i*i;j<=n;j+=i)  // 把 i 的倍数全部划掉，从 i*i 开始就够了  //@cross
+                    comp[j]=true;                                      //@cross
             }
         }
-        for (int i=2;i<=n;i++)                      //@done
-            if (!comp[i]) System.out.print(i+" ");  //@done
+        for (int i=2;i<=n;i++)             // 没被划掉的，就是质数               //@done
+            if (!comp[i]) System.out.print(i+" ");                     //@done
         System.out.println();
     }
 }

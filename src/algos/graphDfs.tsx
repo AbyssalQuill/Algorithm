@@ -193,14 +193,14 @@ export const graphDfs: AlgoDef<DfsInput, DfsState> = {
 #include <stdio.h>
 int adj[105][105],deg[105],vis[105],order[105],cnt=0;
 void dfs(int u){
-    vis[u]=1;                               //@visit
-    order[cnt++]=u;                         //@visit
+    vis[u]=1;                  // 来到 u，先标记，并记下访问的顺序  //@visit
+    order[cnt++]=u;                                  //@visit
     for (int i=0;i<deg[u];i++){
         int v=adj[u][i];
-        if (vis[v]) continue;               //@skip
-        dfs(v);                             //@go
+        if (vis[v]) continue;  // 去过的结点，不再去          //@skip
+        dfs(v);                // 没去过，沿着这条边往深处走      //@go
     }
-    // u 的邻居都处理完了，回到上一层                     //@back
+    // u 的邻居都处理完了，回到上一层                              //@back
 }
 int main(){
     int n,m,a,b,s;
@@ -211,9 +211,9 @@ int main(){
         adj[b][deg[b]++]=a;
     }
     scanf("%d",&s);
-    dfs(s);                                 //@init
+    dfs(s);                    // 从起点开始搜索            //@init
     for (int i=0;i<cnt;i++) printf("%d ",order[i]);
-    printf("\n");                           //@done
+    printf("\n");                                    //@done
     return 0;
 }
 `,
@@ -224,13 +224,13 @@ vector<int> adj[105];
 bool vis[105];
 vector<int> order_;
 void dfs(int u){
-    vis[u]=true;                            //@visit
-    order_.push_back(u);                    //@visit
+    vis[u]=true;               // 来到 u，先标记，并记下访问的顺序  //@visit
+    order_.push_back(u);                             //@visit
     for (int v:adj[u]){
-        if (vis[v]) continue;               //@skip
-        dfs(v);                             //@go
+        if (vis[v]) continue;  // 去过的结点，不再去          //@skip
+        dfs(v);                // 没去过，沿着这条边往深处走      //@go
     }
-    // u 的邻居都处理完了，回到上一层                     //@back
+    // u 的邻居都处理完了，回到上一层                              //@back
 }
 int main(){
     int n,m,a,b,s;
@@ -241,9 +241,9 @@ int main(){
         adj[b].push_back(a);
     }
     cin>>s;
-    dfs(s);                                 //@init
+    dfs(s);                    // 从起点开始搜索            //@init
     for (int x:order_) cout<<x<<" ";
-    cout<<endl;                             //@done
+    cout<<endl;                                      //@done
     return 0;
 }
 `,
@@ -252,12 +252,12 @@ import sys
 sys.setrecursionlimit(10000)
 
 def dfs(u):
-    vis[u]=True                             #@visit
+    vis[u]=True       # 来到 u，先标记，并记下访问的顺序   #@visit
     order.append(u)                         #@visit
     for v in adj[u]:
         if vis[v]:
-            continue                        #@skip
-        dfs(v)                              #@go
+            continue  # 去过的结点，不再去           #@skip
+        dfs(v)        # 没去过，沿着这条边往深处走       #@go
     # u 的邻居都处理完了，回到上一层                      #@back
 
 n,m=map(int,input().split())
@@ -269,7 +269,7 @@ for _ in range(m):
 s=int(input())
 vis=[False]*(n+1)
 order=[]
-dfs(s)                                      #@init
+dfs(s)                # 从起点开始搜索             #@init
 print(*order)                               #@done
 `,
     java: String.raw`
@@ -281,13 +281,13 @@ public class Main{
     static List<Integer> order=new ArrayList<>();
 
     static void dfs(int u){
-        vis[u]=true;                        //@visit
-        order.add(u);                       //@visit
+        vis[u]=true;               // 来到 u，先标记，并记下访问的顺序  //@visit
+        order.add(u);                                    //@visit
         for (int v:adj.get(u)){
-            if (vis[v]) continue;           //@skip
-            dfs(v);                         //@go
+            if (vis[v]) continue;  // 去过的结点，不再去          //@skip
+            dfs(v);                // 没去过，沿着这条边往深处走      //@go
         }
-        // u 的邻居都处理完了，回到上一层                 //@back
+        // u 的邻居都处理完了，回到上一层                              //@back
     }
 
     public static void main(String[] args){
@@ -300,10 +300,10 @@ public class Main{
             adj.get(b).add(a);
         }
         int s=sc.nextInt();
-        dfs(s);                             //@init
+        dfs(s);                    // 从起点开始搜索            //@init
         StringBuilder sb=new StringBuilder();
         for (int x:order) sb.append(x).append(' ');
-        System.out.println(sb);             //@done
+        System.out.println(sb);                          //@done
     }
 }
 `,

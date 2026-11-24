@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import type { Token } from 'marked'
 import { IconArrow } from '../components/icons'
-import { Problems } from '../components/Problems'
+import { DiffLegend, Problems } from '../components/Problems'
 import { pickProblems } from '../data/problems'
 import { loadLesson } from '../learn/content'
 import { whenIdle } from '../prefetch'
@@ -88,7 +88,7 @@ export default function Lesson() {
 
   if (!found) return <Navigate to="/learn" replace />
   const { lesson, prev, next } = found
-  const probs = pickProblems(...lesson.problems)
+  const probs = [...pickProblems(...lesson.problems)].sort((a, b) => (a.diff ?? 0) - (b.diff ?? 0))
 
   return (
     <div className="container lesson-wrap">
@@ -131,7 +131,8 @@ export default function Lesson() {
         {tokens && probs.length > 0 && (
           <section className="lesson-problems">
             <h2>配套练习（洛谷）</h2>
-            <p className="lp-sub">下面几道题只会用到本课的内容。点击题目会在洛谷原站打开，请在那里编写并提交代码。</p>
+            <p className="lp-sub">题目由易到难排列：前面的只会用到本课和前面讲过的内容，后面的可以当作挑战。题号和难度的颜色与洛谷一致。点击题目会在洛谷原站打开，请在那里编写并提交代码。</p>
+            <DiffLegend levels={[...new Set(probs.map((p) => p.diff ?? 0))].filter((d) => d > 0).sort()} />
             <Problems list={probs} />
           </section>
         )}

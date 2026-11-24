@@ -140,17 +140,17 @@ export const selectionSort: AlgoDef<number[], SelState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-void selectionSort(int a[],int n){             //@init
-    for (int i=0;i<n-1;i++){                   //@pick
-        int m=i;                               //@pick
+void selectionSort(int a[],int n){            // 选择排序：每一轮选出最小的，放到最前面        //@init
+    for (int i=0;i<n-1;i++){                  // 先假设第 i 个就是剩下的数里最小的，下标记作 m  //@pick
+        int m=i;                                                            //@pick
         for (int j=i+1;j<n;j++){
-            if (a[j]<a[m]){                    //@cmp
-                m=j;                           //@newMin
+            if (a[j]<a[m]){                   // 拿后面的数和当前的最小值比一比            //@cmp
+                m=j;                          // 发现更小的，更新最小值的下标             //@newMin
             }
         }
-        int t=a[i];                            //@swap
-        a[i]=a[m];                             //@swap
-        a[m]=t;                                //@swap
+        int t=a[i];                           // 把最小的数换到第 i 个位置             //@swap
+        a[i]=a[m];                                                          //@swap
+        a[m]=t;                                                             //@swap
     }
 }
 int main(){
@@ -158,22 +158,22 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     selectionSort(a,n);
-    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  // 输出排好序的数组                  //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-void selectionSort(int a[],int n){          //@init
-    for (int i=0;i<n-1;i++){                //@pick
-        int m=i;                            //@pick
+void selectionSort(int a[],int n){          // 选择排序：每一轮选出最小的，放到最前面        //@init
+    for (int i=0;i<n-1;i++){                // 先假设第 i 个就是剩下的数里最小的，下标记作 m  //@pick
+        int m=i;                                                          //@pick
         for (int j=i+1;j<n;j++){
-            if (a[j]<a[m]){                 //@cmp
-                m=j;                        //@newMin
+            if (a[j]<a[m]){                 // 拿后面的数和当前的最小值比一比            //@cmp
+                m=j;                        // 发现更小的，更新最小值的下标             //@newMin
             }
         }
-        swap(a[i],a[m]);                    //@swap
+        swap(a[i],a[m]);                    // 把最小的数换到第 i 个位置             //@swap
     }
 }
 int main(){
@@ -181,41 +181,41 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     selectionSort(a,n);
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  // 输出排好序的数组                   //@done
     return 0;
 }
 `,
     python: String.raw`
-def selection_sort(a):                      #@init
+def selection_sort(a):       # 选择排序：每一轮选出最小的，放到最前面        #@init
     n=len(a)
-    for i in range(n-1):                    #@pick
-        m=i                                 #@pick
+    for i in range(n-1):     # 先假设第 i 个就是剩下的数里最小的，下标记作 m  #@pick
+        m=i                                               #@pick
         for j in range(i+1,n):
-            if a[j]<a[m]:                   #@cmp
-                m=j                         #@newMin
-        a[i],a[m]=a[m],a[i]                 #@swap
+            if a[j]<a[m]:    # 拿后面的数和当前的最小值比一比            #@cmp
+                m=j          # 发现更小的，更新最小值的下标             #@newMin
+        a[i],a[m]=a[m],a[i]  # 把最小的数换到第 i 个位置             #@swap
 
 n=int(input())
 a=list(map(int,input().split()))
 selection_sort(a)
-print(*a)                                   #@done
+print(*a)                    # 输出排好序的数组                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
-    static void selectionSort(int[] a){         //@init
+    static void selectionSort(int[] a){       // 选择排序：每一轮选出最小的，放到最前面        //@init
         int n=a.length;
-        for (int i=0;i<n-1;i++){                //@pick
-            int m=i;                            //@pick
+        for (int i=0;i<n-1;i++){              // 先假设第 i 个就是剩下的数里最小的，下标记作 m  //@pick
+            int m=i;                                                        //@pick
             for (int j=i+1;j<n;j++){
-                if (a[j]<a[m]){                 //@cmp
-                    m=j;                        //@newMin
+                if (a[j]<a[m]){               // 拿后面的数和当前的最小值比一比            //@cmp
+                    m=j;                      // 发现更小的，更新最小值的下标             //@newMin
                 }
             }
-            int t=a[i];                         //@swap
-            a[i]=a[m];                          //@swap
-            a[m]=t;                             //@swap
+            int t=a[i];                       // 把最小的数换到第 i 个位置             //@swap
+            a[i]=a[m];                                                      //@swap
+            a[m]=t;                                                         //@swap
         }
     }
 
@@ -225,7 +225,7 @@ public class Main{
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
         selectionSort(a);
-        for (int x:a) System.out.print(x+" ");  //@done
+        for (int x:a) System.out.print(x+" ");  // 输出排好序的数组                 //@done
     }
 }
 `,

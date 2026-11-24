@@ -160,17 +160,17 @@ export const graphStore: AlgoDef<StoreInput, StoreState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int g[105][105],adj[105][105],deg[105];     //@init
+int g[105][105],adj[105][105],deg[105];  // 邻接矩阵 g 和邻接表 adj，各存一份     //@init
 int main(){
     int n,m,a,b;
     scanf("%d %d",&n,&m);
     for (int i=0;i<m;i++){
         scanf("%d %d",&a,&b);
-        g[a][b]=g[b][a]=1;                  //@matrix
-        adj[a][deg[a]++]=b;                 //@list
-        adj[b][deg[b]++]=a;                 //@list
+        g[a][b]=g[b][a]=1;               // 矩阵里把 a、b 两个格子都置成 1（无向边）  //@matrix
+        adj[a][deg[a]++]=b;              // 两个结点的清单里，互相加上对方          //@list
+        adj[b][deg[b]++]=a;                                          //@list
     }
-    for (int u=1;u<=n;u++){                 //@done
+    for (int u=1;u<=n;u++){              // 逐个结点输出它的邻居清单             //@done
         printf("%d:",u);
         for (int i=0;i<deg[u];i++) printf(" %d",adj[u][i]);
         printf("\n");
@@ -181,18 +181,18 @@ int main(){
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int g[105][105];                            //@init
+int g[105][105];              // 邻接矩阵 g 和邻接表 adj，各存一份     //@init
 vector<int> adj[105];
 int main(){
     int n,m,a,b;
     cin>>n>>m;
     for (int i=0;i<m;i++){
         cin>>a>>b;
-        g[a][b]=g[b][a]=1;                  //@matrix
-        adj[a].push_back(b);                //@list
-        adj[b].push_back(a);                //@list
+        g[a][b]=g[b][a]=1;    // 矩阵里把 a、b 两个格子都置成 1（无向边）  //@matrix
+        adj[a].push_back(b);  // 两个结点的清单里，互相加上对方          //@list
+        adj[b].push_back(a);                              //@list
     }
-    for (int u=1;u<=n;u++){                 //@done
+    for (int u=1;u<=n;u++){   // 逐个结点输出它的邻居清单             //@done
         cout<<u<<":";
         for (int v:adj[u]) cout<<" "<<v;
         cout<<endl;
@@ -202,14 +202,14 @@ int main(){
 `,
     python: String.raw`
 n,m=map(int,input().split())
-g=[[0]*(n+1) for _ in range(n+1)]           #@init
+g=[[0]*(n+1) for _ in range(n+1)]  # 邻接矩阵 g 和邻接表 adj，各存一份     #@init
 adj=[[] for _ in range(n+1)]
 for _ in range(m):
     a,b=map(int,input().split())
-    g[a][b]=g[b][a]=1                       #@matrix
-    adj[a].append(b)                        #@list
-    adj[b].append(a)                        #@list
-for u in range(1,n+1):                      #@done
+    g[a][b]=g[b][a]=1              # 矩阵里把 a、b 两个格子都置成 1（无向边）  #@matrix
+    adj[a].append(b)               # 两个结点的清单里，互相加上对方          #@list
+    adj[b].append(a)                                          #@list
+for u in range(1,n+1):             # 逐个结点输出它的邻居清单             #@done
     print(str(u)+":",*adj[u])
 `,
     java: String.raw`
@@ -219,16 +219,16 @@ public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt(),m=sc.nextInt();
-        int[][] g=new int[n+1][n+1];        //@init
+        int[][] g=new int[n+1][n+1];  // 邻接矩阵 g 和邻接表 adj，各存一份     //@init
         List<List<Integer>> adj=new ArrayList<>();
         for (int i=0;i<=n;i++) adj.add(new ArrayList<>());
         for (int i=0;i<m;i++){
             int a=sc.nextInt(),b=sc.nextInt();
-            g[a][b]=g[b][a]=1;              //@matrix
-            adj.get(a).add(b);              //@list
-            adj.get(b).add(a);              //@list
+            g[a][b]=g[b][a]=1;        // 矩阵里把 a、b 两个格子都置成 1（无向边）  //@matrix
+            adj.get(a).add(b);        // 两个结点的清单里，互相加上对方          //@list
+            adj.get(b).add(a);                                    //@list
         }
-        for (int u=1;u<=n;u++){             //@done
+        for (int u=1;u<=n;u++){       // 逐个结点输出它的邻居清单             //@done
             StringBuilder sb=new StringBuilder(u+":");
             for (int v:adj.get(u)) sb.append(' ').append(v);
             System.out.println(sb);

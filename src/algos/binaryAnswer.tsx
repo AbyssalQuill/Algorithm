@@ -156,19 +156,19 @@ int main(){
         scanf("%d",&a[i]);
         if (a[i]>mx) mx=a[i];
     }
-    int lo=1,hi=mx,ans=0;                     //@init
+    int lo=1,hi=mx,ans=0;      // 答案的范围，是 1 到最长的那根木头   //@init
     while (lo<=hi){
-        int mid=lo+(hi-lo)/2;                 //@check
-        int cnt=0;                            //@check
-        for (int i=0;i<n;i++) cnt+=a[i]/mid;  //@check
+        int mid=lo+(hi-lo)/2;  // 试试长度 mid，数一数一共能切出几段  //@check
+        int cnt=0;                                     //@check
+        for (int i=0;i<n;i++) cnt+=a[i]/mid;           //@check
         if (cnt>=k){
-            ans=mid;                          //@ok
-            lo=mid+1;                         //@ok
+            ans=mid;           // 够用，先记下来，再试试更长的       //@ok
+            lo=mid+1;                                  //@ok
         }else{
-            hi=mid-1;                         //@bad
+            hi=mid-1;          // 不够，只能切短一点            //@bad
         }
     }
-    printf("%d\n",ans);                       //@done
+    printf("%d\n",ans);        // 输出最长的可行长度            //@done
     return 0;
 }
 `,
@@ -182,35 +182,35 @@ int main(){
         cin>>a[i];
         mx=max(mx,a[i]);
     }
-    int lo=1,hi=mx,ans=0;                     //@init
+    int lo=1,hi=mx,ans=0;      // 答案的范围，是 1 到最长的那根木头   //@init
     while (lo<=hi){
-        int mid=lo+(hi-lo)/2;                 //@check
-        int cnt=0;                            //@check
-        for (int i=0;i<n;i++) cnt+=a[i]/mid;  //@check
+        int mid=lo+(hi-lo)/2;  // 试试长度 mid，数一数一共能切出几段  //@check
+        int cnt=0;                                     //@check
+        for (int i=0;i<n;i++) cnt+=a[i]/mid;           //@check
         if (cnt>=k){
-            ans=mid;                          //@ok
-            lo=mid+1;                         //@ok
+            ans=mid;           // 够用，先记下来，再试试更长的       //@ok
+            lo=mid+1;                                  //@ok
         }else{
-            hi=mid-1;                         //@bad
+            hi=mid-1;          // 不够，只能切短一点            //@bad
         }
     }
-    cout<<ans<<endl;                          //@done
+    cout<<ans<<endl;           // 输出最长的可行长度            //@done
     return 0;
 }
 `,
     python: String.raw`
 n,k=map(int,input().split())
 a=list(map(int,input().split()))
-lo,hi,ans=1,max(a),0                        #@init
+lo,hi,ans=1,max(a),0   # 答案的范围，是 1 到最长的那根木头   #@init
 while lo<=hi:
-    mid=lo+(hi-lo)//2                       #@check
-    cnt=sum(x//mid for x in a)              #@check
+    mid=lo+(hi-lo)//2  # 试试长度 mid，数一数一共能切出几段  #@check
+    cnt=sum(x//mid for x in a)                #@check
     if cnt>=k:
-        ans=mid                             #@ok
-        lo=mid+1                            #@ok
+        ans=mid        # 够用，先记下来，再试试更长的       #@ok
+        lo=mid+1                              #@ok
     else:
-        hi=mid-1                            #@bad
-print(ans)                                  #@done
+        hi=mid-1       # 不够，只能切短一点            #@bad
+print(ans)             # 输出最长的可行长度            #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -224,19 +224,19 @@ public class Main{
             a[i]=sc.nextInt();
             mx=Math.max(mx,a[i]);
         }
-        int lo=1,hi=mx,ans=0;                     //@init
+        int lo=1,hi=mx,ans=0;      // 答案的范围，是 1 到最长的那根木头   //@init
         while (lo<=hi){
-            int mid=lo+(hi-lo)/2;                 //@check
-            int cnt=0;                            //@check
-            for (int i=0;i<n;i++) cnt+=a[i]/mid;  //@check
+            int mid=lo+(hi-lo)/2;  // 试试长度 mid，数一数一共能切出几段  //@check
+            int cnt=0;                                     //@check
+            for (int i=0;i<n;i++) cnt+=a[i]/mid;           //@check
             if (cnt>=k){
-                ans=mid;                          //@ok
-                lo=mid+1;                         //@ok
+                ans=mid;           // 够用，先记下来，再试试更长的       //@ok
+                lo=mid+1;                                  //@ok
             }else{
-                hi=mid-1;                         //@bad
+                hi=mid-1;          // 不够，只能切短一点            //@bad
             }
         }
-        System.out.println(ans);                  //@done
+        System.out.println(ans);   // 输出最长的可行长度            //@done
     }
 }
 `,

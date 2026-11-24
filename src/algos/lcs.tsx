@@ -244,30 +244,30 @@ int max(int x,int y){
 int main(){
     char a[105],b[105],res[105];
     scanf("%s %s",a,b);
-    int n=strlen(a),m=strlen(b);                      //@init
+    int n=strlen(a),m=strlen(b);              // dp[i][j]：A 的前 i 个字符和 B 的前 j 个字符的最长公共子序列  //@init
     for (int i=1;i<=n;i++){
         for (int j=1;j<=m;j++){
             if (a[i-1]==b[j-1]){
-                dp[i][j]=dp[i-1][j-1]+1;              //@match
+                dp[i][j]=dp[i-1][j-1]+1;      // 字符相同，在左上角的基础上加一                          //@match
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);  //@skip
+                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);  // 不同，取“丢掉 A 的一个字符”和“丢掉 B 的一个字符”里较大的  //@skip
             }
         }
     }
     int i=n,j=m,k=0;
     while (i>0&&j>0){
         if (a[i-1]==b[j-1]){
-            res[k++]=a[i-1];                          //@tmatch
-            i--;                                      //@tmatch
-            j--;                                      //@tmatch
+            res[k++]=a[i-1];                  // 回溯：字符相同，它是公共子序列的一员，向左上走                  //@tmatch
+            i--;                                                                          //@tmatch
+            j--;                                                                          //@tmatch
         }else if (dp[i-1][j]>=dp[i][j-1]){
-            i--;                                      //@tup
+            i--;                              // 回溯：值来自上面，向上走                             //@tup
         }else{
-            j--;                                      //@tleft
+            j--;                              // 回溯：值来自左边，向左走                             //@tleft
         }
     }
-    printf("%d\n",dp[n][m]);                          //@done
-    for (int t=k-1;t>=0;t--) putchar(res[t]);         //@done
+    printf("%d\n",dp[n][m]);                  // 输出长度，和其中一个公共子序列                          //@done
+    for (int t=k-1;t>=0;t--) putchar(res[t]);                                             //@done
     printf("\n");
     return 0;
 }
@@ -279,13 +279,13 @@ int dp[105][105];
 int main(){
     string a,b;
     cin>>a>>b;
-    int n=a.size(),m=b.size();                        //@init
+    int n=a.size(),m=b.size();                // dp[i][j]：A 的前 i 个字符和 B 的前 j 个字符的最长公共子序列  //@init
     for (int i=1;i<=n;i++){
         for (int j=1;j<=m;j++){
             if (a[i-1]==b[j-1]){
-                dp[i][j]=dp[i-1][j-1]+1;              //@match
+                dp[i][j]=dp[i-1][j-1]+1;      // 字符相同，在左上角的基础上加一                          //@match
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);  //@skip
+                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);  // 不同，取“丢掉 A 的一个字符”和“丢掉 B 的一个字符”里较大的  //@skip
             }
         }
     }
@@ -293,44 +293,44 @@ int main(){
     int i=n,j=m;
     while (i>0&&j>0){
         if (a[i-1]==b[j-1]){
-            res+=a[i-1];                              //@tmatch
-            i--;                                      //@tmatch
-            j--;                                      //@tmatch
+            res+=a[i-1];                      // 回溯：字符相同，它是公共子序列的一员，向左上走                  //@tmatch
+            i--;                                                                          //@tmatch
+            j--;                                                                          //@tmatch
         }else if (dp[i-1][j]>=dp[i][j-1]){
-            i--;                                      //@tup
+            i--;                              // 回溯：值来自上面，向上走                             //@tup
         }else{
-            j--;                                      //@tleft
+            j--;                              // 回溯：值来自左边，向左走                             //@tleft
         }
     }
     reverse(res.begin(),res.end());
-    cout<<dp[n][m]<<endl<<res<<endl;                  //@done
+    cout<<dp[n][m]<<endl<<res<<endl;          // 输出长度，和其中一个公共子序列                          //@done
     return 0;
 }
 `,
     python: String.raw`
 a=input()
 b=input()
-n,m=len(a),len(b)                                #@init
+n,m=len(a),len(b)                             # dp[i][j]：A 的前 i 个字符和 B 的前 j 个字符的最长公共子序列  #@init
 dp=[[0]*(m+1) for _ in range(n+1)]
 for i in range(1,n+1):
     for j in range(1,m+1):
         if a[i-1]==b[j-1]:
-            dp[i][j]=dp[i-1][j-1]+1              #@match
+            dp[i][j]=dp[i-1][j-1]+1           # 字符相同，在左上角的基础上加一                          #@match
         else:
-            dp[i][j]=max(dp[i-1][j],dp[i][j-1])  #@skip
+            dp[i][j]=max(dp[i-1][j],dp[i][j-1])  # 不同，取“丢掉 A 的一个字符”和“丢掉 B 的一个字符”里较大的     #@skip
 res=[]
 i,j=n,m
 while i>0 and j>0:
     if a[i-1]==b[j-1]:
-        res.append(a[i-1])                       #@tmatch
-        i-=1                                     #@tmatch
-        j-=1                                     #@tmatch
+        res.append(a[i-1])                    # 回溯：字符相同，它是公共子序列的一员，向左上走                  #@tmatch
+        i-=1                                                                             #@tmatch
+        j-=1                                                                             #@tmatch
     elif dp[i-1][j]>=dp[i][j-1]:
-        i-=1                                     #@tup
+        i-=1                                  # 回溯：值来自上面，向上走                             #@tup
     else:
-        j-=1                                     #@tleft
-print(dp[n][m])                                  #@done
-print(''.join(reversed(res)))                    #@done
+        j-=1                                  # 回溯：值来自左边，向左走                             #@tleft
+print(dp[n][m])                               # 输出长度，和其中一个公共子序列                          #@done
+print(''.join(reversed(res)))                                                            #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -339,14 +339,14 @@ public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
         String a=sc.next(),b=sc.next();
-        int n=a.length(),m=b.length();                         //@init
+        int n=a.length(),m=b.length();        // dp[i][j]：A 的前 i 个字符和 B 的前 j 个字符的最长公共子序列  //@init
         int[][] dp=new int[n+1][m+1];
         for (int i=1;i<=n;i++){
             for (int j=1;j<=m;j++){
                 if (a.charAt(i-1)==b.charAt(j-1)){
-                    dp[i][j]=dp[i-1][j-1]+1;                   //@match
+                    dp[i][j]=dp[i-1][j-1]+1;  // 字符相同，在左上角的基础上加一                          //@match
                 }else{
-                    dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);  //@skip
+                    dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);  // 不同，取“丢掉 A 的一个字符”和“丢掉 B 的一个字符”里较大的  //@skip
                 }
             }
         }
@@ -354,17 +354,17 @@ public class Main{
         int i=n,j=m;
         while (i>0&&j>0){
             if (a.charAt(i-1)==b.charAt(j-1)){
-                res.append(a.charAt(i-1));                     //@tmatch
-                i--;                                           //@tmatch
-                j--;                                           //@tmatch
+                res.append(a.charAt(i-1));    // 回溯：字符相同，它是公共子序列的一员，向左上走                  //@tmatch
+                i--;                                                                      //@tmatch
+                j--;                                                                      //@tmatch
             }else if (dp[i-1][j]>=dp[i][j-1]){
-                i--;                                           //@tup
+                i--;                          // 回溯：值来自上面，向上走                             //@tup
             }else{
-                j--;                                           //@tleft
+                j--;                          // 回溯：值来自左边，向左走                             //@tleft
             }
         }
-        System.out.println(dp[n][m]);                          //@done
-        System.out.println(res.reverse());                     //@done
+        System.out.println(dp[n][m]);         // 输出长度，和其中一个公共子序列                          //@done
+        System.out.println(res.reverse());                                                //@done
     }
 }
 `,

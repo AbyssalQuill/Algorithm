@@ -134,13 +134,13 @@ export const bitXor: Example<number[], XorState> = {
     c: String.raw`
 #include <stdio.h>
 int main(){
-    int n,x,res=0;                          //@init
+    int n,x,res=0;       // res 从 0 开始，和 0 异或不会改变任何数  //@init
     scanf("%d",&n);
     for (int i=0;i<n;i++){
         scanf("%d",&x);
-        res^=x;                             //@xor
+        res^=x;          // 成对的数会抵消成 0，只剩下落单的那个       //@xor
     }
-    printf("%d\n",res);                     //@done
+    printf("%d\n",res);  // 剩下的，就是只出现一次的数             //@done
     return 0;
 }
 `,
@@ -148,22 +148,22 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 int main(){
-    int n,x,res=0;                          //@init
+    int n,x,res=0;    // res 从 0 开始，和 0 异或不会改变任何数  //@init
     cin>>n;
     for (int i=0;i<n;i++){
         cin>>x;
-        res^=x;                             //@xor
+        res^=x;       // 成对的数会抵消成 0，只剩下落单的那个       //@xor
     }
-    cout<<res<<endl;                        //@done
+    cout<<res<<endl;  // 剩下的，就是只出现一次的数             //@done
     return 0;
 }
 `,
     python: String.raw`
 n=int(input())
-res=0                                       #@init
+res=0       # res 从 0 开始，和 0 异或不会改变任何数      #@init
 for x in map(int,input().split()):
-    res^=x                                  #@xor
-print(res)                                  #@done
+    res^=x  # 成对的数会抵消成 0，只剩下落单的那个           #@xor
+print(res)  # 剩下的，就是只出现一次的数                 #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -171,11 +171,11 @@ import java.util.*;
 public class Main{
     public static void main(String[] args){
         Scanner sc=new Scanner(System.in);
-        int n=sc.nextInt(),res=0;           //@init
+        int n=sc.nextInt(),res=0;  // res 从 0 开始，和 0 异或不会改变任何数  //@init
         for (int i=0;i<n;i++){
-            res^=sc.nextInt();              //@xor
+            res^=sc.nextInt();     // 成对的数会抵消成 0，只剩下落单的那个       //@xor
         }
-        System.out.println(res);            //@done
+        System.out.println(res);   // 剩下的，就是只出现一次的数             //@done
     }
 }
 `,

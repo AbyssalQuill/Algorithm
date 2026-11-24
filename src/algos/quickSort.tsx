@@ -176,23 +176,23 @@ export const quickSort: AlgoDef<number[], QsState> = {
     c: String.raw`
 #include <stdio.h>
 int partition(int a[],int lo,int hi){
-    int pivot=a[hi];                           //@pivot
-    int i=lo;                                  //@pivot
+    int pivot=a[hi];                          // 选最后一个数当基准，i 是“比基准小”的区域的边界  //@pivot
+    int i=lo;                                                               //@pivot
     for (int j=lo;j<hi;j++){
-        if (a[j]<pivot){                       //@cmp
-            int t=a[i];                        //@swap
-            a[i]=a[j];                         //@swap
-            a[j]=t;                            //@swap
-            i++;                               //@swap
+        if (a[j]<pivot){                      // 比基准小的数，要放到左边去              //@cmp
+            int t=a[i];                       // 换进左边的区域，边界右移一位             //@swap
+            a[i]=a[j];                                                      //@swap
+            a[j]=t;                                                         //@swap
+            i++;                                                            //@swap
         }
     }
-    int t=a[i];                                //@place
-    a[i]=a[hi];                                //@place
-    a[hi]=t;                                   //@place
+    int t=a[i];                               // 把基准放到它最终的位置上               //@place
+    a[i]=a[hi];                                                             //@place
+    a[hi]=t;                                                                //@place
     return i;
 }
 void quickSort(int a[],int lo,int hi){
-    if (lo>=hi) return;                        //@call
+    if (lo>=hi) return;                       // 只有一个数或者没有数，不用排             //@call
     int p=partition(a,lo,hi);
     quickSort(a,lo,p-1);
     quickSort(a,p+1,hi);
@@ -201,8 +201,8 @@ int main(){
     int n,a[1005];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    quickSort(a,0,n-1);                        //@init
-    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
+    quickSort(a,0,n-1);                       // 对整个数组做快速排序                 //@init
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  // 输出排好序的数组                  //@done
     return 0;
 }
 `,
@@ -210,19 +210,19 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 int partitionArr(int a[],int lo,int hi){
-    int pivot=a[hi];                        //@pivot
-    int i=lo;                               //@pivot
+    int pivot=a[hi];                        // 选最后一个数当基准，i 是“比基准小”的区域的边界  //@pivot
+    int i=lo;                                                             //@pivot
     for (int j=lo;j<hi;j++){
-        if (a[j]<pivot){                    //@cmp
-            swap(a[i],a[j]);                //@swap
-            i++;                            //@swap
+        if (a[j]<pivot){                    // 比基准小的数，要放到左边去              //@cmp
+            swap(a[i],a[j]);                // 换进左边的区域，边界右移一位             //@swap
+            i++;                                                          //@swap
         }
     }
-    swap(a[i],a[hi]);                       //@place
+    swap(a[i],a[hi]);                       // 把基准放到它最终的位置上               //@place
     return i;
 }
 void quickSort(int a[],int lo,int hi){
-    if (lo>=hi) return;                     //@call
+    if (lo>=hi) return;                     // 只有一个数或者没有数，不用排             //@call
     int p=partitionArr(a,lo,hi);
     quickSort(a,lo,p-1);
     quickSort(a,p+1,hi);
@@ -231,24 +231,24 @@ int main(){
     int n,a[1005];
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
-    quickSort(a,0,n-1);                     //@init
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
+    quickSort(a,0,n-1);                     // 对整个数组做快速排序                 //@init
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  // 输出排好序的数组                   //@done
     return 0;
 }
 `,
     python: String.raw`
 def partition(a,lo,hi):
-    pivot=a[hi]                             #@pivot
-    i=lo                                    #@pivot
+    pivot=a[hi]                  # 选最后一个数当基准，i 是“比基准小”的区域的边界  #@pivot
+    i=lo                                                      #@pivot
     for j in range(lo,hi):
-        if a[j]<pivot:                      #@cmp
-            a[i],a[j]=a[j],a[i]             #@swap
-            i+=1                            #@swap
-    a[i],a[hi]=a[hi],a[i]                   #@place
+        if a[j]<pivot:           # 比基准小的数，要放到左边去              #@cmp
+            a[i],a[j]=a[j],a[i]  # 换进左边的区域，边界右移一位             #@swap
+            i+=1                                              #@swap
+    a[i],a[hi]=a[hi],a[i]        # 把基准放到它最终的位置上               #@place
     return i
 
 def quick_sort(a,lo,hi):
-    if lo>=hi:                              #@call
+    if lo>=hi:                   # 只有一个数或者没有数，不用排             #@call
         return
     p=partition(a,lo,hi)
     quick_sort(a,lo,p-1)
@@ -256,32 +256,32 @@ def quick_sort(a,lo,hi):
 
 n=int(input())
 a=list(map(int,input().split()))
-quick_sort(a,0,n-1)                         #@init
-print(*a)                                   #@done
+quick_sort(a,0,n-1)              # 对整个数组做快速排序                 #@init
+print(*a)                        # 输出排好序的数组                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
     static int partition(int[] a,int lo,int hi){
-        int pivot=a[hi];                        //@pivot
-        int i=lo;                               //@pivot
+        int pivot=a[hi];                      // 选最后一个数当基准，i 是“比基准小”的区域的边界  //@pivot
+        int i=lo;                                                           //@pivot
         for (int j=lo;j<hi;j++){
-            if (a[j]<pivot){                    //@cmp
-                int t=a[i];                     //@swap
-                a[i]=a[j];                      //@swap
-                a[j]=t;                         //@swap
-                i++;                            //@swap
+            if (a[j]<pivot){                  // 比基准小的数，要放到左边去              //@cmp
+                int t=a[i];                   // 换进左边的区域，边界右移一位             //@swap
+                a[i]=a[j];                                                  //@swap
+                a[j]=t;                                                     //@swap
+                i++;                                                        //@swap
             }
         }
-        int t=a[i];                             //@place
-        a[i]=a[hi];                             //@place
-        a[hi]=t;                                //@place
+        int t=a[i];                           // 把基准放到它最终的位置上               //@place
+        a[i]=a[hi];                                                         //@place
+        a[hi]=t;                                                            //@place
         return i;
     }
 
     static void quickSort(int[] a,int lo,int hi){
-        if (lo>=hi) return;                     //@call
+        if (lo>=hi) return;                   // 只有一个数或者没有数，不用排             //@call
         int p=partition(a,lo,hi);
         quickSort(a,lo,p-1);
         quickSort(a,p+1,hi);
@@ -292,8 +292,8 @@ public class Main{
         int n=sc.nextInt();
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
-        quickSort(a,0,n-1);                     //@init
-        for (int x:a) System.out.print(x+" ");  //@done
+        quickSort(a,0,n-1);                   // 对整个数组做快速排序                 //@init
+        for (int x:a) System.out.print(x+" ");  // 输出排好序的数组                 //@done
     }
 }
 `,

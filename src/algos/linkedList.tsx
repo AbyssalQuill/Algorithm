@@ -155,14 +155,14 @@ typedef struct Node{
     struct Node *next;
 } Node;
 Node* reverseList(Node* head){
-    Node *prev=NULL,*cur=head;              //@init
+    Node *prev=NULL,*cur=head;  // prev 是已经反转好的部分，cur 是当前结点  //@init
     while (cur){
-        Node* nxt=cur->next;                //@save
-        cur->next=prev;                     //@flip
-        prev=cur;                           //@move
-        cur=nxt;                            //@move
+        Node* nxt=cur->next;    // 先记下后面的结点，免得断开以后找不到        //@save
+        cur->next=prev;         // 让当前结点的指针掉头，指向前一个          //@flip
+        prev=cur;               // prev 和 cur 各向前走一步         //@move
+        cur=nxt;                                             //@move
     }
-    return prev;                            //@done
+    return prev;                // prev 就是新的头结点              //@done
 }
 int main(){
     int n;
@@ -193,14 +193,14 @@ struct Node{
     Node(int v):val(v){}
 };
 Node* reverseList(Node* head){
-    Node *prev=nullptr,*cur=head;           //@init
+    Node *prev=nullptr,*cur=head;  // prev 是已经反转好的部分，cur 是当前结点  //@init
     while (cur){
-        Node* nxt=cur->next;                //@save
-        cur->next=prev;                     //@flip
-        prev=cur;                           //@move
-        cur=nxt;                            //@move
+        Node* nxt=cur->next;       // 先记下后面的结点，免得断开以后找不到        //@save
+        cur->next=prev;            // 让当前结点的指针掉头，指向前一个          //@flip
+        prev=cur;                  // prev 和 cur 各向前走一步         //@move
+        cur=nxt;                                                //@move
     }
-    return prev;                            //@done
+    return prev;                   // prev 就是新的头结点              //@done
 }
 int main(){
     int n,x;
@@ -228,13 +228,13 @@ class Node:
         self.next=None
 
 def reverse_list(head):
-    prev,cur=None,head                      #@init
+    prev,cur=None,head  # prev 是已经反转好的部分，cur 是当前结点  #@init
     while cur:
-        nxt=cur.next                        #@save
-        cur.next=prev                       #@flip
-        prev=cur                            #@move
-        cur=nxt                             #@move
-    return prev                             #@done
+        nxt=cur.next    # 先记下后面的结点，免得断开以后找不到        #@save
+        cur.next=prev   # 让当前结点的指针掉头，指向前一个          #@flip
+        prev=cur        # prev 和 cur 各向前走一步         #@move
+        cur=nxt                                     #@move
+    return prev         # prev 就是新的头结点              #@done
 
 n=int(input())
 head=tail=None
@@ -265,14 +265,14 @@ public class Main{
     }
 
     static Node reverseList(Node head){
-        Node prev=null,cur=head;            //@init
+        Node prev=null,cur=head;  // prev 是已经反转好的部分，cur 是当前结点  //@init
         while (cur!=null){
-            Node nxt=cur.next;              //@save
-            cur.next=prev;                  //@flip
-            prev=cur;                       //@move
-            cur=nxt;                        //@move
+            Node nxt=cur.next;    // 先记下后面的结点，免得断开以后找不到        //@save
+            cur.next=prev;        // 让当前结点的指针掉头，指向前一个          //@flip
+            prev=cur;             // prev 和 cur 各向前走一步         //@move
+            cur=nxt;                                           //@move
         }
-        return prev;                        //@done
+        return prev;              // prev 就是新的头结点              //@done
     }
 
     public static void main(String[] args){

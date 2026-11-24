@@ -127,14 +127,14 @@ int cmp(const void *x,const void *y){
 int main(){
     int n,t[20];
     scanf("%d",&n);
-    for (int i=0;i<n;i++) scanf("%d",&t[i]);  //@init
-    qsort(t,n,sizeof(int),cmp);               //@sort
+    for (int i=0;i<n;i++) scanf("%d",&t[i]);  // 读入每个人的接水时间             //@init
+    qsort(t,n,sizeof(int),cmp);               // 接水时间短的排在前面             //@sort
     int total=0,wait=0;
     for (int i=0;i<n;i++){
-        total+=wait;                          //@wait
-        wait+=t[i];                           //@wait
+        total+=wait;                          // 这个人的等待时间，是前面所有人接水时间之和  //@wait
+        wait+=t[i];                                                     //@wait
     }
-    printf("%d\n",total);                     //@done
+    printf("%d\n",total);                     // 输出最小的总等待时间             //@done
     return 0;
 }
 `,
@@ -144,26 +144,26 @@ using namespace std;
 int main(){
     int n,t[20];
     cin>>n;
-    for (int i=0;i<n;i++) cin>>t[i];        //@init
-    sort(t,t+n);                            //@sort
+    for (int i=0;i<n;i++) cin>>t[i];  // 读入每个人的接水时间             //@init
+    sort(t,t+n);                      // 接水时间短的排在前面             //@sort
     int total=0,wait=0;
     for (int i=0;i<n;i++){
-        total+=wait;                        //@wait
-        wait+=t[i];                         //@wait
+        total+=wait;                  // 这个人的等待时间，是前面所有人接水时间之和  //@wait
+        wait+=t[i];                                             //@wait
     }
-    cout<<total<<endl;                      //@done
+    cout<<total<<endl;                // 输出最小的总等待时间             //@done
     return 0;
 }
 `,
     python: String.raw`
 n=int(input())
-t=list(map(int,input().split()))            #@init
-t.sort()                                    #@sort
+t=list(map(int,input().split()))  # 读入每个人的接水时间             #@init
+t.sort()                          # 接水时间短的排在前面             #@sort
 total,wait=0,0
 for x in t:
-    total+=wait                             #@wait
-    wait+=x                                 #@wait
-print(total)                                #@done
+    total+=wait                   # 这个人的等待时间，是前面所有人接水时间之和  #@wait
+    wait+=x                                                #@wait
+print(total)                      # 输出最小的总等待时间             #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -173,14 +173,14 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt();
         int[] t=new int[n];
-        for (int i=0;i<n;i++) t[i]=sc.nextInt();  //@init
-        Arrays.sort(t);                           //@sort
+        for (int i=0;i<n;i++) t[i]=sc.nextInt();  // 读入每个人的接水时间         //@init
+        Arrays.sort(t);                       // 接水时间短的排在前面             //@sort
         int total=0,wait=0;
         for (int i=0;i<n;i++){
-            total+=wait;                          //@wait
-            wait+=t[i];                           //@wait
+            total+=wait;                      // 这个人的等待时间，是前面所有人接水时间之和  //@wait
+            wait+=t[i];                                                 //@wait
         }
-        System.out.println(total);                //@done
+        System.out.println(total);            // 输出最小的总等待时间             //@done
     }
 }
 `,

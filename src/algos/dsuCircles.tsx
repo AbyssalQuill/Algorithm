@@ -88,34 +88,34 @@ export const dsuCircles: Example<CirclesInput, DsuState> = {
 #include <stdio.h>
 int fa[1005],sz[1005];
 int find(int x){
-    if (fa[x]==x) return x;                 //@root
-    int r=find(fa[x]);                      //@climb
-    fa[x]=r;                                //@compress
+    if (fa[x]==x) return x;  // 父结点是自己，它就是根               //@root
+    int r=find(fa[x]);       // 不是根，继续向上找                 //@climb
+    fa[x]=r;                 // 回来的时候，让每个结点直接挂到根下面（路径压缩）  //@compress
     return r;
 }
 int main(){
     int n,m,a,b;
     scanf("%d %d",&n,&m);
     for (int i=1;i<=n;i++){
-        fa[i]=i;                            //@init
+        fa[i]=i;             // 一开始，每个人自成一个圈              //@init
         sz[i]=1;
     }
     int cnt=n;
     while (m--){
         scanf("%d %d",&a,&b);
-        a=find(a);                          //@roots
+        a=find(a);           // 先分别找到两个人所在朋友圈的根           //@roots
         b=find(b);
-        if (a==b) continue;                 //@same
+        if (a==b) continue;  // 根相同，已经在同一个圈里了             //@same
         if (sz[a]<sz[b]){
             int t=a;
             a=b;
             b=t;
         }
-        fa[b]=a;                            //@link
-        sz[a]+=sz[b];                       //@link
-        cnt--;                              //@link
+        fa[b]=a;             // 合并两个圈，圈的个数少了一个            //@link
+        sz[a]+=sz[b];                                     //@link
+        cnt--;                                            //@link
     }
-    printf("%d\n",cnt);                     //@done
+    printf("%d\n",cnt);      // 剩下几个集合，就是几个朋友圈            //@done
     return 0;
 }
 `,
@@ -124,57 +124,57 @@ int main(){
 using namespace std;
 int fa[1005],sz[1005];
 int find(int x){
-    if (fa[x]==x) return x;                 //@root
-    int r=find(fa[x]);                      //@climb
-    fa[x]=r;                                //@compress
+    if (fa[x]==x) return x;  // 父结点是自己，它就是根               //@root
+    int r=find(fa[x]);       // 不是根，继续向上找                 //@climb
+    fa[x]=r;                 // 回来的时候，让每个结点直接挂到根下面（路径压缩）  //@compress
     return r;
 }
 int main(){
     int n,m,a,b;
     cin>>n>>m;
     for (int i=1;i<=n;i++){
-        fa[i]=i;                            //@init
+        fa[i]=i;             // 一开始，每个人自成一个圈              //@init
         sz[i]=1;
     }
     int cnt=n;
     while (m--){
         cin>>a>>b;
-        a=find(a);                          //@roots
+        a=find(a);           // 先分别找到两个人所在朋友圈的根           //@roots
         b=find(b);
-        if (a==b) continue;                 //@same
+        if (a==b) continue;  // 根相同，已经在同一个圈里了             //@same
         if (sz[a]<sz[b]) swap(a,b);
-        fa[b]=a;                            //@link
-        sz[a]+=sz[b];                       //@link
-        cnt--;                              //@link
+        fa[b]=a;             // 合并两个圈，圈的个数少了一个            //@link
+        sz[a]+=sz[b];                                     //@link
+        cnt--;                                            //@link
     }
-    cout<<cnt<<endl;                        //@done
+    cout<<cnt<<endl;         // 剩下几个集合，就是几个朋友圈            //@done
     return 0;
 }
 `,
     python: String.raw`
 def find(x):
     if fa[x]==x:
-        return x                            #@root
-    r=find(fa[x])                           #@climb
-    fa[x]=r                                 #@compress
+        return x     # 父结点是自己，它就是根               #@root
+    r=find(fa[x])    # 不是根，继续向上找                 #@climb
+    fa[x]=r          # 回来的时候，让每个结点直接挂到根下面（路径压缩）  #@compress
     return r
 
 n,m=map(int,input().split())
-fa=list(range(n+1))                         #@init
+fa=list(range(n+1))  # 一开始，每个人自成一个圈              #@init
 sz=[1]*(n+1)
 cnt=n
 for _ in range(m):
     a,b=map(int,input().split())
-    a=find(a)                               #@roots
+    a=find(a)        # 先分别找到两个人所在朋友圈的根           #@roots
     b=find(b)
     if a==b:
-        continue                            #@same
+        continue     # 根相同，已经在同一个圈里了             #@same
     if sz[a]<sz[b]:
         a,b=b,a
-    fa[b]=a                                 #@link
-    sz[a]+=sz[b]                            #@link
-    cnt-=1                                  #@link
-print(cnt)                                  #@done
+    fa[b]=a          # 合并两个圈，圈的个数少了一个            #@link
+    sz[a]+=sz[b]                                 #@link
+    cnt-=1                                       #@link
+print(cnt)           # 剩下几个集合，就是几个朋友圈            #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -183,9 +183,9 @@ public class Main{
     static int[] fa=new int[1005],sz=new int[1005];
 
     static int find(int x){
-        if (fa[x]==x) return x;             //@root
-        int r=find(fa[x]);                  //@climb
-        fa[x]=r;                            //@compress
+        if (fa[x]==x) return x;        // 父结点是自己，它就是根               //@root
+        int r=find(fa[x]);             // 不是根，继续向上找                 //@climb
+        fa[x]=r;                       // 回来的时候，让每个结点直接挂到根下面（路径压缩）  //@compress
         return r;
     }
 
@@ -193,24 +193,24 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt(),m=sc.nextInt();
         for (int i=1;i<=n;i++){
-            fa[i]=i;                        //@init
+            fa[i]=i;                   // 一开始，每个人自成一个圈              //@init
             sz[i]=1;
         }
         int cnt=n;
         while (m-- > 0){
-            int a=find(sc.nextInt());       //@roots
+            int a=find(sc.nextInt());  // 先分别找到两个人所在朋友圈的根           //@roots
             int b=find(sc.nextInt());
-            if (a==b) continue;             //@same
+            if (a==b) continue;        // 根相同，已经在同一个圈里了             //@same
             if (sz[a]<sz[b]){
                 int t=a;
                 a=b;
                 b=t;
             }
-            fa[b]=a;                        //@link
-            sz[a]+=sz[b];                   //@link
-            cnt--;                          //@link
+            fa[b]=a;                   // 合并两个圈，圈的个数少了一个            //@link
+            sz[a]+=sz[b];                                           //@link
+            cnt--;                                                  //@link
         }
-        System.out.println(cnt);            //@done
+        System.out.println(cnt);       // 剩下几个集合，就是几个朋友圈            //@done
     }
 }
 `,

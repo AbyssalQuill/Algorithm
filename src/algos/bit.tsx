@@ -235,11 +235,11 @@ int lowbit(int x){
     return x&-x;
 }
 void add(int i,int k){
-    for (;i<=n;i+=lowbit(i)) c[i]+=k;       //@uStep
+    for (;i<=n;i+=lowbit(i)) c[i]+=k;    // 沿着 lowbit 一路向上，更新所有管着它的格子  //@uStep
 }
 int sum(int i){
     int s=0;
-    for (;i>0;i-=lowbit(i)) s+=c[i];        //@qStep
+    for (;i>0;i-=lowbit(i)) s+=c[i];     // 沿着 lowbit 一路向下，把几块的和加起来    //@qStep
     return s;
 }
 int main(){
@@ -247,16 +247,16 @@ int main(){
     scanf("%d",&n);
     for (int i=1;i<=n;i++){
         scanf("%d",&a);
-        add(i,a);                           //@init
+        add(i,a);                        // 先把每个数都“加”进树状数组             //@init
     }
     scanf("%d",&m);
     while (m--){
         scanf("%d %d %d",&z,&x,&y);
         if (z==1) add(x,y);
-        else res[rc++]=sum(y)-sum(x-1);     //@qAns
+        else res[rc++]=sum(y)-sum(x-1);  // 区间和 = 前 y 个的和 - 前 x-1 个的和  //@qAns
     }
     for (int i=0;i<rc;i++) printf("%d ",res[i]);
-    printf("\n");                           //@done
+    printf("\n");                        // 一起输出所有查询的结果                //@done
     return 0;
 }
 `,
@@ -268,11 +268,11 @@ int lowbit(int x){
     return x&-x;
 }
 void add(int i,int k){
-    for (;i<=n;i+=lowbit(i)) c[i]+=k;         //@uStep
+    for (;i<=n;i+=lowbit(i)) c[i]+=k;         // 沿着 lowbit 一路向上，更新所有管着它的格子  //@uStep
 }
 int sum(int i){
     int s=0;
-    for (;i>0;i-=lowbit(i)) s+=c[i];          //@qStep
+    for (;i>0;i-=lowbit(i)) s+=c[i];          // 沿着 lowbit 一路向下，把几块的和加起来    //@qStep
     return s;
 }
 int main(){
@@ -281,16 +281,16 @@ int main(){
     cin>>n;
     for (int i=1;i<=n;i++){
         cin>>a;
-        add(i,a);                             //@init
+        add(i,a);                             // 先把每个数都“加”进树状数组             //@init
     }
     cin>>m;
     while (m--){
         cin>>z>>x>>y;
         if (z==1) add(x,y);
-        else res.push_back(sum(y)-sum(x-1));  //@qAns
+        else res.push_back(sum(y)-sum(x-1));  // 区间和 = 前 y 个的和 - 前 x-1 个的和  //@qAns
     }
     for (int v:res) cout<<v<<" ";
-    cout<<endl;                               //@done
+    cout<<endl;                               // 一起输出所有查询的结果                //@done
     return 0;
 }
 `,
@@ -300,28 +300,28 @@ def lowbit(x):
 
 def add(i,k):
     while i<=n:
-        c[i]+=k                             #@uStep
+        c[i]+=k                            # 沿着 lowbit 一路向上，更新所有管着它的格子  #@uStep
         i+=lowbit(i)
 
 def prefix(i):
     s=0
     while i>0:
-        s+=c[i]                             #@qStep
+        s+=c[i]                            # 沿着 lowbit 一路向下，把几块的和加起来    #@qStep
         i-=lowbit(i)
     return s
 
 n=int(input())
 c=[0]*(n+1)
 for i,a in enumerate(map(int,input().split()),1):
-    add(i,a)                                #@init
+    add(i,a)                               # 先把每个数都“加”进树状数组             #@init
 res=[]
 for _ in range(int(input())):
     z,x,y=map(int,input().split())
     if z==1:
         add(x,y)
     else:
-        res.append(prefix(y)-prefix(x-1))   #@qAns
-print(*res)                                 #@done
+        res.append(prefix(y)-prefix(x-1))  # 区间和 = 前 y 个的和 - 前 x-1 个的和  #@qAns
+print(*res)                                # 一起输出所有查询的结果                #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -335,12 +335,12 @@ public class Main{
     }
 
     static void add(int i,int k){
-        for (;i<=n;i+=lowbit(i)) c[i]+=k;                 //@uStep
+        for (;i<=n;i+=lowbit(i)) c[i]+=k;     // 沿着 lowbit 一路向上，更新所有管着它的格子              //@uStep
     }
 
     static int sum(int i){
         int s=0;
-        for (;i>0;i-=lowbit(i)) s+=c[i];                  //@qStep
+        for (;i>0;i-=lowbit(i)) s+=c[i];      // 沿着 lowbit 一路向下，把几块的和加起来                //@qStep
         return s;
     }
 
@@ -348,16 +348,16 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         n=sc.nextInt();
         for (int i=1;i<=n;i++){
-            add(i,sc.nextInt());                          //@init
+            add(i,sc.nextInt());              // 先把每个数都“加”进树状数组                         //@init
         }
         int m=sc.nextInt();
         StringBuilder sb=new StringBuilder();
         while (m-- > 0){
             int z=sc.nextInt(),x=sc.nextInt(),y=sc.nextInt();
             if (z==1) add(x,y);
-            else sb.append(sum(y)-sum(x-1)).append(' ');  //@qAns
+            else sb.append(sum(y)-sum(x-1)).append(' ');  // 区间和 = 前 y 个的和 - 前 x-1 个的和  //@qAns
         }
-        System.out.println(sb);                           //@done
+        System.out.println(sb);               // 一起输出所有查询的结果                            //@done
     }
 }
 `,

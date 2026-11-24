@@ -219,25 +219,25 @@ export const mergeSort: AlgoDef<number[], MsState> = {
 #include <stdio.h>
 int tmp[1005];
 void mergeSort(int a[],int l,int r){
-    if (l>=r) return;                          //@call
-    int mid=(l+r)/2;                           //@split
+    if (l>=r) return;                         // 只剩一个数，就不用再分了      //@call
+    int mid=(l+r)/2;                          // 从中间一分为二，分别排好序     //@split
     mergeSort(a,l,mid);
     mergeSort(a,mid+1,r);
-    int i=l,j=mid+1,k=l;                       //@merge
+    int i=l,j=mid+1,k=l;                      // 把两个有序的部分合并成一个     //@merge
     while (i<=mid&&j<=r){
-        if (a[i]<=a[j]) tmp[k++]=a[i++];       //@takeL
-        else tmp[k++]=a[j++];                  //@takeR
+        if (a[i]<=a[j]) tmp[k++]=a[i++];      // 左边的数小（或相等），先取左边的  //@takeL
+        else tmp[k++]=a[j++];                 // 否则先取右边的           //@takeR
     }
-    while (i<=mid) tmp[k++]=a[i++];            //@restL
-    while (j<=r) tmp[k++]=a[j++];              //@restR
-    for (int p=l;p<=r;p++) a[p]=tmp[p];        //@copy
+    while (i<=mid) tmp[k++]=a[i++];           // 右边取完了，把左边剩下的搬过来   //@restL
+    while (j<=r) tmp[k++]=a[j++];             // 左边取完了，把右边剩下的搬过来   //@restR
+    for (int p=l;p<=r;p++) a[p]=tmp[p];       // 合并好的结果放回原数组       //@copy
 }
 int main(){
     int n,a[1005];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    mergeSort(a,0,n-1);                        //@init
-    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
+    mergeSort(a,0,n-1);                       // 从整个数组开始排序         //@init
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  // 输出排好序的数组         //@done
     return 0;
 }
 `,
@@ -246,58 +246,58 @@ int main(){
 using namespace std;
 int tmp[1005];
 void mergeSort(int a[],int l,int r){
-    if (l>=r) return;                       //@call
-    int mid=(l+r)/2;                        //@split
+    if (l>=r) return;                       // 只剩一个数，就不用再分了      //@call
+    int mid=(l+r)/2;                        // 从中间一分为二，分别排好序     //@split
     mergeSort(a,l,mid);
     mergeSort(a,mid+1,r);
-    int i=l,j=mid+1,k=l;                    //@merge
+    int i=l,j=mid+1,k=l;                    // 把两个有序的部分合并成一个     //@merge
     while (i<=mid&&j<=r){
-        if (a[i]<=a[j]) tmp[k++]=a[i++];    //@takeL
-        else tmp[k++]=a[j++];               //@takeR
+        if (a[i]<=a[j]) tmp[k++]=a[i++];    // 左边的数小（或相等），先取左边的  //@takeL
+        else tmp[k++]=a[j++];               // 否则先取右边的           //@takeR
     }
-    while (i<=mid) tmp[k++]=a[i++];         //@restL
-    while (j<=r) tmp[k++]=a[j++];           //@restR
-    for (int p=l;p<=r;p++) a[p]=tmp[p];     //@copy
+    while (i<=mid) tmp[k++]=a[i++];         // 右边取完了，把左边剩下的搬过来   //@restL
+    while (j<=r) tmp[k++]=a[j++];           // 左边取完了，把右边剩下的搬过来   //@restR
+    for (int p=l;p<=r;p++) a[p]=tmp[p];     // 合并好的结果放回原数组       //@copy
 }
 int main(){
     int n,a[1005];
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
-    mergeSort(a,0,n-1);                     //@init
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
+    mergeSort(a,0,n-1);                     // 从整个数组开始排序         //@init
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  // 输出排好序的数组          //@done
     return 0;
 }
 `,
     python: String.raw`
 def merge_sort(a,l,r,tmp):
-    if l>=r:                                #@call
+    if l>=r:               # 只剩一个数，就不用再分了      #@call
         return
-    mid=(l+r)//2                            #@split
+    mid=(l+r)//2           # 从中间一分为二，分别排好序     #@split
     merge_sort(a,l,mid,tmp)
     merge_sort(a,mid+1,r,tmp)
-    i,j,k=l,mid+1,l                         #@merge
+    i,j,k=l,mid+1,l        # 把两个有序的部分合并成一个     #@merge
     while i<=mid and j<=r:
         if a[i]<=a[j]:
-            tmp[k]=a[i]                     #@takeL
-            i+=1                            #@takeL
+            tmp[k]=a[i]    # 左边的数小（或相等），先取左边的  #@takeL
+            i+=1                               #@takeL
         else:
-            tmp[k]=a[j]                     #@takeR
-            j+=1                            #@takeR
+            tmp[k]=a[j]    # 否则先取右边的           #@takeR
+            j+=1                               #@takeR
         k+=1
     while i<=mid:
-        tmp[k]=a[i]                         #@restL
-        i+=1                                #@restL
+        tmp[k]=a[i]        # 右边取完了，把左边剩下的搬过来   #@restL
+        i+=1                                   #@restL
         k+=1
     while j<=r:
-        tmp[k]=a[j]                         #@restR
-        j+=1                                #@restR
+        tmp[k]=a[j]        # 左边取完了，把右边剩下的搬过来   #@restR
+        j+=1                                   #@restR
         k+=1
-    a[l:r+1]=tmp[l:r+1]                     #@copy
+    a[l:r+1]=tmp[l:r+1]    # 合并好的结果放回原数组       #@copy
 
 n=int(input())
 a=list(map(int,input().split()))
-merge_sort(a,0,n-1,[0]*n)                   #@init
-print(*a)                                   #@done
+merge_sort(a,0,n-1,[0]*n)  # 从整个数组开始排序         #@init
+print(*a)                  # 输出排好序的数组          #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -306,18 +306,18 @@ public class Main{
     static int[] tmp=new int[1005];
 
     static void mergeSort(int[] a,int l,int r){
-        if (l>=r) return;                       //@call
-        int mid=(l+r)/2;                        //@split
+        if (l>=r) return;                     // 只剩一个数，就不用再分了      //@call
+        int mid=(l+r)/2;                      // 从中间一分为二，分别排好序     //@split
         mergeSort(a,l,mid);
         mergeSort(a,mid+1,r);
-        int i=l,j=mid+1,k=l;                    //@merge
+        int i=l,j=mid+1,k=l;                  // 把两个有序的部分合并成一个     //@merge
         while (i<=mid&&j<=r){
-            if (a[i]<=a[j]) tmp[k++]=a[i++];    //@takeL
-            else tmp[k++]=a[j++];               //@takeR
+            if (a[i]<=a[j]) tmp[k++]=a[i++];  // 左边的数小（或相等），先取左边的  //@takeL
+            else tmp[k++]=a[j++];             // 否则先取右边的           //@takeR
         }
-        while (i<=mid) tmp[k++]=a[i++];         //@restL
-        while (j<=r) tmp[k++]=a[j++];           //@restR
-        for (int p=l;p<=r;p++) a[p]=tmp[p];     //@copy
+        while (i<=mid) tmp[k++]=a[i++];       // 右边取完了，把左边剩下的搬过来   //@restL
+        while (j<=r) tmp[k++]=a[j++];         // 左边取完了，把右边剩下的搬过来   //@restR
+        for (int p=l;p<=r;p++) a[p]=tmp[p];   // 合并好的结果放回原数组       //@copy
     }
 
     public static void main(String[] args){
@@ -325,8 +325,8 @@ public class Main{
         int n=sc.nextInt();
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
-        mergeSort(a,0,n-1);                     //@init
-        for (int x:a) System.out.print(x+" ");  //@done
+        mergeSort(a,0,n-1);                   // 从整个数组开始排序         //@init
+        for (int x:a) System.out.print(x+" ");  // 输出排好序的数组        //@done
     }
 }
 `,

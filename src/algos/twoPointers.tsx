@@ -173,19 +173,19 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     scanf("%d",&t);
-    int l=0,r=n-1;                          //@init
+    int l=0,r=n-1;                  // l 指向最小的数，r 指向最大的数  //@init
     while (l<r){
-        int sum=a[l]+a[r];                  //@sum
+        int sum=a[l]+a[r];          // 算一下两端的和            //@sum
         if (sum==t){
-            printf("%d %d\n",l,r);          //@hit
-            return 0;                       //@hit
+            printf("%d %d\n",l,r);  // 正好等于目标，找到了         //@hit
+            return 0;                                     //@hit
         }else if (sum<t){
-            l++;                            //@moveL
+            l++;                    // 和太小，左指针右移，换一个更大的   //@moveL
         }else{
-            r--;                            //@moveR
+            r--;                    // 和太大，右指针左移，换一个更小的   //@moveR
         }
     }
-    printf("-1 -1\n");                      //@miss
+    printf("-1 -1\n");              // 两个指针碰头了，没有答案       //@miss
     return 0;
 }
 `,
@@ -197,34 +197,34 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     cin>>t;
-    int l=0,r=n-1;                          //@init
+    int l=0,r=n-1;                  // l 指向最小的数，r 指向最大的数  //@init
     while (l<r){
-        int sum=a[l]+a[r];                  //@sum
+        int sum=a[l]+a[r];          // 算一下两端的和            //@sum
         if (sum==t){
-            cout<<l<<" "<<r<<endl;          //@hit
-            return 0;                       //@hit
+            cout<<l<<" "<<r<<endl;  // 正好等于目标，找到了         //@hit
+            return 0;                                     //@hit
         }else if (sum<t){
-            l++;                            //@moveL
+            l++;                    // 和太小，左指针右移，换一个更大的   //@moveL
         }else{
-            r--;                            //@moveR
+            r--;                    // 和太大，右指针左移，换一个更小的   //@moveR
         }
     }
-    cout<<"-1 -1"<<endl;                    //@miss
+    cout<<"-1 -1"<<endl;            // 两个指针碰头了，没有答案       //@miss
     return 0;
 }
 `,
     python: String.raw`
 def two_sum(a,t):
-    l,r=0,len(a)-1                          #@init
+    l,r=0,len(a)-1      # l 指向最小的数，r 指向最大的数  #@init
     while l<r:
-        s=a[l]+a[r]                         #@sum
+        s=a[l]+a[r]     # 算一下两端的和            #@sum
         if s==t:
-            return l,r                      #@hit
+            return l,r  # 正好等于目标，找到了         #@hit
         elif s<t:
-            l+=1                            #@moveL
+            l+=1        # 和太小，左指针右移，换一个更大的   #@moveL
         else:
-            r-=1                            #@moveR
-    return -1,-1                            #@miss
+            r-=1        # 和太大，右指针左移，换一个更小的   #@moveR
+    return -1,-1        # 两个指针碰头了，没有答案       #@miss
 
 n=int(input())
 a=list(map(int,input().split()))
@@ -241,19 +241,19 @@ public class Main{
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
         int t=sc.nextInt();
-        int l=0,r=n-1;                        //@init
+        int l=0,r=n-1;                        // l 指向最小的数，r 指向最大的数  //@init
         while (l<r){
-            int sum=a[l]+a[r];                //@sum
+            int sum=a[l]+a[r];                // 算一下两端的和            //@sum
             if (sum==t){
-                System.out.println(l+" "+r);  //@hit
-                return;                       //@hit
+                System.out.println(l+" "+r);  // 正好等于目标，找到了         //@hit
+                return;                                             //@hit
             }else if (sum<t){
-                l++;                          //@moveL
+                l++;                          // 和太小，左指针右移，换一个更大的   //@moveL
             }else{
-                r--;                          //@moveR
+                r--;                          // 和太大，右指针左移，换一个更小的   //@moveR
             }
         }
-        System.out.println("-1 -1");          //@miss
+        System.out.println("-1 -1");          // 两个指针碰头了，没有答案       //@miss
     }
 }
 `,

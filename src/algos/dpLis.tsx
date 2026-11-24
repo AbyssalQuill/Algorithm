@@ -128,18 +128,18 @@ export const dpLis: Example<number[], LisState> = {
 int main(){
     int n,a[20],dp[20],best=0;
     scanf("%d",&n);
-    for (int i=0;i<n;i++) scanf("%d",&a[i]);  //@init
+    for (int i=0;i<n;i++) scanf("%d",&a[i]);                        //@init
     for (int i=0;i<n;i++){
-        dp[i]=1;                              //@start
+        dp[i]=1;                       // a[i] 自己单独就是一个长度为 1 的上升序列  //@start
         for (int j=0;j<i;j++){
-            if (a[j]>=a[i]) continue;         //@skip
-            if (dp[j]+1>dp[i]){               //@keep
-                dp[i]=dp[j]+1;                //@update
+            if (a[j]>=a[i]) continue;  // a[j] 不比 a[i] 小，接不到它前面     //@skip
+            if (dp[j]+1>dp[i]){        // 能接上，但接上以后更长吗              //@keep
+                dp[i]=dp[j]+1;         // 更长，更新 dp[i]               //@update
             }
         }
         if (dp[i]>best) best=dp[i];
     }
-    printf("%d\n",best);                      //@done
+    printf("%d\n",best);               // 答案是所有 dp 里最大的             //@done
     return 0;
 }
 `,
@@ -149,33 +149,33 @@ using namespace std;
 int main(){
     int n,a[20],dp[20],best=0;
     cin>>n;
-    for (int i=0;i<n;i++) cin>>a[i];        //@init
+    for (int i=0;i<n;i++) cin>>a[i];                                //@init
     for (int i=0;i<n;i++){
-        dp[i]=1;                            //@start
+        dp[i]=1;                       // a[i] 自己单独就是一个长度为 1 的上升序列  //@start
         for (int j=0;j<i;j++){
-            if (a[j]>=a[i]) continue;       //@skip
-            if (dp[j]+1>dp[i]){             //@keep
-                dp[i]=dp[j]+1;              //@update
+            if (a[j]>=a[i]) continue;  // a[j] 不比 a[i] 小，接不到它前面     //@skip
+            if (dp[j]+1>dp[i]){        // 能接上，但接上以后更长吗              //@keep
+                dp[i]=dp[j]+1;         // 更长，更新 dp[i]               //@update
             }
         }
         best=max(best,dp[i]);
     }
-    cout<<best<<endl;                       //@done
+    cout<<best<<endl;                  // 答案是所有 dp 里最大的             //@done
     return 0;
 }
 `,
     python: String.raw`
 n=int(input())
-a=list(map(int,input().split()))            #@init
+a=list(map(int,input().split()))                       #@init
 dp=[1]*n
 for i in range(n):
-    dp[i]=1                                 #@start
+    dp[i]=1                # a[i] 自己单独就是一个长度为 1 的上升序列  #@start
     for j in range(i):
         if a[j]>=a[i]:
-            continue                        #@skip
-        if dp[j]+1>dp[i]:                   #@keep
-            dp[i]=dp[j]+1                   #@update
-print(max(dp))                              #@done
+            continue       # a[j] 不比 a[i] 小，接不到它前面     #@skip
+        if dp[j]+1>dp[i]:  # 能接上，但接上以后更长吗              #@keep
+            dp[i]=dp[j]+1  # 更长，更新 dp[i]               #@update
+print(max(dp))             # 答案是所有 dp 里最大的             #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -185,18 +185,18 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt(),best=0;
         int[] a=new int[n],dp=new int[n];
-        for (int i=0;i<n;i++) a[i]=sc.nextInt();  //@init
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();                        //@init
         for (int i=0;i<n;i++){
-            dp[i]=1;                              //@start
+            dp[i]=1;                       // a[i] 自己单独就是一个长度为 1 的上升序列  //@start
             for (int j=0;j<i;j++){
-                if (a[j]>=a[i]) continue;         //@skip
-                if (dp[j]+1>dp[i]){               //@keep
-                    dp[i]=dp[j]+1;                //@update
+                if (a[j]>=a[i]) continue;  // a[j] 不比 a[i] 小，接不到它前面     //@skip
+                if (dp[j]+1>dp[i]){        // 能接上，但接上以后更长吗              //@keep
+                    dp[i]=dp[j]+1;         // 更长，更新 dp[i]               //@update
                 }
             }
             best=Math.max(best,dp[i]);
         }
-        System.out.println(best);                 //@done
+        System.out.println(best);          // 答案是所有 dp 里最大的             //@done
     }
 }
 `,

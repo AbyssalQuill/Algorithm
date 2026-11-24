@@ -164,13 +164,13 @@ export const prefixSum: AlgoDef<PsInput, PsState> = {
 int main(){
     int n,l,r,a[1005],s[1005];
     scanf("%d",&n);
-    s[0]=0;                                 //@init
+    s[0]=0;                      // s[0]=0，方便处理从第 1 个开始的区间        //@init
     for (int i=1;i<=n;i++){
         scanf("%d",&a[i]);
-        s[i]=s[i-1]+a[i];                   //@build
+        s[i]=s[i-1]+a[i];        // s[i] 是前 i 个数的和                //@build
     }
     scanf("%d %d",&l,&r);
-    printf("%d\n",s[r]-s[l-1]);             //@query
+    printf("%d\n",s[r]-s[l-1]);  // 区间 [l, r] 的和 = s[r] - s[l-1]  //@query
     return 0;
 }
 `,
@@ -180,24 +180,24 @@ using namespace std;
 int main(){
     int n,l,r,a[1005],s[1005];
     cin>>n;
-    s[0]=0;                                 //@init
+    s[0]=0;                   // s[0]=0，方便处理从第 1 个开始的区间        //@init
     for (int i=1;i<=n;i++){
         cin>>a[i];
-        s[i]=s[i-1]+a[i];                   //@build
+        s[i]=s[i-1]+a[i];     // s[i] 是前 i 个数的和                //@build
     }
     cin>>l>>r;
-    cout<<s[r]-s[l-1]<<endl;                //@query
+    cout<<s[r]-s[l-1]<<endl;  // 区间 [l, r] 的和 = s[r] - s[l-1]  //@query
     return 0;
 }
 `,
     python: String.raw`
 n=int(input())
 a=[0]+list(map(int,input().split()))
-s=[0]*(n+1)                                 #@init
+s=[0]*(n+1)           # s[0]=0，方便处理从第 1 个开始的区间        #@init
 for i in range(1,n+1):
-    s[i]=s[i-1]+a[i]                        #@build
+    s[i]=s[i-1]+a[i]  # s[i] 是前 i 个数的和                #@build
 l,r=map(int,input().split())
-print(s[r]-s[l-1])                          #@query
+print(s[r]-s[l-1])    # 区间 [l, r] 的和 = s[r] - s[l-1]  #@query
 `,
     java: String.raw`
 import java.util.*;
@@ -207,13 +207,13 @@ public class Main{
         Scanner sc=new Scanner(System.in);
         int n=sc.nextInt();
         int[] a=new int[n+1];
-        int[] s=new int[n+1];               //@init
+        int[] s=new int[n+1];             // s[0]=0，方便处理从第 1 个开始的区间        //@init
         for (int i=1;i<=n;i++){
             a[i]=sc.nextInt();
-            s[i]=s[i-1]+a[i];               //@build
+            s[i]=s[i-1]+a[i];             // s[i] 是前 i 个数的和                //@build
         }
         int l=sc.nextInt(),r=sc.nextInt();
-        System.out.println(s[r]-s[l-1]);    //@query
+        System.out.println(s[r]-s[l-1]);  // 区间 [l, r] 的和 = s[r] - s[l-1]  //@query
     }
 }
 `,

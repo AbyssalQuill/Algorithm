@@ -181,14 +181,14 @@ int main(){
     struct Act acts[105];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d %d",&acts[i].start,&acts[i].end);
-    qsort(acts,n,sizeof(struct Act),cmp);   //@init
+    qsort(acts,n,sizeof(struct Act),cmp);  // 按结束时间排序，结束得早的排在前面   //@init
     int last=-1,cnt=0;
     for (int i=0;i<n;i++){
-        if (acts[i].start<last) continue;   //@skip
-        cnt++;                              //@take
-        last=acts[i].end;                   //@take
+        if (acts[i].start<last) continue;  // 开始时间早于上一场的结束，冲突，跳过  //@skip
+        cnt++;                             // 不冲突，就选它，并记下它的结束时间   //@take
+        last=acts[i].end;                                         //@take
     }
-    printf("%d\n",cnt);                     //@done
+    printf("%d\n",cnt);                    // 输出最多能安排几个           //@done
     return 0;
 }
 `,
@@ -206,14 +206,14 @@ int main(){
     sort(acts.begin(),acts.end(),[](const Act &x,const Act &y){
         if (x.end!=y.end) return x.end<y.end;
         return x.start<y.start;
-    });                                     //@init
+    });                              // 按结束时间排序，结束得早的排在前面   //@init
     int last=-1,cnt=0;
     for (auto &a:acts){
-        if (a.start<last) continue;         //@skip
-        cnt++;                              //@take
-        last=a.end;                         //@take
+        if (a.start<last) continue;  // 开始时间早于上一场的结束，冲突，跳过  //@skip
+        cnt++;                       // 不冲突，就选它，并记下它的结束时间   //@take
+        last=a.end;                                         //@take
     }
-    cout<<cnt<<endl;                        //@done
+    cout<<cnt<<endl;                 // 输出最多能安排几个           //@done
     return 0;
 }
 `,
@@ -222,14 +222,14 @@ from collections import namedtuple
 Act=namedtuple('Act','start end')
 n=int(input())
 acts=[Act(*map(int,input().split())) for _ in range(n)]
-acts.sort(key=lambda a: (a.end,a.start))    #@init
+acts.sort(key=lambda a: (a.end,a.start))  # 按结束时间排序，结束得早的排在前面   #@init
 last,cnt=-1,0
 for a in acts:
     if a.start<last:
-        continue                            #@skip
-    cnt+=1                                  #@take
-    last=a.end                              #@take
-print(cnt)                                  #@done
+        continue                          # 开始时间早于上一场的结束，冲突，跳过  #@skip
+    cnt+=1                                # 不冲突，就选它，并记下它的结束时间   #@take
+    last=a.end                                                  #@take
+print(cnt)                                # 输出最多能安排几个           #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -248,14 +248,14 @@ public class Main{
         int n=sc.nextInt();
         Act[] acts=new Act[n];
         for (int i=0;i<n;i++) acts[i]=new Act(sc.nextInt(),sc.nextInt());
-        Arrays.sort(acts,(a,b)->a.end!=b.end?a.end-b.end:a.start-b.start);  //@init
+        Arrays.sort(acts,(a,b)->a.end!=b.end?a.end-b.end:a.start-b.start);  // 按结束时间排序，结束得早的排在前面  //@init
         int last=-1,cnt=0;
         for (Act a:acts){
-            if (a.start<last) continue;                         //@skip
-            cnt++;                                              //@take
-            last=a.end;                                         //@take
+            if (a.start<last) continue;       // 开始时间早于上一场的结束，冲突，跳过                       //@skip
+            cnt++;                            // 不冲突，就选它，并记下它的结束时间                        //@take
+            last=a.end;                                                                   //@take
         }
-        System.out.println(cnt);                                //@done
+        System.out.println(cnt);              // 输出最多能安排几个                                //@done
     }
 }
 `,

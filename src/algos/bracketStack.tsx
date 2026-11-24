@@ -246,18 +246,18 @@ export const bracketStack: AlgoDef<string, BrState> = {
 #include <stdio.h>
 char st[1005];
 int check(char s[]){
-    int top=0;                                                  //@init
-    for (int i=0;s[i];i++){                                     //@read
-        char c=s[i];                                            //@read
-        if (c=='('||c=='['||c=='{'){                            //@push
-            st[top++]=c;                                        //@push
+    int top=0;                                // 准备一个空栈                                   //@init
+    for (int i=0;s[i];i++){                   // 从左到右，一个一个看括号                             //@read
+        char c=s[i];                                                                      //@read
+        if (c=='('||c=='['||c=='{'){          // 左括号先压进栈，等着被配对                            //@push
+            st[top++]=c;                                                                  //@push
         }else{
-            if (top==0) return 0;                               //@emptyFail
-            char t=st[--top];                                   //@pop
-            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return 0;  //@match
+            if (top==0) return 0;             // 栈是空的，说明右括号多了                             //@emptyFail
+            char t=st[--top];                 // 取出栈顶，看看它和当前的右括号配不配                       //@pop
+            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return 0;  // 类型对不上，直接判不合法  //@match
         }
     }
-    return top==0;                                              //@final
+    return top==0;                            // 栈空了，才说明所有左括号都配上了                         //@final
 }
 int main(){
     char s[1005];
@@ -270,18 +270,18 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 bool check(string s){
-    stack<char> st;                                             //@init
-    for (char c:s){                                             //@read
-        if (c=='('||c=='['||c=='{'){                            //@push
-            st.push(c);                                         //@push
+    stack<char> st;                           // 准备一个空栈                                   //@init
+    for (char c:s){                           // 从左到右，一个一个看括号                             //@read
+        if (c=='('||c=='['||c=='{'){          // 左括号先压进栈，等着被配对                            //@push
+            st.push(c);                                                                   //@push
         }else{
-            if (st.empty()) return false;                       //@emptyFail
-            char t=st.top();                                    //@pop
-            st.pop();                                           //@pop
-            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;  //@match
+            if (st.empty()) return false;     // 栈是空的，说明右括号多了                             //@emptyFail
+            char t=st.top();                  // 取出栈顶，看看它和当前的右括号配不配                       //@pop
+            st.pop();                                                                     //@pop
+            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;  // 类型对不上，直接判不合法  //@match
         }
     }
-    return st.empty();                                          //@final
+    return st.empty();                        // 栈空了，才说明所有左括号都配上了                         //@final
 }
 int main(){
     string s;
@@ -292,18 +292,18 @@ int main(){
 `,
     python: String.raw`
 def check(s):
-    st=[]                                   #@init
+    st=[]                   # 准备一个空栈              #@init
     pair={')': '(',']': '[','}': '{'}
-    for c in s:                             #@read
-        if c in '([{':                      #@push
-            st.append(c)                    #@push
+    for c in s:             # 从左到右，一个一个看括号        #@read
+        if c in '([{':      # 左括号先压进栈，等着被配对       #@push
+            st.append(c)                          #@push
         else:
-            if not st:                      #@emptyFail
-                return False                #@emptyFail
-            t=st.pop()                      #@pop
-            if pair[c]!=t:                  #@match
-                return False                #@match
-    return not st                           #@final
+            if not st:      # 栈是空的，说明右括号多了        #@emptyFail
+                return False                      #@emptyFail
+            t=st.pop()      # 取出栈顶，看看它和当前的右括号配不配  #@pop
+            if pair[c]!=t:  # 类型对不上，直接判不合法        #@match
+                return False                      #@match
+    return not st           # 栈空了，才说明所有左括号都配上了    #@final
 
 s=input().strip()
 print("YES" if check(s) else "NO")
@@ -313,17 +313,17 @@ import java.util.*;
 
 public class Main{
     static boolean check(String s){
-        Deque<Character> st=new ArrayDeque<>();                 //@init
-        for (char c:s.toCharArray()){                           //@read
-            if (c=='('||c=='['||c=='{'){                        //@push
-                st.push(c);                                     //@push
+        Deque<Character> st=new ArrayDeque<>();  // 准备一个空栈                                //@init
+        for (char c:s.toCharArray()){         // 从左到右，一个一个看括号                             //@read
+            if (c=='('||c=='['||c=='{'){      // 左括号先压进栈，等着被配对                            //@push
+                st.push(c);                                                               //@push
             }else{
-                if (st.isEmpty()) return false;                 //@emptyFail
-                char t=st.pop();                                //@pop
-                if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;  //@match
+                if (st.isEmpty()) return false;  // 栈是空的，说明右括号多了                          //@emptyFail
+                char t=st.pop();              // 取出栈顶，看看它和当前的右括号配不配                       //@pop
+                if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;  // 类型对不上，直接判不合法  //@match
             }
         }
-        return st.isEmpty();                                    //@final
+        return st.isEmpty();                  // 栈空了，才说明所有左括号都配上了                         //@final
     }
 
     public static void main(String[] args){

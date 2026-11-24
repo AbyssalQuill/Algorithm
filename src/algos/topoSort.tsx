@@ -190,19 +190,19 @@ int main(){
         indeg[b]++;
     }
     for (int i=1;i<=n;i++)
-        if (indeg[i]==0) q[tail++]=i;                    //@init
+        if (indeg[i]==0) q[tail++]=i;         // 入度为 0 的课，先放进队列               //@init
     while (head<tail){
-        int u=q[head++];                                 //@take
-        order[cnt++]=u;                                  //@take
+        int u=q[head++];                      // 取出队头，它就是下一门要学的课              //@take
+        order[cnt++]=u;                                                       //@take
         for (int i=0;i<deg[u];i++){
             int v=adj[u][i];
-            indeg[v]--;                                  //@dec
-            if (indeg[v]==0) q[tail++]=v;                //@push
+            indeg[v]--;                       // 它学完了，后继课程的先修课少了一门            //@dec
+            if (indeg[v]==0) q[tail++]=v;     // 先修课都学完了，可以入队了                //@push
         }
     }
-    if (cnt<n) puts("CYCLE");                            //@done
+    if (cnt<n) puts("CYCLE");                 // 全部学完就输出顺序，否则说明有环             //@done
     else{
-        for (int i=0;i<cnt;i++) printf("%d ",order[i]);  //@done
+        for (int i=0;i<cnt;i++) printf("%d ",order[i]);  // 全部学完就输出顺序，否则说明有环  //@done
         printf("\n");
     }
     return 0;
@@ -224,19 +224,19 @@ int main(){
     queue<int> q;
     vector<int> order;
     for (int i=1;i<=n;i++)
-        if (indeg[i]==0) q.push(i);                //@init
+        if (indeg[i]==0) q.push(i);           // 入度为 0 的课，先放进队列         //@init
     while (!q.empty()){
-        int u=q.front();                           //@take
-        q.pop();                                   //@take
-        order.push_back(u);                        //@take
+        int u=q.front();                      // 取出队头，它就是下一门要学的课        //@take
+        q.pop();                                                        //@take
+        order.push_back(u);                                             //@take
         for (int v:adj[u]){
-            indeg[v]--;                            //@dec
-            if (indeg[v]==0) q.push(v);            //@push
+            indeg[v]--;                       // 它学完了，后继课程的先修课少了一门      //@dec
+            if (indeg[v]==0) q.push(v);       // 先修课都学完了，可以入队了          //@push
         }
     }
-    if ((int)order.size()<n) cout<<"CYCLE"<<endl;  //@done
+    if ((int)order.size()<n) cout<<"CYCLE"<<endl;  // 全部学完就输出顺序，否则说明有环  //@done
     else{
-        for (int x:order) cout<<x<<" ";            //@done
+        for (int x:order) cout<<x<<" ";       // 全部学完就输出顺序，否则说明有环       //@done
         cout<<endl;
     }
     return 0;
@@ -252,19 +252,19 @@ for _ in range(m):
     a,b=map(int,input().split())
     adj[a].append(b)
     indeg[b]+=1
-q=deque(i for i in range(1,n+1) if indeg[i]==0)  #@init
+q=deque(i for i in range(1,n+1) if indeg[i]==0)  # 入度为 0 的课，先放进队列  #@init
 order=[]
 while q:
-    u=q.popleft()                                #@take
-    order.append(u)                              #@take
+    u=q.popleft()                             # 取出队头，它就是下一门要学的课    #@take
+    order.append(u)                                                #@take
     for v in adj[u]:
-        indeg[v]-=1                              #@dec
+        indeg[v]-=1                           # 它学完了，后继课程的先修课少了一门  #@dec
         if indeg[v]==0:
-            q.append(v)                          #@push
+            q.append(v)                       # 先修课都学完了，可以入队了      #@push
 if len(order)<n:
-    print("CYCLE")                               #@done
+    print("CYCLE")                            # 全部学完就输出顺序，否则说明有环   #@done
 else:
-    print(*order)                                #@done
+    print(*order)                             # 全部学完就输出顺序，否则说明有环   #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -284,19 +284,19 @@ public class Main{
         Queue<Integer> q=new ArrayDeque<>();
         List<Integer> order=new ArrayList<>();
         for (int i=1;i<=n;i++)
-            if (indeg[i]==0) q.add(i);                    //@init
+            if (indeg[i]==0) q.add(i);        // 入度为 0 的课，先放进队列                //@init
         while (!q.isEmpty()){
-            int u=q.poll();                               //@take
-            order.add(u);                                 //@take
+            int u=q.poll();                   // 取出队头，它就是下一门要学的课               //@take
+            order.add(u);                                                      //@take
             for (int v:adj.get(u)){
-                indeg[v]--;                               //@dec
-                if (indeg[v]==0) q.add(v);                //@push
+                indeg[v]--;                   // 它学完了，后继课程的先修课少了一门             //@dec
+                if (indeg[v]==0) q.add(v);    // 先修课都学完了，可以入队了                 //@push
             }
         }
-        if (order.size()<n) System.out.println("CYCLE");  //@done
+        if (order.size()<n) System.out.println("CYCLE");  // 全部学完就输出顺序，否则说明有环  //@done
         else{
             StringBuilder sb=new StringBuilder();
-            for (int x:order) sb.append(x).append(' ');   //@done
+            for (int x:order) sb.append(x).append(' ');  // 全部学完就输出顺序，否则说明有环   //@done
             System.out.println(sb);
         }
     }

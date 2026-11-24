@@ -152,16 +152,16 @@ int main(){
     int n,s,a[20];
     scanf("%d %d",&n,&s);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    int l=0,sum=0,best=0;                         //@init
+    int l=0,sum=0,best=0;                     // l 是窗口的左端，sum 是窗口里的数的和  //@init
     for (int r=0;r<n;r++){
-        sum+=a[r];                                //@extend
+        sum+=a[r];                            // 右端右移，把新的数加进窗口          //@extend
         while (sum>=s){
-            if (best==0||r-l+1<best) best=r-l+1;  //@record
-            sum-=a[l];                            //@shrink
-            l++;                                  //@shrink
+            if (best==0||r-l+1<best) best=r-l+1;  // 窗口够大了，试着更新最短的长度    //@record
+            sum-=a[l];                        // 从左边缩小窗口，看看还够不够         //@shrink
+            l++;                                                        //@shrink
         }
     }
-    printf("%d\n",best);                          //@done
+    printf("%d\n",best);                      // 输出最短的长度                //@done
     return 0;
 }
 `,
@@ -172,31 +172,31 @@ int main(){
     int n,s,a[20];
     cin>>n>>s;
     for (int i=0;i<n;i++) cin>>a[i];
-    int l=0,sum=0,best=0;                         //@init
+    int l=0,sum=0,best=0;                     // l 是窗口的左端，sum 是窗口里的数的和  //@init
     for (int r=0;r<n;r++){
-        sum+=a[r];                                //@extend
+        sum+=a[r];                            // 右端右移，把新的数加进窗口          //@extend
         while (sum>=s){
-            if (best==0||r-l+1<best) best=r-l+1;  //@record
-            sum-=a[l];                            //@shrink
-            l++;                                  //@shrink
+            if (best==0||r-l+1<best) best=r-l+1;  // 窗口够大了，试着更新最短的长度    //@record
+            sum-=a[l];                        // 从左边缩小窗口，看看还够不够         //@shrink
+            l++;                                                        //@shrink
         }
     }
-    cout<<best<<endl;                             //@done
+    cout<<best<<endl;                         // 输出最短的长度                //@done
     return 0;
 }
 `,
     python: String.raw`
 n,s=map(int,input().split())
 a=list(map(int,input().split()))
-l,total,best=0,0,0                          #@init
+l,total,best=0,0,0      # l 是窗口的左端，sum 是窗口里的数的和  #@init
 for r in range(n):
-    total+=a[r]                             #@extend
+    total+=a[r]         # 右端右移，把新的数加进窗口          #@extend
     while total>=s:
         if best==0 or r-l+1<best:
-            best=r-l+1                      #@record
-        total-=a[l]                         #@shrink
-        l+=1                                #@shrink
-print(best)                                 #@done
+            best=r-l+1  # 窗口够大了，试着更新最短的长度        #@record
+        total-=a[l]     # 从左边缩小窗口，看看还够不够         #@shrink
+        l+=1                                     #@shrink
+print(best)             # 输出最短的长度                #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -207,16 +207,16 @@ public class Main{
         int n=sc.nextInt(),s=sc.nextInt();
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
-        int l=0,sum=0,best=0;                         //@init
+        int l=0,sum=0,best=0;                 // l 是窗口的左端，sum 是窗口里的数的和    //@init
         for (int r=0;r<n;r++){
-            sum+=a[r];                                //@extend
+            sum+=a[r];                        // 右端右移，把新的数加进窗口            //@extend
             while (sum>=s){
-                if (best==0||r-l+1<best) best=r-l+1;  //@record
-                sum-=a[l];                            //@shrink
-                l++;                                  //@shrink
+                if (best==0||r-l+1<best) best=r-l+1;  // 窗口够大了，试着更新最短的长度  //@record
+                sum-=a[l];                    // 从左边缩小窗口，看看还够不够           //@shrink
+                l++;                                                      //@shrink
             }
         }
-        System.out.println(best);                     //@done
+        System.out.println(best);             // 输出最短的长度                  //@done
     }
 }
 `,

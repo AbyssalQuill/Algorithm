@@ -48,12 +48,12 @@ const mk = (comment: string, str: string, pre: string): RegExp =>
   new RegExp(`(${comment})|(${str})|(${pre})|(\\b${NUM}\\b)|([A-Za-z_]\\w*)`, 'y')
 
 const SPECS: Record<Lang, Spec> = {
-  c: { re: mk(String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`, String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`, String.raw`^[ \t]*#[ \t]*\w+(?:[ \t]*<[^>\n]*>)?`), kw: set(C_KW), types: set(C_TYPES), capsAreTypes: false },
-  cpp: { re: mk(String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`, String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`, String.raw`^[ \t]*#[ \t]*\w+(?:[ \t]*<[^>\n]*>)?`), kw: set(CPP_KW), types: set(CPP_TYPES), capsAreTypes: false },
-  python: { re: mk(String.raw`#[^\n]*`, String.raw`(?:[rRbBfF]{0,2})(?:"""[\s\S]*?(?:"""|$)|'''[\s\S]*?(?:'''|$)|"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?)`, String.raw`(?!)`), kw: set(PY_KW), types: set(PY_TYPES), capsAreTypes: false },
-  java: { re: mk(String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)`, String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`, String.raw`(?!)`), kw: set(JAVA_KW), types: set(JAVA_TYPES), capsAreTypes: true },
+  c: { re: mk(String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|(?![\s\S]))`, String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`, String.raw`^[ \t]*#[ \t]*\w+(?:[ \t]*<[^>\n]*>)?`), kw: set(C_KW), types: set(C_TYPES), capsAreTypes: false },
+  cpp: { re: mk(String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|(?![\s\S]))`, String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`, String.raw`^[ \t]*#[ \t]*\w+(?:[ \t]*<[^>\n]*>)?`), kw: set(CPP_KW), types: set(CPP_TYPES), capsAreTypes: false },
+  python: { re: mk(String.raw`#[^\n]*`, String.raw`(?:[rRbBfF]{0,2})(?:"""[\s\S]*?(?:"""|(?![\s\S]))|'''[\s\S]*?(?:'''|(?![\s\S]))|"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?)`, String.raw`(?!)`), kw: set(PY_KW), types: set(PY_TYPES), capsAreTypes: false },
+  java: { re: mk(String.raw`\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|(?![\s\S]))`, String.raw`"(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?`, String.raw`(?!)`), kw: set(JAVA_KW), types: set(JAVA_TYPES), capsAreTypes: true },
 }
-// 预处理行需要用多行模式识别行首的 #
+// 预处理行需要用多行模式识别行首的 #。注意多行模式下 $ 会匹配每一行的行尾，所以“直到文件结尾”要写成 (?![\s\S])，否则多行注释只有第一行会被当作注释
 for (const l of ['c', 'cpp'] as const) SPECS[l].re = new RegExp(SPECS[l].re.source, 'ym')
 
 function color(kind: Kind): Pick<Tok, 'light' | 'dark'> {

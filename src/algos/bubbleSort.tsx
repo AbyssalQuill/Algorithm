@@ -133,18 +133,18 @@ export const bubbleSort: AlgoDef<number[], SortState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-void bubbleSort(int a[],int n){                //@init
-    for (int i=0;i<n-1;i++){                   //@outer
-        int swapped=0;                         //@outer
+void bubbleSort(int a[],int n){               // 冒泡排序：每一轮把最大的数“冒”到最后           //@init
+    for (int i=0;i<n-1;i++){                  // 最多 n-1 轮，swapped 记录这一轮有没有交换过  //@outer
+        int swapped=0;                                                         //@outer
         for (int j=0;j<n-1-i;j++){
-            if (a[j]>a[j+1]){                  //@cmp
-                int temp=a[j];                 //@swap
-                a[j]=a[j+1];                   //@swap
-                a[j+1]=temp;                   //@swap
-                swapped=1;                     //@swap
+            if (a[j]>a[j+1]){                 // 相邻的两个数，左边比右边大就要交换             //@cmp
+                int temp=a[j];                // 交换位置，并记下“这一轮动过”               //@swap
+                a[j]=a[j+1];                                                   //@swap
+                a[j+1]=temp;                                                   //@swap
+                swapped=1;                                                     //@swap
             }
         }
-        if (!swapped) break;                   //@pass
+        if (!swapped) break;                  // 一次都没交换，说明已经有序，提前结束            //@pass
     }
 }
 int main(){
@@ -152,23 +152,23 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     bubbleSort(a,n);
-    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  // 输出排好序的数组                     //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-void bubbleSort(int a[],int n){             //@init
-    for (int i=0;i<n-1;i++){                //@outer
-        bool swapped=false;                 //@outer
+void bubbleSort(int a[],int n){             // 冒泡排序：每一轮把最大的数“冒”到最后           //@init
+    for (int i=0;i<n-1;i++){                // 最多 n-1 轮，swapped 记录这一轮有没有交换过  //@outer
+        bool swapped=false;                                                  //@outer
         for (int j=0;j<n-1-i;j++){
-            if (a[j]>a[j+1]){               //@cmp
-                swap(a[j],a[j+1]);          //@swap
-                swapped=true;               //@swap
+            if (a[j]>a[j+1]){               // 相邻的两个数，左边比右边大就要交换             //@cmp
+                swap(a[j],a[j+1]);          // 交换位置，并记下“这一轮动过”               //@swap
+                swapped=true;                                                //@swap
             }
         }
-        if (!swapped) break;                //@pass
+        if (!swapped) break;                // 一次都没交换，说明已经有序，提前结束            //@pass
     }
 }
 int main(){
@@ -176,44 +176,44 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     bubbleSort(a,n);
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  // 输出排好序的数组                      //@done
     return 0;
 }
 `,
     python: String.raw`
-def bubble_sort(a):                         #@init
+def bubble_sort(a):                      # 冒泡排序：每一轮把最大的数“冒”到最后           #@init
     n=len(a)
-    for i in range(n-1):                    #@outer
-        swapped=False                       #@outer
+    for i in range(n-1):                 # 最多 n-1 轮，swapped 记录这一轮有没有交换过  #@outer
+        swapped=False                                                    #@outer
         for j in range(n-1-i):
-            if a[j]>a[j+1]:                 #@cmp
-                a[j],a[j+1]=a[j+1],a[j]     #@swap
-                swapped=True                #@swap
-        if not swapped:                     #@pass
-            break                           #@pass
+            if a[j]>a[j+1]:              # 相邻的两个数，左边比右边大就要交换             #@cmp
+                a[j],a[j+1]=a[j+1],a[j]  # 交换位置，并记下“这一轮动过”               #@swap
+                swapped=True                                             #@swap
+        if not swapped:                  # 一次都没交换，说明已经有序，提前结束            #@pass
+            break                                                        #@pass
 
 n=int(input())
 a=list(map(int,input().split()))
 bubble_sort(a)
-print(*a)                                   #@done
+print(*a)                                # 输出排好序的数组                      #@done
 `,
     java: String.raw`
 import java.util.*;
 
 public class Main{
-    static void bubbleSort(int[] a){            //@init
+    static void bubbleSort(int[] a){          // 冒泡排序：每一轮把最大的数“冒”到最后           //@init
         int n=a.length;
-        for (int i=0;i<n-1;i++){                //@outer
-            boolean swapped=false;              //@outer
+        for (int i=0;i<n-1;i++){              // 最多 n-1 轮，swapped 记录这一轮有没有交换过  //@outer
+            boolean swapped=false;                                             //@outer
             for (int j=0;j<n-1-i;j++){
-                if (a[j]>a[j+1]){               //@cmp
-                    int temp=a[j];              //@swap
-                    a[j]=a[j+1];                //@swap
-                    a[j+1]=temp;                //@swap
-                    swapped=true;               //@swap
+                if (a[j]>a[j+1]){             // 相邻的两个数，左边比右边大就要交换             //@cmp
+                    int temp=a[j];            // 交换位置，并记下“这一轮动过”               //@swap
+                    a[j]=a[j+1];                                               //@swap
+                    a[j+1]=temp;                                               //@swap
+                    swapped=true;                                              //@swap
                 }
             }
-            if (!swapped) break;                //@pass
+            if (!swapped) break;              // 一次都没交换，说明已经有序，提前结束            //@pass
         }
     }
 
@@ -223,7 +223,7 @@ public class Main{
         int[] a=new int[n];
         for (int i=0;i<n;i++) a[i]=sc.nextInt();
         bubbleSort(a);
-        for (int x:a) System.out.print(x+" ");  //@done
+        for (int x:a) System.out.print(x+" ");  // 输出排好序的数组                    //@done
     }
 }
 `,

@@ -164,7 +164,7 @@ int main(){
     int n,m;
     scanf("%d %d",&n,&m);
     for (int i=0;i<m;i++) scanf("%d %d %d",&ea[i],&eb[i],&ew[i]);
-    for (int i=1;i<m;i++){                  //@init
+    for (int i=1;i<m;i++){                  // 把边按权值从小到大排好队           //@init
         int a=ea[i],b=eb[i],w=ew[i],j=i-1;
         while (j>=0&&ew[j]>w){
             ea[j+1]=ea[j]; eb[j+1]=eb[j]; ew[j+1]=ew[j];
@@ -175,13 +175,13 @@ int main(){
     for (int i=1;i<=n;i++) fa[i]=i;
     int total=0,cnt=0;
     for (int i=0;i<m;i++){
-        int ra=find(ea[i]),rb=find(eb[i]);  //@consider
-        if (ra==rb) continue;               //@reject
-        fa[ra]=rb;                          //@accept
-        total+=ew[i];                       //@accept
-        cnt++;                              //@accept
+        int ra=find(ea[i]),rb=find(eb[i]);  // 找出这条边两个端点所在集合的根        //@consider
+        if (ra==rb) continue;               // 根相同，加进来会成环，放弃          //@reject
+        fa[ra]=rb;                          // 连接了两个不同的集合，选下这条边       //@accept
+        total+=ew[i];                                                 //@accept
+        cnt++;                                                        //@accept
     }
-    printf("%d\n",cnt==n-1?total:-1);       //@done
+    printf("%d\n",cnt==n-1?total:-1);       // 选够 n-1 条边就连通了，否则输出 -1  //@done
     return 0;
 }
 `,
@@ -200,19 +200,19 @@ int main(){
     cin>>n>>m;
     vector<E> es(m);
     for (auto &e:es) cin>>e.a>>e.b>>e.w;
-    stable_sort(es.begin(),es.end(),[](const E &x,const E &y){  //@init
-        return x.w<y.w;                                         //@init
-    });                                                         //@init
+    stable_sort(es.begin(),es.end(),[](const E &x,const E &y){  // 把边按权值从小到大排好队  //@init
+        return x.w<y.w;                                                          //@init
+    });                                                                          //@init
     for (int i=1;i<=n;i++) fa[i]=i;
     int total=0,cnt=0;
     for (auto &e:es){
-        int ra=find(e.a),rb=find(e.b);                          //@consider
-        if (ra==rb) continue;                                   //@reject
-        fa[ra]=rb;                                              //@accept
-        total+=e.w;                                             //@accept
-        cnt++;                                                  //@accept
+        int ra=find(e.a),rb=find(e.b);        // 找出这条边两个端点所在集合的根                 //@consider
+        if (ra==rb) continue;                 // 根相同，加进来会成环，放弃                   //@reject
+        fa[ra]=rb;                            // 连接了两个不同的集合，选下这条边                //@accept
+        total+=e.w;                                                              //@accept
+        cnt++;                                                                   //@accept
     }
-    cout<<(cnt==n-1?total:-1)<<endl;                            //@done
+    cout<<(cnt==n-1?total:-1)<<endl;          // 选够 n-1 条边就连通了，否则输出 -1           //@done
     return 0;
 }
 `,
@@ -224,17 +224,17 @@ def find(x):
 
 n,m=map(int,input().split())
 es=[tuple(map(int,input().split())) for _ in range(m)]
-es.sort(key=lambda e: e[2])                 #@init
+es.sort(key=lambda e: e[2])       # 把边按权值从小到大排好队           #@init
 fa=list(range(n+1))
 total=cnt=0
 for a,b,w in es:
-    ra,rb=find(a),find(b)                   #@consider
+    ra,rb=find(a),find(b)         # 找出这条边两个端点所在集合的根        #@consider
     if ra==rb:
-        continue                            #@reject
-    fa[ra]=rb                               #@accept
-    total+=w                                #@accept
-    cnt+=1                                  #@accept
-print(total if cnt==n-1 else -1)            #@done
+        continue                  # 根相同，加进来会成环，放弃          #@reject
+    fa[ra]=rb                     # 连接了两个不同的集合，选下这条边       #@accept
+    total+=w                                               #@accept
+    cnt+=1                                                 #@accept
+print(total if cnt==n-1 else -1)  # 选够 n-1 条边就连通了，否则输出 -1  #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -251,17 +251,17 @@ public class Main{
         int n=sc.nextInt(),m=sc.nextInt();
         int[][] es=new int[m][3];
         for (int i=0;i<m;i++) for (int j=0;j<3;j++) es[i][j]=sc.nextInt();
-        Arrays.sort(es,(x,y)->x[2]-y[2]);       //@init
+        Arrays.sort(es,(x,y)->x[2]-y[2]);     // 把边按权值从小到大排好队             //@init
         for (int i=1;i<=n;i++) fa[i]=i;
         int total=0,cnt=0;
         for (int[] e:es){
-            int ra=find(e[0]),rb=find(e[1]);    //@consider
-            if (ra==rb) continue;               //@reject
-            fa[ra]=rb;                          //@accept
-            total+=e[2];                        //@accept
-            cnt++;                              //@accept
+            int ra=find(e[0]),rb=find(e[1]);  // 找出这条边两个端点所在集合的根          //@consider
+            if (ra==rb) continue;             // 根相同，加进来会成环，放弃            //@reject
+            fa[ra]=rb;                        // 连接了两个不同的集合，选下这条边         //@accept
+            total+=e[2];                                                  //@accept
+            cnt++;                                                        //@accept
         }
-        System.out.println(cnt==n-1?total:-1);  //@done
+        System.out.println(cnt==n-1?total:-1);  // 选够 n-1 条边就连通了，否则输出 -1  //@done
     }
 }
 `,

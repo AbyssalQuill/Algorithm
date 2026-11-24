@@ -202,22 +202,22 @@ int main(){
     }
     scanf("%d",&s);
     for (int i=1;i<=n;i++) dist[i]=INF;
-    dist[s]=0;                              //@init
+    dist[s]=0;               // 起点到自己的距离是 0              //@init
     for (int it=0;it<n;it++){
         int u=-1;
         for (int i=1;i<=n;i++)
             if (!done[i]&&dist[i]<INF&&(u==-1||dist[i]<dist[u])) u=i;
-        if (u==-1) break;                   //@stop
-        done[u]=1;                          //@pick
+        if (u==-1) break;    // 剩下的结点都到不了，提前结束           //@stop
+        done[u]=1;           // 选出离起点最近的、还没确定的结点，把它确定下来  //@pick
         for (int i=0;i<deg[u];i++){
             int v=adj[u][i],c=dist[u]+wt[u][i];
-            if (c<dist[v]){                 //@relax
-                dist[v]=c;                  //@update
+            if (c<dist[v]){  // 经过 u 走到 v，比原来记录的距离更短吗    //@relax
+                dist[v]=c;   // 更短，更新 v 的距离              //@update
             }
         }
     }
     for (int i=1;i<=n;i++) printf("%d ",dist[i]==INF?-1:dist[i]);
-    printf("\n");                           //@done
+    printf("\n");            // 输出到每个结点的最短距离             //@done
     return 0;
 }
 `,
@@ -238,21 +238,21 @@ int main(){
     }
     cin>>s;
     fill(dist_,dist_+n+1,INF);
-    dist_[s]=0;                             //@init
+    dist_[s]=0;                        // 起点到自己的距离是 0              //@init
     for (int it=0;it<n;it++){
         int u=-1;
         for (int i=1;i<=n;i++)
             if (!done[i]&&dist_[i]<INF&&(u==-1||dist_[i]<dist_[u])) u=i;
-        if (u==-1) break;                   //@stop
-        done[u]=true;                       //@pick
+        if (u==-1) break;              // 剩下的结点都到不了，提前结束           //@stop
+        done[u]=true;                  // 选出离起点最近的、还没确定的结点，把它确定下来  //@pick
         for (auto [v,c]:adj[u]){
-            if (dist_[u]+c<dist_[v]){       //@relax
-                dist_[v]=dist_[u]+c;        //@update
+            if (dist_[u]+c<dist_[v]){  // 经过 u 走到 v，比原来记录的距离更短吗    //@relax
+                dist_[v]=dist_[u]+c;   // 更短，更新 v 的距离              //@update
             }
         }
     }
     for (int i=1;i<=n;i++) cout<<(dist_[i]==INF?-1:dist_[i])<<" ";
-    cout<<endl;                             //@done
+    cout<<endl;                        // 输出到每个结点的最短距离             //@done
     return 0;
 }
 `,
@@ -266,7 +266,7 @@ for _ in range(m):
     adj[b].append((a,w))
 s=int(input())
 dist=[INF]*(n+1)
-dist[s]=0                                        #@init
+dist[s]=0                                     # 起点到自己的距离是 0              #@init
 done=[False]*(n+1)
 for _ in range(n):
     u=-1
@@ -274,12 +274,12 @@ for _ in range(n):
         if not done[i] and dist[i]<INF and (u==-1 or dist[i]<dist[u]):
             u=i
     if u==-1:
-        break                                    #@stop
-    done[u]=True                                 #@pick
+        break                                 # 剩下的结点都到不了，提前结束           #@stop
+    done[u]=True                              # 选出离起点最近的、还没确定的结点，把它确定下来  #@pick
     for v,c in adj[u]:
-        if dist[u]+c<dist[v]:                    #@relax
-            dist[v]=dist[u]+c                    #@update
-print(*[-1 if d==INF else d for d in dist[1:]])  #@done
+        if dist[u]+c<dist[v]:                 # 经过 u 走到 v，比原来记录的距离更短吗    #@relax
+            dist[v]=dist[u]+c                 # 更短，更新 v 的距离              #@update
+print(*[-1 if d==INF else d for d in dist[1:]])  # 输出到每个结点的最短距离          #@done
 `,
     java: String.raw`
 import java.util.*;
@@ -300,22 +300,22 @@ public class Main{
         int[] dist=new int[n+1];
         boolean[] done=new boolean[n+1];
         Arrays.fill(dist,INF);
-        dist[s]=0;                             //@init
+        dist[s]=0;                            // 起点到自己的距离是 0              //@init
         for (int it=0;it<n;it++){
             int u=-1;
             for (int i=1;i<=n;i++)
                 if (!done[i]&&dist[i]<INF&&(u==-1||dist[i]<dist[u])) u=i;
-            if (u==-1) break;                  //@stop
-            done[u]=true;                      //@pick
+            if (u==-1) break;                 // 剩下的结点都到不了，提前结束           //@stop
+            done[u]=true;                     // 选出离起点最近的、还没确定的结点，把它确定下来  //@pick
             for (int[] e:adj.get(u)){
-                if (dist[u]+e[1]<dist[e[0]]){  //@relax
-                    dist[e[0]]=dist[u]+e[1];   //@update
+                if (dist[u]+e[1]<dist[e[0]]){  // 经过 u 走到 v，比原来记录的距离更短吗   //@relax
+                    dist[e[0]]=dist[u]+e[1];  // 更短，更新 v 的距离              //@update
                 }
             }
         }
         StringBuilder sb=new StringBuilder();
         for (int i=1;i<=n;i++) sb.append(dist[i]==INF?-1:dist[i]).append(' ');
-        System.out.println(sb);                //@done
+        System.out.println(sb);               // 输出到每个结点的最短距离             //@done
     }
 }
 `,

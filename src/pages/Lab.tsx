@@ -6,7 +6,8 @@ import { CodePanel } from '../components/CodePanel'
 import { IconArrow } from '../components/icons'
 import { Player } from '../components/Player'
 import { ProblemCard } from '../components/ProblemCard'
-import { Problems } from '../components/Problems'
+import { DiffLegend, Problems } from '../components/Problems'
+import { topicProblems } from '../data/topicProblems'
 import type { AnyAlgo, AnyExample } from '../engine/types'
 import { usePlayer } from '../engine/usePlayer'
 import { useLang } from '../hooks'
@@ -33,6 +34,7 @@ function LabView({ algo, list, at }: { algo: AnyAlgo; list: AnyExample[]; at: nu
   const frame = frames[Math.min(player.index, frames.length - 1)]
   const [lang, setLang] = useLang()
   const View = ex.View
+  const practice = useMemo(() => topicProblems(algo.id, list.flatMap((e) => e.problems)), [algo, list])
 
   const here = ALGOS.findIndex((a) => a.id === algo.id)
   const prevAlgo = ALGOS[here - 1]
@@ -118,14 +120,14 @@ function LabView({ algo, list, at }: { algo: AnyAlgo; list: AnyExample[]; at: nu
       </header>
 
       {list.length > 1 && (
-        <nav className="ex-tabs" aria-label="例题">
-          <span className="ex-tabs-label">例题</span>
+        <nav className="ex-tabs" aria-label="基础演示与例题">
+          <span className="ex-tabs-label">先看基础演示，再做例题</span>
           {list.map((e, i) => (
-            <Link key={e.slug} to={i === 0 ? `/lab/${algo.id}` : `/lab/${algo.id}?ex=${e.slug}`} replace className={`ex-tab${i === at ? ' on' : ''}`} aria-current={i === at ? 'page' : undefined}>
-              <b>{i + 1}</b>
+            <Link key={e.slug} to={i === 0 ? `/lab/${algo.id}` : `/lab/${algo.id}?ex=${e.slug}`} replace className={`ex-tab${i === at ? ' on' : ''}${i === 0 ? ' base' : ''}`} aria-current={i === at ? 'page' : undefined}>
+              <b>{i === 0 ? '基' : i}</b>
               <span>
-                <strong>{e.name}</strong>
-                <i>{e.type}</i>
+                <strong>{i === 0 ? '基础演示' : e.name}</strong>
+                <i>{i === 0 ? e.name : e.type}</i>
               </span>
             </Link>
           ))}
@@ -193,13 +195,14 @@ function LabView({ algo, list, at }: { algo: AnyAlgo; list: AnyExample[]; at: nu
         </article>
       </section>
 
-      {ex.problems.length > 0 && (
+      {practice.length > 0 && (
         <section className="lab-problems">
           <h2 className="section-title">
-            <span className="mark">洛谷练习</span>
+            <span className="mark">课后练习</span>
           </h2>
-          <p className="section-sub">看懂演示以后，可以去洛谷上亲手写一遍。点击题目会在新的标签页里打开。</p>
-          <Problems list={ex.problems} />
+          <p className="section-sub">看懂演示以后，可以去洛谷上亲手写一遍。题目由易到难排列，题号和难度的颜色与洛谷一致。点击题目会在新的标签页里打开。</p>
+          <DiffLegend levels={[...new Set(practice.map((p) => p.diff ?? 0))].filter((d) => d > 0).sort()} />
+          <Problems list={practice} />
         </section>
       )}
 
