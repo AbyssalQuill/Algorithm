@@ -9,18 +9,23 @@ import { bfsGrid } from './bfsGrid'
 import { bubbleSort } from './bubbleSort'
 import { dsu } from './dsu'
 import { graphDfs } from './graphDfs'
+import { graphStore } from './graphStore'
+import { hanoi } from './hanoi'
 import { hashTable } from './hashTable'
 import { heap } from './heap'
 import { insertionSort } from './insertionSort'
 import { josephusQueue } from './josephusQueue'
+import { kruskal } from './kruskal'
 import { lcs } from './lcs'
 import { linkedList } from './linkedList'
 import { mergeSort } from './mergeSort'
+import { nQueens } from './nQueens'
 import { prefixSum } from './prefixSum'
 import { quickSort } from './quickSort'
 import { selectionSort } from './selectionSort'
 import { segTree } from './segTree'
 import { sieve } from './sieve'
+import { topoSort } from './topoSort'
 import { treeTraversal } from './treeTraversal'
 import { trie } from './trie'
 import { twoPointers } from './twoPointers'
@@ -33,6 +38,7 @@ export const ALGOS: AnyAlgo[] = [
   hashTable,
   dsu,
   bit,
+  graphStore,
   bst,
   treeTraversal,
   heap,
@@ -51,6 +57,10 @@ export const ALGOS: AnyAlgo[] = [
   bfsGrid,
   graphDfs,
   dijkstra,
+  kruskal,
+  topoSort,
+  hanoi,
+  nQueens,
   lcs,
 ]
 

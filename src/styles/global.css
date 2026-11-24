@@ -1552,6 +1552,10 @@ kbd {
 .gr-edge.tone-swap {
   stroke-dasharray: 2 7;
 }
+.gr-edge.tone-dim,
+.gr-head.tone-dim {
+  opacity: 0.3;
+}
 .gr-head {
   fill: var(--pencil-soft);
 }
@@ -1606,6 +1610,61 @@ kbd {
   font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
+}
+.pegs {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  margin: 8px 0 6px;
+}
+.peg-col {
+  flex: 1;
+  max-width: 200px;
+}
+.peg {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 4px;
+  height: 180px;
+  padding-bottom: 5px;
+  border-bottom: 3px solid var(--pencil);
+}
+.peg::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--line-2);
+  transform: translateX(-50%);
+}
+.disk {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  height: 24px;
+  border: 2px solid var(--t-bd);
+  border-radius: 9px 6px 10px 6px / 6px 10px 6px 9px;
+  background-color: var(--t-bg);
+  background-image: repeating-linear-gradient(135deg, var(--t-hatch, transparent) 0 1.5px, transparent 1.5px 6px);
+  color: var(--t-fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.peg-name {
+  margin-top: 3px;
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
 }
 .hash {
   display: flex;
