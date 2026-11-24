@@ -1,20 +1,26 @@
 import type { AnyAlgo } from '../engine/types'
 import { binarySearch } from './binarySearch'
 import { bracketStack } from './bracketStack'
+import { bigAdd } from './bigAdd'
 import { bit } from './bit'
+import { bitClear } from './bitClear'
 import { bst } from './bst'
 import { diffArray } from './diffArray'
 import { dijkstra } from './dijkstra'
 import { bfsGrid } from './bfsGrid'
 import { bubbleSort } from './bubbleSort'
 import { dsu } from './dsu'
+import { gcd } from './gcd'
 import { graphDfs } from './graphDfs'
+import { greedy } from './greedy'
 import { graphStore } from './graphStore'
 import { hanoi } from './hanoi'
 import { hashTable } from './hashTable'
 import { heap } from './heap'
 import { insertionSort } from './insertionSort'
 import { josephusQueue } from './josephusQueue'
+import { kmp } from './kmp'
+import { knapsack } from './knapsack'
 import { kruskal } from './kruskal'
 import { lcs } from './lcs'
 import { linkedList } from './linkedList'
@@ -25,6 +31,7 @@ import { quickSort } from './quickSort'
 import { selectionSort } from './selectionSort'
 import { segTree } from './segTree'
 import { sieve } from './sieve'
+import { sparseTable } from './sparseTable'
 import { topoSort } from './topoSort'
 import { treeTraversal } from './treeTraversal'
 import { trie } from './trie'
@@ -44,6 +51,7 @@ export const ALGOS: AnyAlgo[] = [
   heap,
   trie,
   segTree,
+  sparseTable,
   bubbleSort,
   selectionSort,
   insertionSort,
@@ -61,7 +69,13 @@ export const ALGOS: AnyAlgo[] = [
   topoSort,
   hanoi,
   nQueens,
+  greedy,
+  knapsack,
   lcs,
+  gcd,
+  bitClear,
+  bigAdd,
+  kmp,
 ]
 
 export const findAlgo = (id: string | undefined) => ALGOS.find((a) => a.id === id)
