@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ALGOS } from '../algos'
+import { ALGOS, examplesOf } from '../algos'
 import { IconArrow } from '../components/icons'
 import { EASE_OUT } from '../motion'
 
@@ -16,7 +16,7 @@ export default function LabIndex() {
         <h1>
           <span className="mark">动画实验室</span>
         </h1>
-        <p>每个演示都可以自己输入数据，单步前进或后退，也可以拖动进度条；右侧的代码会同步高亮，并且能在四种语言之间切换。</p>
+        <p>每个专题里有几道不同类型的例题。先读题，再输入自己的数据，动画会一步步演示；右边的代码同步高亮，可以在 C、C++、Python、Java 之间切换。</p>
       </header>
 
       {groups.map((g) => (
@@ -29,6 +29,7 @@ export default function LabIndex() {
                   <span className="tag tag-kind">{a.kind}</span>
                   <h3>{a.title}</h3>
                   <p>{a.tagline}</p>
+                  {a.extra && a.extra.length > 0 && <p className="card-ex">例题：{examplesOf(a).map((e) => e.name).join('、')}</p>}
                   <div className="card-foot">
                     <span className="card-cx">时间 {a.complexity.time}</span>
                     <span className="card-go">
@@ -42,7 +43,7 @@ export default function LabIndex() {
         </section>
       ))}
 
-      <p className="more-note">更多数据结构与算法的动画会陆续加入，完整的学习计划见“开始学习”页面。</p>
+      <p className="more-note">更多专题和例题会陆续加入，完整的学习计划见“开始学习”页面。</p>
     </div>
   )
 }

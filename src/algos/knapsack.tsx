@@ -3,7 +3,9 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { lcs } from './lcs'
+import { dpLis } from './dpLis'
+import { randInt, readInput } from './shared'
 
 export interface KnapInput {
   w: number[]
@@ -96,47 +98,84 @@ function KnapView({ frame }: { frame: Frame<KnapState> }) {
 }
 
 function parse(text: string): ParseResult<KnapInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 3) return { ok: false, error: '格式是「各物品的重量 | 各物品的价值 | 背包容量」，例如：2 3 4 5 | 3 4 5 6 | 8' }
-  const w = toNums(parts[0])
-  const v = toNums(parts[1])
-  const c = toNums(parts[2])
-  if (w.length < 1 || w.length > 5 || w.length !== v.length) return { ok: false, error: '请写 1～5 件物品，重量和价值的个数要一样。' }
-  if (c.length !== 1 || !Number.isInteger(c[0]) || c[0] < 1 || c[0] > 10) return { ok: false, error: '背包容量请取 1～10。' }
-  if (w.some((x) => !Number.isInteger(x) || x < 1 || x > 10) || v.some((x) => !Number.isInteger(x) || x < 1 || x > 99)) return { ok: false, error: '重量取 1～10，价值取 1～99 的整数。' }
-  return { ok: true, value: { w, v, cap: c[0] } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 5)
+    const cap = r.int('W', 1, 10)
+    const w = r.ints(n, '重量', 1, 10)
+    const v = r.ints(n, '价值', 1, 99)
+    r.end()
+    return { w, v, cap }
+  })
 }
 
 export const knapsack: AlgoDef<KnapInput, KnapState> = {
-  id: 'knapsack',
-  title: '动态规划：0-1 背包',
-  tagline: '每件物品选或不选，用一张表记下“前 i 件物品、容量 j”时的最大价值',
+  id: 'dp',
+  title: '动态规划',
+  tagline: '把大问题拆成小问题，每个小问题只算一次，结果填进表格里反复使用',
   kind: '算法',
-  intro: [
+  slug: 'knapsack',
+  name: '0-1 背包',
+  type: '二维状态',
+  idea: [
     '背包问题是动态规划最经典的入门题：有若干件物品，每件有重量和价值，只有一个；背包有容量限制，要挑出一些放进去，使价值之和最大。“每件要么放要么不放”，所以叫 0-1 背包。如果逐个枚举所有的选法，n 件物品就有 2ⁿ 种，很快就算不动了。',
     '动态规划把问题拆小：设 dp[i][j] 为只考虑前 i 件物品、容量是 j 时的最大价值。对第 i 件物品只有两种可能：不选，价值和只考虑前 i-1 件、容量 j 时一样；选，就要先给它腾出空间，价值是前 i-1 件、容量 j-w 时的最大价值再加上它自己的价值。两者取较大的。把表从上到下、从左到右填满，右下角就是答案。',
+    '每个格子只依赖上一行的格子，所以可以把二维数组压缩成一维，内层循环从大到小倒着遍历，空间降到 O(W)。',
+    '要知道具体选了哪些物品，可以从 dp[n][W] 倒着看：如果它和上一行相等，就说明没选；否则选了，容量减去它的重量。',
+    '一维写法里内层循环必须倒着遍历（从 W 到 w），正着遍历会让同一件物品被重复选择，变成完全背包。',
+  ],
+  statement: {
+    desc: [
+      '有 n 件物品和一个容量为 W 的背包，第 i 件物品的重量是 w[i]、价值是 v[i]，每件物品最多选一次。选出一些物品放进背包，要求总重量不超过 W，求能得到的最大总价值。',
+    ],
+    input: [
+      '第一行两个整数 n 和 W（1 ≤ n ≤ 5，1 ≤ W ≤ 10）。',
+      '第二行 n 个整数，是各物品的重量（1～10）。',
+      '第三行 n 个整数，是各物品的价值（1～99）。',
+    ],
+    output: [
+      '一行一个整数，是能得到的最大总价值。',
+    ],
+  },
+  intro: [
+    '动态规划（DP）适合这样的问题：直接枚举所有方案，数量是指数级的，根本算不完；但是大问题可以拆成规模更小、形式相同的子问题，而且不同的方案会反复遇到同样的子问题。DP 先定义一个“状态”，用它表示一个子问题的答案，再找出大问题和小问题之间的关系，然后按从小到大的顺序，把每个子问题只算一次，结果记在表里反复使用。',
+    '写 DP 一般分四步：确定状态表示什么；写出转移方程，说明一个状态怎样由更小的状态得到；确定边界（最小的子问题的答案）和计算的顺序；最后看清答案在表里的哪个位置。下面的两道例题，一道状态是“前 i 件物品、容量 j”，另一道是“A 的前 i 个字符、B 的前 j 个字符”，都是二维的表，填表的方式也很相似。',
   ],
   points: [
-    '状态：dp[i][j]。第 0 行全是 0（没有物品可选）。转移：放不下时 dp[i][j]=dp[i-1][j]，放得下时取 max(dp[i-1][j], dp[i-1][j-w]+v)。',
-    '每个格子只依赖上一行的格子，所以可以把二维数组压缩成一维，内层循环从大到小倒着遍历，空间降到 O(W)。',
-    '这个算法的时间是 O(nW)，与容量 W 的数值大小有关，所以叫“伪多项式”，W 到十亿时就不能用了。',
-    '要知道具体选了哪些物品，可以从 dp[n][W] 倒着看：如果它和上一行相等，就说明没选；否则选了，容量减去它的重量。',
+    '状态要能完整地描述一个子问题，写代码之前先用一句话说清“dp[i][j] 表示什么”，后面的转移才不会乱。',
+    '转移方程说明一个状态怎样由更小的状态得到，常见的形式是在几种选择里取最大值、最小值，或者把几种情况相加。',
+    '计算的顺序要保证用到某个格子时，它依赖的格子都已经算好了。二维表通常按行从上到下、每行从左到右填。',
+    '如果每个格子只依赖上一行，可以只保留一行，把二维数组压缩成一维，空间从 O(nW) 降到 O(W)。',
+    '表里存的是最优值，要知道具体选了什么，需要从终点沿着“值来自哪里”倒着走一遍。',
   ],
   pitfalls: [
-    '一维写法里内层循环必须倒着遍历（从 W 到 w），正着遍历会让同一件物品被重复选择，变成完全背包。',
-    '放不下的情形不能漏掉，否则 j-w 会变成负数，数组越界。',
-    '容量和价值的类型要留意：价值总和可能超过 int 的范围，要用 long long。',
+    '状态没有定义清楚，转移时就会漏掉情况或者重复计算。',
+    '边界没有初始化，或者下标从 0 还是从 1 开始搞混，是越界和答案错误最常见的来源。',
+    '数据一大，二维表放不下，也算不完，要考虑压缩状态或者换思路；背包的容量到十亿时，这样的表是不能用的。',
   ],
   complexity: { time: 'O(nW)', space: 'O(nW)', note: '这里是二维表的空间；压缩成一维后只需要 O(W)。n 是物品数，W 是背包容量。' },
-  inputHint: '格式：各物品的重量 | 各物品的价值 | 背包容量，例如 2 3 4 5 | 3 4 5 6 | 8（最多 5 件物品，容量 1～10）。',
   presets: [
-    { label: '经典例子', text: '2 3 4 5 | 3 4 5 6 | 8' },
-    { label: '贪心会出错', text: '5 4 3 | 10 40 50 | 7' },
-    { label: '全都放得下', text: '1 2 3 | 5 6 7 | 10' },
+    { label: '经典例子', text: '4 8\n2 3 4 5\n3 4 5 6' },
+    { label: '贪心会出错', text: '3 7\n5 4 3\n10 40 50' },
+    { label: '全都放得下', text: '3 10\n1 2 3\n5 6 7' },
   ],
   defaultInput: { w: [2, 3, 4, 5], v: [3, 4, 5, 6], cap: 8 },
   parse,
-  format: (x) => `${x.w.join(' ')} | ${x.v.join(' ')} | ${x.cap}`,
+  format: (x) => `${x.w.length} ${x.cap}\n${x.w.join(' ')}\n${x.v.join(' ')}`,
+  answer: (x) => {
+    let best = 0
+    for (let mask = 0; mask < 1 << x.w.length; mask++) {
+      let sw = 0
+      let sv = 0
+      x.w.forEach((wi, i) => {
+        if ((mask >> i) & 1) {
+          sw += wi
+          sv += x.v[i]
+        }
+      })
+      if (sw <= x.cap) best = Math.max(best, sv)
+    }
+    return String(best)
+  },
   random: () => {
     const n = randInt(3, 5)
     return { w: Array.from({ length: n }, () => randInt(1, 6)), v: Array.from({ length: n }, () => randInt(2, 30)), cap: randInt(5, 10) }
@@ -146,8 +185,10 @@ export const knapsack: AlgoDef<KnapInput, KnapState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int n,W,w[15],v[15],dp[15][105];                //@init
-int max(int a,int b){ return a>b?a:b; }
+int n,W,w[15],v[15],dp[15][105];                                //@init
+int max(int a,int b){
+    return a>b?a:b;
+}
 int main(){
     scanf("%d %d",&n,&W);
     for (int i=1;i<=n;i++) scanf("%d",&w[i]);
@@ -155,20 +196,20 @@ int main(){
     for (int i=1;i<=n;i++){
         for (int j=0;j<=W;j++){
             if (w[i]>j){
-                dp[i][j]=dp[i-1][j];            //@tooHeavy
+                dp[i][j]=dp[i-1][j];                            //@tooHeavy
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);   //@choose
+                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  //@choose
             }
         }
     }
-    printf("%d\n",dp[n][W]);                    //@done
+    printf("%d\n",dp[n][W]);                                    //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int n,W,w[15],v[15],dp[15][105];                //@init
+int n,W,w[15],v[15],dp[15][105];                                //@init
 int main(){
     cin>>n>>W;
     for (int i=1;i<=n;i++) cin>>w[i];
@@ -176,53 +217,54 @@ int main(){
     for (int i=1;i<=n;i++){
         for (int j=0;j<=W;j++){
             if (w[i]>j){
-                dp[i][j]=dp[i-1][j];            //@tooHeavy
+                dp[i][j]=dp[i-1][j];                            //@tooHeavy
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);   //@choose
+                dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  //@choose
             }
         }
     }
-    cout<<dp[n][W]<<endl;                       //@done
+    cout<<dp[n][W]<<endl;                                       //@done
     return 0;
 }
 `,
     python: String.raw`
-n, W = map(int, input().split())
-w = [0] + list(map(int, input().split()))
-v = [0] + list(map(int, input().split()))
-dp = [[0] * (W + 1) for _ in range(n + 1)]      #@init
-for i in range(1, n + 1):
-    for j in range(W + 1):
-        if w[i] > j:
-            dp[i][j] = dp[i - 1][j]             #@tooHeavy
+n,W=map(int,input().split())
+w=[0]+list(map(int,input().split()))
+v=[0]+list(map(int,input().split()))
+dp=[[0]*(W+1) for _ in range(n+1)]                         #@init
+for i in range(1,n+1):
+    for j in range(W+1):
+        if w[i]>j:
+            dp[i][j]=dp[i-1][j]                            #@tooHeavy
         else:
-            dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - w[i]] + v[i])   #@choose
-print(dp[n][W])                                 #@done
+            dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i])  #@choose
+print(dp[n][W])                                            #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), W = sc.nextInt();
-        int[] w = new int[n + 1], v = new int[n + 1];
-        for (int i = 1; i <= n; i++) w[i] = sc.nextInt();
-        for (int i = 1; i <= n; i++) v[i] = sc.nextInt();
-        int[][] dp = new int[n + 1][W + 1];         //@init
-        for (int i = 1; i <= n; i++) {
-            for (int j = 0; j <= W; j++) {
-                if (w[i] > j) {
-                    dp[i][j] = dp[i - 1][j];        //@tooHeavy
-                } else {
-                    dp[i][j] = Math.max(dp[i - 1][j], dp[i - 1][j - w[i]] + v[i]);   //@choose
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),W=sc.nextInt();
+        int[] w=new int[n+1],v=new int[n+1];
+        for (int i=1;i<=n;i++) w[i]=sc.nextInt();
+        for (int i=1;i<=n;i++) v[i]=sc.nextInt();
+        int[][] dp=new int[n+1][W+1];                           //@init
+        for (int i=1;i<=n;i++){
+            for (int j=0;j<=W;j++){
+                if (w[i]>j){
+                    dp[i][j]=dp[i-1][j];                        //@tooHeavy
+                }else{
+                    dp[i][j]=Math.max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]);  //@choose
                 }
             }
         }
-        System.out.println(dp[n][W]);               //@done
+        System.out.println(dp[n][W]);                           //@done
     }
 }
 `,
   },
   problems: pickProblems('P1048', 'P1060'),
+  extra: [lcs, dpLis],
 }

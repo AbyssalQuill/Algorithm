@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame } from '../engine/types'
-import { parseList, randList } from './shared'
+import { arrayInput, randList } from './shared'
 
 export interface InsState {
   cells: { id: number; v: number }[]
@@ -81,6 +81,21 @@ export const insertionSort: AlgoDef<number[], InsState> = {
   title: '插入排序',
   tagline: '像整理手里的扑克牌一样，每次把新的一张插进前面已经排好的部分',
   kind: '算法',
+  slug: 'sort',
+  name: '从小到大排序',
+  type: '排序',
+  statement: {
+    desc: [
+      '给定 n 个整数，用插入排序把它们从小到大排好序，输出排序之后的结果。演示里可以看到每个数是怎样一步步挪到合适位置的。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 14）。',
+      '第二行 n 个整数，每个在 1～99 之间，可以有相同的数。',
+    ],
+    output: [
+      '一行 n 个整数，从小到大排列，用空格隔开。',
+    ],
+  },
   intro: [
     '打牌时整理手牌，大多数人的做法是这样的：左手拿着已经排好的牌，右手每抽到一张新牌，就从右往左找到它该在的位置，插进去。插入排序做的正是这件事。',
     '数组的前 i 个数始终保持有序。处理第 i 个数时，把它与左边相邻的数比较，只要左边的更大，就交换一次，让它再向左挪一格；遇到不比它大的数，或者已经到了最左边，就停下来。重复这个过程，直到最后一个数也插了进去。',
@@ -97,31 +112,30 @@ export const insertionSort: AlgoDef<number[], InsState> = {
     '在 n 很大时它同样是 O(n²)，数据量上万就应该改用 sort 或者归并、快速排序。',
   ],
   complexity: { time: 'O(n²)', space: 'O(1)', note: '数据已经有序时，每个数只比较一次，所以最好情况是 O(n)；完全倒序时最慢。' },
-  inputHint: '输入 2～14 个 1～99 的整数，空格隔开，回车或点“应用”。',
   presets: [
-    { label: '已经有序', text: '1 2 3 4 5 6 7 8' },
-    { label: '完全倒序', text: '9 8 7 6 5 4 3 2' },
-    { label: '有重复数', text: '4 2 4 1 3 2' },
+    { label: '已经有序', text: '8\n1 2 3 4 5 6 7 8' },
+    { label: '完全倒序', text: '8\n9 8 7 6 5 4 3 2' },
+    { label: '有重复数', text: '6\n4 2 4 1 3 2' },
   ],
   defaultInput: [5, 3, 8, 1, 9, 2, 7],
-  parse: (t) => parseList(t, { min: 2, max: 14, lo: 1, hi: 99 }),
-  format: (v) => v.join(' '),
+  ...arrayInput({ min: 2, max: 14, lo: 1, hi: 99 }),
+  answer: (v) => [...v].sort((a, b) => a - b).join(' '),
   random: () => randList(8),
   run: runInsertionSort,
   View: InsView,
   sources: {
     c: String.raw`
 #include <stdio.h>
-void insertionSort(int a[],int n){              //@init
-    for (int i=1;i<n;i++){                      //@pick
-        int j=i;                                //@pick
-        while (j>0 && a[j-1]>a[j]){             //@cmp
-            int t=a[j-1];                       //@swap
-            a[j-1]=a[j];                        //@swap
-            a[j]=t;                             //@swap
-            j--;                                //@swap
+void insertionSort(int a[],int n){             //@init
+    for (int i=1;i<n;i++){                     //@pick
+        int j=i;                               //@pick
+        while (j>0 && a[j-1]>a[j]){            //@cmp
+            int t=a[j-1];                      //@swap
+            a[j-1]=a[j];                       //@swap
+            a[j]=t;                            //@swap
+            j--;                               //@swap
         }
-        // 此时 a[0..i] 已经有序                //@place
+        // 此时 a[0..i] 已经有序                     //@place
     }
 }
 int main(){
@@ -129,21 +143,21 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     insertionSort(a,n);
-    for (int i=0;i<n;i++) printf("%d ",a[i]);   //@done
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-void insertionSort(int a[],int n){              //@init
-    for (int i=1;i<n;i++){                      //@pick
-        int j=i;                                //@pick
-        while (j>0 && a[j-1]>a[j]){             //@cmp
-            swap(a[j-1],a[j]);                  //@swap
-            j--;                                //@swap
+void insertionSort(int a[],int n){          //@init
+    for (int i=1;i<n;i++){                  //@pick
+        int j=i;                            //@pick
+        while (j>0 && a[j-1]>a[j]){         //@cmp
+            swap(a[j-1],a[j]);              //@swap
+            j--;                            //@swap
         }
-        // 此时 a[0..i] 已经有序                //@place
+        // 此时 a[0..i] 已经有序                  //@place
     }
 }
 int main(){
@@ -151,50 +165,49 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     insertionSort(a,n);
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";      //@done
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
     return 0;
 }
 `,
     python: String.raw`
-def insertion_sort(a):                          #@init
-    for i in range(1, len(a)):                  #@pick
-        j = i                                   #@pick
-        while j > 0 and a[j - 1] > a[j]:        #@cmp
-            a[j - 1], a[j] = a[j], a[j - 1]     #@swap
-            j -= 1                              #@swap
-        # 此时 a[0..i] 已经有序                 #@place
+def insertion_sort(a):                      #@init
+    for i in range(1,len(a)):               #@pick
+        j=i                                 #@pick
+        while j>0 and a[j-1]>a[j]:          #@cmp
+            a[j-1],a[j]=a[j],a[j-1]         #@swap
+            j-=1                            #@swap
+        # 此时 a[0..i] 已经有序                   #@place
 
-
-n = int(input())
-a = list(map(int, input().split()))
+n=int(input())
+a=list(map(int,input().split()))
 insertion_sort(a)
-print(*a)                                       #@done
+print(*a)                                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static void insertionSort(int[] a) {            //@init
-        int n = a.length;
-        for (int i = 1; i < n; i++) {               //@pick
-            int j = i;                              //@pick
-            while (j > 0 && a[j - 1] > a[j]) {      //@cmp
-                int t = a[j - 1];                   //@swap
-                a[j - 1] = a[j];                    //@swap
-                a[j] = t;                           //@swap
-                j--;                                //@swap
+public class Main{
+    static void insertionSort(int[] a){         //@init
+        int n=a.length;
+        for (int i=1;i<n;i++){                  //@pick
+            int j=i;                            //@pick
+            while (j>0&&a[j-1]>a[j]){           //@cmp
+                int t=a[j-1];                   //@swap
+                a[j-1]=a[j];                    //@swap
+                a[j]=t;                         //@swap
+                j--;                            //@swap
             }
-            // 此时 a[0..i] 已经有序                //@place
+            // 此时 a[0..i] 已经有序                  //@place
         }
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
         insertionSort(a);
-        for (int x : a) System.out.print(x + " ");  //@done
+        for (int x:a) System.out.print(x+" ");  //@done
     }
 }
 `,

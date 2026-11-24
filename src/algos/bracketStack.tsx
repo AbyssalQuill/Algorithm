@@ -4,6 +4,7 @@ import { pickProblems } from '../data/problems'
 import { useWidth } from '../hooks'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
+import { readInput } from './shared'
 
 interface Item extends StackItem {
   idx: number
@@ -150,10 +151,11 @@ function BrView({ frame }: { frame: Frame<BrState> }) {
 }
 
 function parse(text: string): ParseResult<string> {
-  const s = text.trim()
-  if (!/^[()[\]{}]+$/.test(s)) return { ok: false, error: '只能输入 ( ) [ ] { } 这六种括号。' }
-  if (s.length > 16) return { ok: false, error: '演示最多支持 16 个字符。' }
-  return { ok: true, value: s }
+  return readInput(text, (r) => {
+    const s = r.word('括号串', /^[()[\]{}]{1,16}$/, '只能由 ( ) [ ] { } 组成，长度 1～16')
+    r.end()
+    return s
+  })
 }
 
 function randomBalanced(pairsN: number): string {
@@ -178,9 +180,23 @@ function randomBalanced(pairsN: number): string {
 
 export const bracketStack: AlgoDef<string, BrState> = {
   id: 'bracket-stack',
-  title: '栈：括号匹配',
+  title: '栈',
   tagline: '栈遵循“后进先出”的规则，最适合用来检查括号是否成对',
   kind: '数据结构',
+  slug: 'brackets',
+  name: '括号匹配',
+  type: '后进先出',
+  statement: {
+    desc: [
+      '给定一个只包含 ( ) [ ] { } 六种括号的字符串，判断其中的括号是否合法：每个左括号都要被同类型的右括号闭合，并且括号必须按正确的顺序闭合。例如 ([]) 是合法的，而 ([)] 不合法。',
+    ],
+    input: [
+      '一行，一个只含 ( ) [ ] { } 的字符串，长度 1～16。',
+    ],
+    output: [
+      '一行。括号合法输出 YES，不合法输出 NO。',
+    ],
+  },
   intro: [
     '栈是一种“后进先出”（LIFO）的数据结构，就像叠在一起的一摞盘子：新盘子只能放在最上面，取的时候也只能先取最上面的一个。对应的两个基本操作叫作入栈（push）和出栈（pop）。',
     '括号匹配是栈最典型的应用。遇到左括号，先把它放进栈里等待；遇到右括号，就看栈顶的左括号是否与它成对，成对就取出，不成对则匹配失败。整个字符串读完时，如果栈恰好是空的，说明每个括号都找到了自己的另一半。',
@@ -197,7 +213,6 @@ export const bracketStack: AlgoDef<string, BrState> = {
     'Java 里实现栈，更推荐使用 ArrayDeque 的 push、pop 和 isEmpty，而不是历史遗留的 Stack 类。',
   ],
   complexity: { time: 'O(n)', space: 'O(n)' },
-  inputHint: '输入由 ( ) [ ] { } 组成的字符串（最多 16 个字符）。',
   presets: [
     { label: '完整匹配', text: '{[()]}()' },
     { label: '顺序交叉', text: '([)]' },
@@ -206,7 +221,16 @@ export const bracketStack: AlgoDef<string, BrState> = {
   ],
   defaultInput: '{[()]}()',
   parse,
-  format: (v) => v,
+  format: (s) => s,
+  answer: (s) => {
+    const st: string[] = []
+    const pair: Record<string, string> = { ')': '(', ']': '[', '}': '{' }
+    for (const c of s) {
+      if ('([{'.includes(c)) st.push(c)
+      else if (st.pop() !== pair[c]) return 'NO'
+    }
+    return st.length === 0 ? 'YES' : 'NO'
+  },
   random: () => {
     const base = randomBalanced(3 + Math.floor(Math.random() * 3))
     if (Math.random() < 0.5) return base
@@ -222,18 +246,18 @@ export const bracketStack: AlgoDef<string, BrState> = {
 #include <stdio.h>
 char st[1005];
 int check(char s[]){
-    int top=0;                                   //@init
-    for (int i=0;s[i];i++){                      //@read
-        char c=s[i];                             //@read
-        if (c=='('||c=='['||c=='{'){             //@push
-            st[top++]=c;                         //@push
+    int top=0;                                                  //@init
+    for (int i=0;s[i];i++){                                     //@read
+        char c=s[i];                                            //@read
+        if (c=='('||c=='['||c=='{'){                            //@push
+            st[top++]=c;                                        //@push
         }else{
-            if (top==0) return 0;                //@emptyFail
-            char t=st[--top];                    //@pop
-            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return 0;   //@match
+            if (top==0) return 0;                               //@emptyFail
+            char t=st[--top];                                   //@pop
+            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return 0;  //@match
         }
     }
-    return top==0;                               //@final
+    return top==0;                                              //@final
 }
 int main(){
     char s[1005];
@@ -246,18 +270,18 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 bool check(string s){
-    stack<char> st;                              //@init
-    for (char c:s){                              //@read
-        if (c=='('||c=='['||c=='{'){             //@push
-            st.push(c);                          //@push
+    stack<char> st;                                             //@init
+    for (char c:s){                                             //@read
+        if (c=='('||c=='['||c=='{'){                            //@push
+            st.push(c);                                         //@push
         }else{
-            if (st.empty()) return false;        //@emptyFail
-            char t=st.top();                     //@pop
-            st.pop();                            //@pop
-            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;   //@match
+            if (st.empty()) return false;                       //@emptyFail
+            char t=st.top();                                    //@pop
+            st.pop();                                           //@pop
+            if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;  //@match
         }
     }
-    return st.empty();                           //@final
+    return st.empty();                                          //@final
 }
 int main(){
     string s;
@@ -268,45 +292,44 @@ int main(){
 `,
     python: String.raw`
 def check(s):
-    st = []                                      #@init
-    pair = {')': '(', ']': '[', '}': '{'}
-    for c in s:                                  #@read
-        if c in '([{':                           #@push
-            st.append(c)                         #@push
+    st=[]                                   #@init
+    pair={')': '(',']': '[','}': '{'}
+    for c in s:                             #@read
+        if c in '([{':                      #@push
+            st.append(c)                    #@push
         else:
-            if not st:                           #@emptyFail
-                return False                     #@emptyFail
-            t = st.pop()                         #@pop
-            if pair[c] != t:                     #@match
-                return False                     #@match
-    return not st                                #@final
+            if not st:                      #@emptyFail
+                return False                #@emptyFail
+            t=st.pop()                      #@pop
+            if pair[c]!=t:                  #@match
+                return False                #@match
+    return not st                           #@final
 
-
-s = input().strip()
+s=input().strip()
 print("YES" if check(s) else "NO")
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static boolean check(String s) {
-        Deque<Character> st = new ArrayDeque<>();        //@init
-        for (char c : s.toCharArray()) {                 //@read
-            if (c == '(' || c == '[' || c == '{') {      //@push
-                st.push(c);                              //@push
-            } else {
-                if (st.isEmpty()) return false;          //@emptyFail
-                char t = st.pop();                       //@pop
-                if ((c == ')' && t != '(') || (c == ']' && t != '[') || (c == '}' && t != '{')) return false;   //@match
+public class Main{
+    static boolean check(String s){
+        Deque<Character> st=new ArrayDeque<>();                 //@init
+        for (char c:s.toCharArray()){                           //@read
+            if (c=='('||c=='['||c=='{'){                        //@push
+                st.push(c);                                     //@push
+            }else{
+                if (st.isEmpty()) return false;                 //@emptyFail
+                char t=st.pop();                                //@pop
+                if ((c==')'&&t!='(')||(c==']'&&t!='[')||(c=='}'&&t!='{')) return false;  //@match
             }
         }
-        return st.isEmpty();                             //@final
+        return st.isEmpty();                                    //@final
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String s = sc.next();
-        System.out.println(check(s) ? "YES" : "NO");
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        String s=sc.next();
+        System.out.println(check(s)?"YES":"NO");
     }
 }
 `,

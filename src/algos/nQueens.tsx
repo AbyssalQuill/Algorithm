@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { toNums } from './shared'
+import { readInput } from './shared'
 
 export interface QueensState {
   n: number
@@ -112,16 +112,32 @@ function QueensView({ frame }: { frame: Frame<QueensState> }) {
 }
 
 function parse(text: string): ParseResult<number> {
-  const v = toNums(text)
-  if (v.length !== 1 || !Number.isInteger(v[0]) || v[0] < 4 || v[0] > 6) return { ok: false, error: '棋盘大小请取 4～6（再大动画步骤就太多了）。' }
-  return { ok: true, value: v[0] }
+  return readInput(text, (r) => {
+    const n = r.int('n', 4, 6)
+    r.end()
+    return n
+  })
 }
 
 export const nQueens: AlgoDef<number, QueensState> = {
   id: 'n-queens',
-  title: '回溯：N 皇后',
-  tagline: '一行一行地试着放，放不下去就退回一步换个位置',
+  title: '回溯',
+  tagline: '一行一行地试着放，放不下去就退回一步换个位置，试遍所有可能',
   kind: '算法',
+  slug: 'queens',
+  name: 'N 皇后',
+  type: '逐行试探',
+  statement: {
+    desc: [
+      '在 n×n 的棋盘上放 n 个皇后，使得任意两个皇后都不在同一行、同一列，也不在同一条斜线上（皇后可以攻击这三个方向上的棋子）。求一共有多少种不同的放法。',
+    ],
+    input: [
+      '一行一个整数 n（4 ≤ n ≤ 6）。',
+    ],
+    output: [
+      '一行一个整数，是放法的总数。',
+    ],
+  },
   intro: [
     '回溯是一种“试错”的搜索方法：沿着一条路往下做选择，一旦发现走不通，就撤销上一步的选择，退回来换一个选择继续试。它像是在走迷宫，遇到死路就原路返回。N 皇后是它最经典的例子：在 N×N 的棋盘上放 N 个皇后，要求任意两个皇后不能互相攻击，也就是不在同一行、同一列或者同一条斜线上。',
     '既然每一行恰好要放一个皇后，就逐行处理：对第 r 行，依次尝试每一个列，如果和之前放的皇后不冲突，就放下去，再递归地处理第 r+1 行；递归返回之后，把这个皇后拿走（这就是回溯），继续试下一个列。放满 N 行就记下一个解。',
@@ -138,7 +154,6 @@ export const nQueens: AlgoDef<number, QueensState> = {
     '回溯的时间随着规模爆炸式增长，N 到十几时已经很慢，需要用位运算等办法优化。',
   ],
   complexity: { time: 'O(N!)', space: 'O(N)', note: '最坏情况是 N 的阶乘量级，剪枝之后实际要小得多。空间只有递归的深度和 col 数组。' },
-  inputHint: '输入棋盘的大小 N（4～6）。N 越大，回溯的步骤越多。',
   presets: [
     { label: '4 皇后', text: '4' },
     { label: '5 皇后', text: '5' },
@@ -147,6 +162,25 @@ export const nQueens: AlgoDef<number, QueensState> = {
   defaultInput: 4,
   parse,
   format: (v) => String(v),
+  answer: (n) => {
+    const col: number[] = []
+    let cnt = 0
+    const ok = (r: number, c: number) => col.every((cc, rr) => cc !== c && Math.abs(cc - c) !== r - rr)
+    const dfs = (r: number) => {
+      if (r === n) {
+        cnt++
+        return
+      }
+      for (let c = 0; c < n; c++) {
+        if (!ok(r, c)) continue
+        col.push(c)
+        dfs(r + 1)
+        col.pop()
+      }
+    }
+    dfs(0)
+    return String(cnt)
+  },
   random: () => 4 + Math.floor(Math.random() * 3),
   run: runQueens,
   View: QueensView,
@@ -161,18 +195,21 @@ int ok(int r,int c){
     return 1;
 }
 void dfs(int r){
-    if (r==n){ cnt++; return; }                 //@solution
+    if (r==n){                              //@solution
+        cnt++;                              //@solution
+        return;                             //@solution
+    }                                       //@solution
     for (int c=0;c<n;c++){
-        if (!ok(r,c)) continue;                 //@conflict
-        col[r]=c;                               //@place
+        if (!ok(r,c)) continue;             //@conflict
+        col[r]=c;                           //@place
         dfs(r+1);
-        // 撤销这一行的选择，试下一列             //@back
+        // 撤销这一行的选择，试下一列                    //@back
     }
 }
 int main(){
     scanf("%d",&n);
-    dfs(0);                                     //@init
-    printf("%d\n",cnt);                         //@done
+    dfs(0);                                 //@init
+    printf("%d\n",cnt);                     //@done
     return 0;
 }
 `,
@@ -186,72 +223,76 @@ bool ok(int r,int c){
     return true;
 }
 void dfs(int r){
-    if (r==n){ cnt++; return; }                 //@solution
+    if (r==n){                              //@solution
+        cnt++;                              //@solution
+        return;                             //@solution
+    }                                       //@solution
     for (int c=0;c<n;c++){
-        if (!ok(r,c)) continue;                 //@conflict
-        col[r]=c;                               //@place
+        if (!ok(r,c)) continue;             //@conflict
+        col[r]=c;                           //@place
         dfs(r+1);
-        // 撤销这一行的选择，试下一列             //@back
+        // 撤销这一行的选择，试下一列                    //@back
     }
 }
 int main(){
     cin>>n;
-    dfs(0);                                     //@init
-    cout<<cnt<<endl;                            //@done
+    dfs(0);                                 //@init
+    cout<<cnt<<endl;                        //@done
     return 0;
 }
 `,
     python: String.raw`
-def ok(r, c):
-    return all(col[i] != c and abs(col[i] - c) != r - i for i in range(r))
-
+def ok(r,c):
+    return all(col[i]!=c and abs(col[i]-c)!=r-i for i in range(r))
 
 def dfs(r):
     global cnt
-    if r == n:
-        cnt += 1                                #@solution
+    if r==n:
+        cnt+=1                              #@solution
         return
     for c in range(n):
-        if not ok(r, c):
-            continue                            #@conflict
-        col[r] = c                              #@place
-        dfs(r + 1)
-        # 撤销这一行的选择，试下一列             #@back
+        if not ok(r,c):
+            continue                        #@conflict
+        col[r]=c                            #@place
+        dfs(r+1)
+        # 撤销这一行的选择，试下一列                     #@back
 
-
-n = int(input())
-cnt = 0
-col = [0] * n
-dfs(0)                                          #@init
-print(cnt)                                      #@done
+n=int(input())
+cnt=0
+col=[0]*n
+dfs(0)                                      #@init
+print(cnt)                                  #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int n, cnt = 0;
-    static int[] col = new int[15];
+public class Main{
+    static int n,cnt=0;
+    static int[] col=new int[15];
 
-    static boolean ok(int r, int c) {
-        for (int i = 0; i < r; i++)
-            if (col[i] == c || Math.abs(col[i] - c) == r - i) return false;
+    static boolean ok(int r,int c){
+        for (int i=0;i<r;i++)
+            if (col[i]==c||Math.abs(col[i]-c)==r-i) return false;
         return true;
     }
 
-    static void dfs(int r) {
-        if (r == n) { cnt++; return; }              //@solution
-        for (int c = 0; c < n; c++) {
-            if (!ok(r, c)) continue;                //@conflict
-            col[r] = c;                             //@place
-            dfs(r + 1);
-            // 撤销这一行的选择，试下一列           //@back
+    static void dfs(int r){
+        if (r==n){                          //@solution
+            cnt++;                          //@solution
+            return;                         //@solution
+        }                                   //@solution
+        for (int c=0;c<n;c++){
+            if (!ok(r,c)) continue;         //@conflict
+            col[r]=c;                       //@place
+            dfs(r+1);
+            // 撤销这一行的选择，试下一列                //@back
         }
     }
 
-    public static void main(String[] args) {
-        n = new Scanner(System.in).nextInt();
-        dfs(0);                                     //@init
-        System.out.println(cnt);                    //@done
+    public static void main(String[] args){
+        n=new Scanner(System.in).nextInt();
+        dfs(0);                             //@init
+        System.out.println(cnt);            //@done
     }
 }
 `,

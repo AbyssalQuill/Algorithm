@@ -215,7 +215,7 @@ input {
    ===================================================================== */
 :is(.card, .step, .mini-stage, .stage-card, .prob, .learn-card, .hero-stage, .stage, .lab-nav-a,
   .note, .player, .btn, .chip, .field, .stat, .tag, .pill, .topic, .verdict, .target-chip, .held, .cx span,
-  .p-btn, .theme-btn, .eyebrow, .step-no, .stack-item, .av-ptr span) {
+  .p-btn, .theme-btn, .eyebrow, .step-no, .stack-item, .av-ptr span, .problem, .ex-tab, .tile) {
   position: relative;
   isolation: isolate;
   --sk-r: 14px 9px 16px 8px / 9px 15px 8px 14px;
@@ -226,7 +226,7 @@ input {
 }
 :is(.card, .step, .mini-stage, .stage-card, .prob, .learn-card, .hero-stage, .stage, .lab-nav-a, .note, .player,
   .btn, .chip, .field, .stat, .tag, .pill, .topic, .verdict, .target-chip, .held, .cx span, .p-btn, .theme-btn,
-  .eyebrow, .step-no, .stack-item, .av-ptr span, .av-cell, .char)::after {
+  .eyebrow, .step-no, .stack-item, .av-ptr span, .av-cell, .char, .problem, .ex-tab, .tile)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -238,7 +238,7 @@ input {
   filter: url(#pencil-a);
   transition: background-color 0.25s, border-color 0.25s;
 }
-:is(.card, .step, .mini-stage, .stage-card, .prob, .learn-card, .hero-stage, .stage, .lab-nav-a)::before {
+:is(.card, .step, .mini-stage, .stage-card, .prob, .learn-card, .hero-stage, .stage, .lab-nav-a, .problem)::before {
   content: '';
   position: absolute;
   inset: 7px -7px -7px 7px;
@@ -1008,8 +1008,278 @@ input {
 .field:focus-within {
   --sk-bd: var(--blue);
 }
-.field:has(input[aria-invalid='true']) {
+.field:has(input[aria-invalid='true']),
+.field:has(textarea[aria-invalid='true']) {
   --sk-bd: var(--red);
+}
+.field textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.4em;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  resize: vertical;
+}
+.field textarea:focus {
+  outline: none;
+}
+
+/* ---------- 例题切换 ---------- */
+.ex-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px 14px;
+  margin: 0 0 28px;
+}
+.ex-tabs-label {
+  align-self: center;
+  margin-right: 2px;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.ex-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 20px 7px 12px;
+  color: var(--ink-2);
+  transition: transform 0.15s, color 0.2s;
+  --sk-bg: color-mix(in srgb, var(--paper) 90%, transparent);
+  --sk-bd: var(--pencil-soft);
+}
+.ex-tab b {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--yellow-soft);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.ex-tab span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+.ex-tab strong {
+  font-size: 0.98rem;
+}
+.ex-tab i {
+  color: var(--ink-3);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+.ex-tab:hover {
+  color: var(--blue-ink);
+  transform: translate(-1px, -2px) rotate(-0.6deg);
+  --sk-bd: var(--blue);
+}
+.ex-tab.on {
+  color: var(--ink);
+  --sk-bg: var(--blue-soft);
+  --sk-bd: var(--blue);
+}
+.ex-tab.on b {
+  background: var(--blue);
+  color: var(--on-blue);
+}
+
+/* ---------- 首页的专题列表 ---------- */
+.tiles-group + .tiles-group {
+  margin-top: 26px;
+}
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  margin-top: 12px;
+}
+.tile {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 18px;
+  font-weight: 700;
+  transition: transform 0.15s, color 0.2s;
+  --sk-bg: var(--face);
+  --sk-bd: var(--pencil-soft);
+}
+.tile small {
+  color: var(--ink-3);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+.tile:hover {
+  color: var(--blue-ink);
+  transform: translate(-1px, -2px) rotate(-0.8deg);
+  --sk-bg: var(--blue-soft);
+  --sk-bd: var(--blue);
+}
+.tiles-more {
+  margin-top: 28px;
+}
+.card-ex {
+  margin-top: 8px;
+  color: var(--ink-3);
+  font-size: 0.88rem;
+}
+
+/* ---------- 二分答案：候选范围的刻度条 ---------- */
+.rng {
+  position: relative;
+  height: 18px;
+  border: 2px solid var(--pencil-soft);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+}
+.rng-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 7px;
+  background: var(--blue-soft);
+  box-shadow: inset 0 0 0 2px var(--blue);
+  transition: left 0.3s, width 0.3s;
+}
+.rng-mid {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--yellow-edge);
+  transition: left 0.3s;
+}
+
+/* ---------- 题目卡片 ---------- */
+.problem {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px 40px;
+  margin-bottom: 40px;
+  padding: 26px 32px 30px;
+  --sk-r: 17px 9px 19px 10px / 10px 18px 9px 16px;
+}
+.problem-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+.problem-head h2 {
+  font-size: 1.5rem;
+}
+.ex-no {
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--on-blue);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.problem-desc {
+  color: var(--ink);
+  line-height: 1.9;
+}
+.problem-desc + .problem-desc {
+  margin-top: 0.55em;
+}
+.fmt {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+.fmt h3 {
+  margin-bottom: 6px;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+.fmt p {
+  color: var(--ink-2);
+  font-size: 0.94rem;
+  line-height: 1.75;
+}
+.fmt p + p {
+  margin-top: 0.3em;
+}
+.problem-io {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.problem-io label,
+.io-label {
+  color: var(--ink-2);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.problem-io label small {
+  margin-left: 6px;
+  color: var(--ink-3);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+.io-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.io-actions .chips {
+  margin: 0 0 0 6px;
+}
+.problem-io .hint {
+  margin: 0;
+}
+.field-out pre {
+  min-height: 2.9em;
+  margin: 0;
+  padding: 10px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.field-out {
+  --sk-bg: var(--face);
+}
+.io-empty {
+  color: var(--ink-3);
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+.lab-left .stage {
+  margin-top: 0;
+}
+.learn-idea {
+  grid-column: 1 / -1;
+}
+@media (max-width: 1000px) {
+  .problem {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .problem {
+    padding: 20px 18px 24px;
+  }
+  .ex-tab {
+    flex: 1 1 100%;
+  }
 }
 .chips {
   display: flex;
@@ -2355,4 +2625,19 @@ kbd {
 .mm-wrap {
   touch-action: pan-x pan-y;
   overscroll-behavior-x: contain;
+}
+
+/* 窄屏：语言标签和“复制”按钮要挤得进同一行 */
+@media (max-width: 480px) {
+  .code-head {
+    gap: 6px;
+    padding: 10px;
+  }
+  .code-tab {
+    padding: 4px 11px;
+    font-size: 0.92rem;
+  }
+  .code-copy {
+    padding: 3px 9px;
+  }
 }

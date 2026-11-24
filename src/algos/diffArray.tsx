@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface Op {
   l: number
@@ -114,23 +114,20 @@ function DiffView({ frame }: { frame: Frame<DiffState> }) {
 }
 
 function parse(text: string): ParseResult<DiffInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「数组 | l r k ; l r k」，例如：1 2 3 4 5 6 | 2 4 10 ; 3 6 -5' }
-  const arr = toNums(parts[0])
-  if (arr.length < 2 || arr.length > 8) return { ok: false, error: '数组里请放 2～8 个整数。' }
-  if (arr.some((x) => !Number.isInteger(x) || x < -99 || x > 99)) return { ok: false, error: '数组里的数是 -99～99 的整数。' }
-  const groups = parts[1].split(/[;；]/).map((g) => g.trim()).filter(Boolean)
-  if (groups.length < 1 || groups.length > 4) return { ok: false, error: '请写 1～4 次操作，每次操作写成“l r k”，用分号隔开。' }
-  const ops: Op[] = []
-  for (const g of groups) {
-    const v = toNums(g)
-    if (v.length !== 3 || v.some((x) => !Number.isInteger(x))) return { ok: false, error: `“${g}”不是“l r k”这样的三个整数。` }
-    const [l, r, k] = v
-    if (l < 1 || r > arr.length || l > r) return { ok: false, error: `区间要满足 1 ≤ l ≤ r ≤ ${arr.length}。` }
-    if (Math.abs(k) > 99) return { ok: false, error: '加的数 k 请取 -99～99。' }
-    ops.push({ l, r, k })
-  }
-  return { ok: true, value: { arr, ops } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 2, 8)
+    const arr = r.ints(n, '数', -99, 99)
+    const m = r.int('m', 1, 4)
+    const ops: Op[] = []
+    for (let t = 1; t <= m; t++) {
+      const l = r.int(`第 ${t} 次操作的 l`, 1, n)
+      const rr = r.int(`第 ${t} 次操作的 r`, l, n)
+      const k = r.int(`第 ${t} 次操作的 k`, -99, 99)
+      ops.push({ l, r: rr, k })
+    }
+    r.end()
+    return { arr, ops }
+  })
 }
 
 export const diffArray: AlgoDef<DiffInput, DiffState> = {
@@ -138,6 +135,21 @@ export const diffArray: AlgoDef<DiffInput, DiffState> = {
   title: '差分',
   tagline: '把“给一段区间都加上 k”变成“只改两个位置”，最后一次性还原',
   kind: '算法',
+  slug: 'range-add',
+  name: '区间加法',
+  type: '一维差分',
+  statement: {
+    desc: [
+      '给定一个长度为 n 的数组，依次执行 m 次操作，每次操作把下标 l 到 r（含两端，下标从 1 开始）的每个数都加上 k。所有操作结束以后，输出整个数组。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 8），第二行 n 个整数，每个在 -99～99 之间。',
+      '第三行一个整数 m（1 ≤ m ≤ 4），其后 m 行每行三个整数 l、r、k（1 ≤ l ≤ r ≤ n，-99 ≤ k ≤ 99）。',
+    ],
+    output: [
+      '一行 n 个整数，是所有操作结束以后的数组，用空格隔开。',
+    ],
+  },
   intro: [
     '有一类题目会给出很多次这样的操作：把数组里从 l 到 r 的每个数都加上 k，操作完之后再问数组变成了什么样。如果真的一个一个地加，每次操作要花 O(n) 的时间，次数一多就超时了。',
     '差分的想法是换一种方式记录数组：不记每个数是多少，而是记每个数比前一个数多多少，也就是 d[i] = a[i] - a[i-1]。这样一来，“区间 [l, r] 都加 k”只会改变两处差值：从 l 开始每个数都多了 k，所以 d[l] 加 k；到 r+1 这里要把多出来的取消，所以 d[r+1] 减 k。每次操作只改两个数，所有操作做完之后，再把 d 累加一遍，就还原出最终的数组。',
@@ -154,15 +166,19 @@ export const diffArray: AlgoDef<DiffInput, DiffState> = {
     '差分只适合“先全部修改，最后再查看”的场景；修改和查询交替出现时，每次查询都要重新累加，反而更慢。',
   ],
   complexity: { time: 'O(n + m)', space: 'O(n)', note: 'm 是区间修改的次数。每次修改 O(1)，最后还原一遍 O(n)。' },
-  inputHint: '格式：数组 | l r k ; l r k，例如 1 2 3 4 5 6 | 2 4 10 ; 3 6 -5（最多 8 个数、4 次操作）。',
   presets: [
-    { label: '两次操作', text: '1 2 3 4 5 6 | 2 4 10 ; 3 6 -5' },
-    { label: '全是 0', text: '0 0 0 0 0 0 | 1 3 2 ; 2 5 3 ; 4 6 1' },
-    { label: '修改到末尾', text: '5 5 5 5 | 3 4 -2' },
+    { label: '两次操作', text: '6\n1 2 3 4 5 6\n2\n2 4 10\n3 6 -5' },
+    { label: '全是 0', text: '6\n0 0 0 0 0 0\n3\n1 3 2\n2 5 3\n4 6 1' },
+    { label: '修改到末尾', text: '4\n5 5 5 5\n1\n3 4 -2' },
   ],
   defaultInput: { arr: [1, 2, 3, 4, 5, 6], ops: [{ l: 2, r: 4, k: 10 }, { l: 3, r: 6, k: -5 }] },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.ops.map((o) => `${o.l} ${o.r} ${o.k}`).join(' ; ')}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.ops.length}\n${v.ops.map((o) => `${o.l} ${o.r} ${o.k}`).join('\n')}`,
+  answer: (v) => {
+    const a = [...v.arr]
+    for (const o of v.ops) for (let i = o.l - 1; i < o.r; i++) a[i] += o.k
+    return a.join(' ')
+  },
   random: () => {
     const n = randInt(5, 8)
     const arr = Array.from({ length: n }, () => randInt(0, 9))
@@ -183,20 +199,20 @@ int main(){
     scanf("%d",&n);
     for (int i=1;i<=n;i++){
         scanf("%d",&a[i]);
-        d[i]=a[i]-a[i-1];                       //@build
+        d[i]=a[i]-a[i-1];                   //@build
     }
-    scanf("%d",&m);                             //@init
+    scanf("%d",&m);                         //@init
     while (m--){
         int l,r,k;
         scanf("%d %d %d",&l,&r,&k);
-        d[l]+=k;                                //@addL
-        d[r+1]-=k;                              //@subR
+        d[l]+=k;                            //@addL
+        d[r+1]-=k;                          //@subR
     }
     for (int i=1;i<=n;i++){
-        d[i]+=d[i-1];                           //@restore
+        d[i]+=d[i-1];                       //@restore
         printf("%d ",d[i]);
     }
-    printf("\n");                               //@done
+    printf("\n");                           //@done
     return 0;
 }
 `,
@@ -209,62 +225,62 @@ int main(){
     vector<int> a(n+2),d(n+2);
     for (int i=1;i<=n;i++){
         cin>>a[i];
-        d[i]=a[i]-a[i-1];                       //@build
+        d[i]=a[i]-a[i-1];                   //@build
     }
-    cin>>m;                                     //@init
+    cin>>m;                                 //@init
     while (m--){
         int l,r,k;
         cin>>l>>r>>k;
-        d[l]+=k;                                //@addL
-        d[r+1]-=k;                              //@subR
+        d[l]+=k;                            //@addL
+        d[r+1]-=k;                          //@subR
     }
     for (int i=1;i<=n;i++){
-        d[i]+=d[i-1];                           //@restore
+        d[i]+=d[i-1];                       //@restore
         cout<<d[i]<<" ";
     }
-    cout<<endl;                                 //@done
+    cout<<endl;                             //@done
     return 0;
 }
 `,
     python: String.raw`
-n = int(input())
-a = [0] + list(map(int, input().split()))
-d = [0] * (n + 2)
-for i in range(1, n + 1):
-    d[i] = a[i] - a[i - 1]                      #@build
-m = int(input())                                #@init
+n=int(input())
+a=[0]+list(map(int,input().split()))
+d=[0]*(n+2)
+for i in range(1,n+1):
+    d[i]=a[i]-a[i-1]                        #@build
+m=int(input())                              #@init
 for _ in range(m):
-    l, r, k = map(int, input().split())
-    d[l] += k                                   #@addL
-    d[r + 1] -= k                               #@subR
-for i in range(1, n + 1):
-    d[i] += d[i - 1]                            #@restore
-print(*d[1:n + 1])                              #@done
+    l,r,k=map(int,input().split())
+    d[l]+=k                                 #@addL
+    d[r+1]-=k                               #@subR
+for i in range(1,n+1):
+    d[i]+=d[i-1]                            #@restore
+print(*d[1:n+1])                            #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n + 2], d = new int[n + 2];
-        for (int i = 1; i <= n; i++) {
-            a[i] = sc.nextInt();
-            d[i] = a[i] - a[i - 1];                 //@build
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n+2],d=new int[n+2];
+        for (int i=1;i<=n;i++){
+            a[i]=sc.nextInt();
+            d[i]=a[i]-a[i-1];               //@build
         }
-        int m = sc.nextInt();                       //@init
-        while (m-- > 0) {
-            int l = sc.nextInt(), r = sc.nextInt(), k = sc.nextInt();
-            d[l] += k;                              //@addL
-            d[r + 1] -= k;                          //@subR
+        int m=sc.nextInt();                 //@init
+        while (m-- > 0){
+            int l=sc.nextInt(),r=sc.nextInt(),k=sc.nextInt();
+            d[l]+=k;                        //@addL
+            d[r+1]-=k;                      //@subR
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= n; i++) {
-            d[i] += d[i - 1];                       //@restore
+        StringBuilder sb=new StringBuilder();
+        for (int i=1;i<=n;i++){
+            d[i]+=d[i-1];                   //@restore
             sb.append(d[i]).append(' ');
         }
-        System.out.println(sb);                     //@done
+        System.out.println(sb);             //@done
     }
 }
 `,

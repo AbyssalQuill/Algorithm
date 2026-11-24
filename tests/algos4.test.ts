@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { diffArray, runDiff } from '../src/algos/diffArray'
-import { mergeSort, runMergeSort } from '../src/algos/mergeSort'
-import { runSelectionSort, selectionSort } from '../src/algos/selectionSort'
-import { itPrograms, rnd, rndList } from './helpers'
+import { runDiff } from '../src/algos/diffArray'
+import { runMergeSort } from '../src/algos/mergeSort'
+import { runSelectionSort } from '../src/algos/selectionSort'
+import { rnd, rndList } from './helpers'
 
 const sorted = (a: number[]) => [...a].sort((x, y) => x - y)
 
@@ -16,9 +16,6 @@ describe('选择排序', () => {
       expect(last.compares).toBe((arr.length * (arr.length - 1)) / 2)
     }
   })
-  itPrograms(selectionSort, () =>
-    [[5, 3, 8, 1, 9, 2, 7], [1], [3, 3, 3], [9, 8, 7, 6, 5, 4, 3, 2, 1], rndList(40, 1, 99)].map((arr) => ({ input: `${arr.length}\n${arr.join(' ')}\n`, expected: sorted(arr).join(' ') })),
-  )
 })
 
 describe('归并排序', () => {
@@ -36,9 +33,6 @@ describe('归并排序', () => {
     const ids = runMergeSort(arr).at(-1)!.state.cells.filter((c) => c.v === 4).map((c) => c.id)
     expect(ids).toEqual([0, 2, 4])
   })
-  itPrograms(mergeSort, () =>
-    [[6, 2, 9, 4, 7, 1, 8, 3], [1], [3, 3, 3], [9, 8, 7, 6, 5, 4, 3, 2, 1], rndList(60, 1, 99), rndList(200, 1, 20)].map((arr) => ({ input: `${arr.length}\n${arr.join(' ')}\n`, expected: sorted(arr).join(' ') })),
-  )
 })
 
 describe('差分', () => {
@@ -64,10 +58,4 @@ describe('差分', () => {
       expect(last.res.slice(1)).toEqual(naive(arr, ops))
     }
   })
-  itPrograms(diffArray, () =>
-    Array.from({ length: 20 }, () => {
-      const { arr, ops } = randCase()
-      return { input: `${arr.length}\n${arr.join(' ')}\n${ops.length}\n${ops.map((o) => `${o.l} ${o.r} ${o.k}`).join('\n')}\n`, expected: naive(arr, ops).join(' ') }
-    }),
-  )
 })

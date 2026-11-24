@@ -2,7 +2,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 const M = 7
 
@@ -126,22 +126,37 @@ function HashView({ frame }: { frame: Frame<HashState> }) {
 }
 
 function parse(text: string): ParseResult<HashInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「依次插入的数 | 要查找的数」，例如：15 22 8 3 29 | 22' }
-  const keys = toNums(parts[0])
-  const t = toNums(parts[1])
-  if (keys.length < 2 || keys.length > 9) return { ok: false, error: '请放 2～9 个要插入的数。' }
-  if (t.length !== 1) return { ok: false, error: '“|”右边只放一个要查找的数。' }
-  if ([...keys, t[0]].some((v) => !Number.isInteger(v) || v < 1 || v > 99)) return { ok: false, error: '所有的数都是 1～99 的整数。' }
-  if (new Set(keys).size !== keys.length) return { ok: false, error: '演示里插入的数请互不相同。' }
-  return { ok: true, value: { keys, target: t[0] } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 2, 9)
+    const keys = r.ints(n, '数', 1, 99)
+    const target = r.int('t', 1, 99)
+    r.end()
+    if (new Set(keys).size !== keys.length) fail('演示里存入的数请互不相同。')
+    return { keys, target }
+  })
 }
 
 export const hashTable: AlgoDef<HashInput, HashState> = {
   id: 'hash-table',
-  title: '哈希表：拉链法',
+  title: '哈希表',
   tagline: '用一个函数把数“分配”到不同的桶里，查找时只需要翻开一个桶',
   kind: '数据结构',
+  slug: 'lookup',
+  name: '查找一个数',
+  type: '拉链法',
+  statement: {
+    desc: [
+      '依次把 n 个互不相同的整数存进一个哈希表。哈希表有 7 个桶，数 x 放进编号为 x mod 7 的桶，同一个桶里的数用链表串起来（这叫拉链法）。存完之后，判断给定的数 t 是否在表里。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 9）。',
+      '第二行 n 个互不相同的整数，每个在 1～99 之间，按这个顺序依次存入。',
+      '第三行一个整数 t（1～99），是要查找的数。',
+    ],
+    output: [
+      '一行。t 在表里输出 YES，否则输出 NO。',
+    ],
+  },
   intro: [
     '想在一堆数里快速找到某个数，最直接的办法是一个一个地比较，要花 O(n) 的时间。哈希表换了一个想法：准备若干个桶，用一个哈希函数把每个数“算”到某个桶里，比如 h(x) = x % 7。查找的时候，也先算出它应该在哪个桶，然后只在这一个桶里找，不必看别的桶。',
     '不同的数可能算出同一个桶，这叫冲突。最常用的处理办法是拉链法：每个桶是一条链，同一个桶里的数依次接在链上。只要哈希函数分得比较均匀，每条链都很短，一次查找就几乎只需要一次计算加上一两次比较，所以平均是 O(1)。标准库里的 unordered_set 和 unordered_map 就是这样实现的。',
@@ -158,15 +173,15 @@ export const hashTable: AlgoDef<HashInput, HashState> = {
     '对负数取余在 C++ 里结果可能是负的，作为桶的编号要先修正（比如加上桶数再取一次余）。',
   ],
   complexity: { time: 'O(1)', space: 'O(n)', note: '这是平均情况；所有数都冲突到一个桶里时，查找退化为 O(n)。' },
-  inputHint: '格式：依次插入的数 | 要查找的数，例如 15 22 8 3 29 | 22（最多 9 个互不相同的数，桶数为 7）。',
   presets: [
-    { label: '有冲突，找得到', text: '15 22 8 3 29 36 | 36' },
-    { label: '找不到', text: '15 22 8 3 29 | 50' },
-    { label: '全冲突在一个桶', text: '7 14 21 28 35 | 35' },
+    { label: '有冲突，找得到', text: '6\n15 22 8 3 29 36\n36' },
+    { label: '找不到', text: '5\n15 22 8 3 29\n50' },
+    { label: '全冲突在一个桶', text: '5\n7 14 21 28 35\n35' },
   ],
   defaultInput: { keys: [15, 22, 8, 3, 29, 36], target: 36 },
   parse,
-  format: (v) => `${v.keys.join(' ')} | ${v.target}`,
+  format: (v) => `${v.keys.length}\n${v.keys.join(' ')}\n${v.target}`,
+  answer: (v) => (v.keys.includes(v.target) ? 'YES' : 'NO'),
   random: () => {
     const set = new Set<number>()
     const n = randInt(5, 8)
@@ -180,17 +195,17 @@ export const hashTable: AlgoDef<HashInput, HashState> = {
     c: String.raw`
 #include <stdio.h>
 #define M 7
-int table[M][105],cnt[M];                       //@init
+int table[M][105],cnt[M];                   //@init
 void insert(int x){
-    int h=x%M;                                  //@hash
-    table[h][cnt[h]++]=x;                       //@append
+    int h=x%M;                              //@hash
+    table[h][cnt[h]++]=x;                   //@append
 }
 int search(int x){
-    int h=x%M;                                  //@sHash
-    for (int i=0;i<cnt[h];i++){                 //@sProbe
-        if (table[h][i]==x) return 1;           //@sHit
+    int h=x%M;                              //@sHash
+    for (int i=0;i<cnt[h];i++){             //@sProbe
+        if (table[h][i]==x) return 1;       //@sHit
     }
-    return 0;                                   //@sMiss
+    return 0;                               //@sMiss
 }
 int main(){
     int n,t,x;
@@ -208,17 +223,17 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 const int M=7;
-vector<int> table_[M];                          //@init
+vector<int> table_[M];                      //@init
 void insert(int x){
-    int h=x%M;                                  //@hash
-    table_[h].push_back(x);                     //@append
+    int h=x%M;                              //@hash
+    table_[h].push_back(x);                 //@append
 }
 bool search(int x){
-    int h=x%M;                                  //@sHash
-    for (int y:table_[h]){                      //@sProbe
-        if (y==x) return true;                  //@sHit
+    int h=x%M;                              //@sHash
+    for (int y:table_[h]){                  //@sProbe
+        if (y==x) return true;              //@sHit
     }
-    return false;                               //@sMiss
+    return false;                           //@sMiss
 }
 int main(){
     int n,t,x;
@@ -233,56 +248,53 @@ int main(){
 }
 `,
     python: String.raw`
-M = 7
-table = [[] for _ in range(M)]                  #@init
-
+M=7
+table=[[] for _ in range(M)]                #@init
 
 def insert(x):
-    h = x % M                                   #@hash
-    table[h].append(x)                          #@append
-
+    h=x%M                                   #@hash
+    table[h].append(x)                      #@append
 
 def search(x):
-    h = x % M                                   #@sHash
-    for y in table[h]:                          #@sProbe
-        if y == x:
-            return True                         #@sHit
-    return False                                #@sMiss
+    h=x%M                                   #@sHash
+    for y in table[h]:                      #@sProbe
+        if y==x:
+            return True                     #@sHit
+    return False                            #@sMiss
 
-
-n = int(input())
-for x in map(int, input().split()):
+n=int(input())
+for x in map(int,input().split()):
     insert(x)
-t = int(input())
+t=int(input())
 print("YES" if search(t) else "NO")
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static final int M = 7;
-    static List<List<Integer>> table = new ArrayList<>();   //@init
+public class Main{
+    static final int M=7;
+    static List<List<Integer>> table=new ArrayList<>();  //@init
 
-    static void insert(int x) {
-        int h = x % M;                              //@hash
-        table.get(h).add(x);                        //@append
+    static void insert(int x){
+        int h=x%M;                                       //@hash
+        table.get(h).add(x);                             //@append
     }
 
-    static boolean search(int x) {
-        int h = x % M;                              //@sHash
-        for (int y : table.get(h)) {                //@sProbe
-            if (y == x) return true;                //@sHit
+    static boolean search(int x){
+        int h=x%M;                                       //@sHash
+        for (int y:table.get(h)){                        //@sProbe
+            if (y==x) return true;                       //@sHit
         }
-        return false;                               //@sMiss
+        return false;                                    //@sMiss
     }
 
-    public static void main(String[] args) {
-        for (int i = 0; i < M; i++) table.add(new ArrayList<>());
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        for (int i = 0; i < n; i++) insert(sc.nextInt());
-        int t = sc.nextInt();
-        System.out.println(search(t) ? "YES" : "NO");
+    public static void main(String[] args){
+        for (int i=0;i<M;i++) table.add(new ArrayList<>());
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        for (int i=0;i<n;i++) insert(sc.nextInt());
+        int t=sc.nextInt();
+        System.out.println(search(t)?"YES":"NO");
     }
 }
 `,

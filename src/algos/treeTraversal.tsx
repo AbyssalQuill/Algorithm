@@ -3,7 +3,7 @@ import { TreeView, type TNode } from '../components/TreeView'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 /** 按“层序”给出的二叉树：0 表示这个位置没有结点 */
 export type LevelTree = number[]
@@ -145,20 +145,36 @@ function TravView({ frame }: { frame: Frame<TravState> }) {
 }
 
 function parse(text: string): ParseResult<LevelTree> {
-  const v = text.trim().split(/[\s,，、]+/).filter(Boolean).map((t) => (t === '#' || t === '-' ? 0 : Number(t)))
-  if (v.length < 1 || v.length > 20) return { ok: false, error: '请输入 1～20 个数，用空格隔开；# 表示这个位置没有结点。' }
-  if (v.some((x) => !Number.isInteger(x) || x < 0 || x > 99)) return { ok: false, error: '结点的值是 1～99 的整数，没有结点的位置写 #。' }
-  if (v[0] === 0) return { ok: false, error: '第一个数是根结点，不能是 #。' }
-  const { nodes } = buildTree(v)
-  if (nodes.length > 10) return { ok: false, error: '演示最多画 10 个结点。' }
-  return { ok: true, value: v }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 20)
+    const v = r.ints(n, '结点', 0, 99)
+    r.end()
+    if (v[0] === 0) fail('第一个数是根结点，不能是 0。')
+    if (buildTree(v).nodes.length > 10) fail('演示最多画 10 个结点。')
+    return v
+  })
 }
 
 export const treeTraversal: AlgoDef<LevelTree, TravState> = {
   id: 'tree-traversal',
-  title: '二叉树的四种遍历',
+  title: '二叉树遍历',
   tagline: '同一棵树，按不同的顺序把每个结点走一遍，得到前序、中序、后序和层序四种序列',
   kind: '数据结构',
+  slug: 'orders',
+  name: '四种遍历',
+  type: '遍历序列',
+  statement: {
+    desc: [
+      '给定一棵二叉树，依次输出它的前序、中序、后序和层序遍历。树按层序给出：从上到下、从左到右写出每个位置上的结点，某个位置没有结点就写 0，不存在的结点也就没有孩子，后面不会再为它占位。',
+    ],
+    input: [
+      '第一行一个整数 n（1 ≤ n ≤ 20），表示序列的长度。',
+      '第二行 n 个整数，结点的值在 1～99 之间，0 表示这个位置没有结点。第一个数是根，不能是 0；结点总数不超过 10。',
+    ],
+    output: [
+      '四行，依次是前序、中序、后序和层序遍历的结果，每行的数用空格隔开。',
+    ],
+  },
   intro: [
     '遍历是处理树的基本功：把每个结点恰好访问一次。对于二叉树，最常用的是三种深度优先的顺序，区别只在于“根”在什么时候被访问：前序是根、左、右，中序是左、根、右，后序是左、右、根。它们都可以用一个递归函数写出来，三种写法只差“输出这一句放在哪里”。',
     '还有一种按层访问的层序遍历，从上到下、同一层从左到右。它不是递归，而是靠队列：取出队头访问，再把它的左右孩子放到队尾，这正是广度优先搜索在树上的样子。',
@@ -175,15 +191,42 @@ export const treeTraversal: AlgoDef<LevelTree, TravState> = {
     '三种遍历顺序容易记混，记住“前、中、后”指的是根的位置。',
   ],
   complexity: { time: 'O(n)', space: 'O(h)', note: '每个结点只访问一次。空间是递归的深度 h（层序遍历是队列的大小）。' },
-  inputHint: '按层序写出整棵树，# 表示没有结点，例如 1 2 3 4 5 # 6（最多 10 个结点）。',
   presets: [
-    { label: '一般的树', text: '1 2 3 4 5 # 6' },
-    { label: '完全二叉树', text: '1 2 3 4 5 6 7' },
-    { label: '只往左长', text: '1 2 # 3 # 4' },
+    { label: '一般的树', text: '7\n1 2 3 4 5 0 6' },
+    { label: '完全二叉树', text: '7\n1 2 3 4 5 6 7' },
+    { label: '只往左长', text: '6\n1 2 0 3 0 4' },
   ],
   defaultInput: [1, 2, 3, 4, 5, 0, 6],
   parse,
-  format: (v) => v.map((x) => (x === 0 ? '#' : x)).join(' '),
+  format: (v) => `${v.length}\n${v.join(' ')}`,
+  answer: (v) => {
+    interface N {
+      val: number
+      l?: N
+      r?: N
+    }
+    const root: N = { val: v[0] }
+    const q = [root]
+    let p = 1
+    while (q.length && p < v.length) {
+      const u = q.shift()!
+      if (p < v.length && v[p]) q.push((u.l = { val: v[p] }))
+      p++
+      if (p < v.length && v[p]) q.push((u.r = { val: v[p] }))
+      p++
+    }
+    const pre = (n?: N): number[] => (n ? [n.val, ...pre(n.l), ...pre(n.r)] : [])
+    const ino = (n?: N): number[] => (n ? [...ino(n.l), n.val, ...ino(n.r)] : [])
+    const post = (n?: N): number[] => (n ? [...post(n.l), ...post(n.r), n.val] : [])
+    const lev: number[] = []
+    for (const w = [root]; w.length; ) {
+      const u = w.shift()!
+      lev.push(u.val)
+      if (u.l) w.push(u.l)
+      if (u.r) w.push(u.r)
+    }
+    return [pre(root), ino(root), post(root), lev].map((a) => a.join(' ')).join('\n')
+  },
   random: () => {
     for (;;) {
       const total = randInt(5, 9)
@@ -225,28 +268,28 @@ Node* newNode(int v){
 }
 void pre(Node* r){
     if (!r) return;
-    printf("%d ",r->val);                       //@pre
+    printf("%d ",r->val);                   //@pre
     pre(r->l);
     pre(r->r);
 }
 void in(Node* r){
     if (!r) return;
     in(r->l);
-    printf("%d ",r->val);                       //@in
+    printf("%d ",r->val);                   //@in
     in(r->r);
 }
 void post(Node* r){
     if (!r) return;
     post(r->l);
     post(r->r);
-    printf("%d ",r->val);                       //@post
+    printf("%d ",r->val);                   //@post
 }
 int main(){
     int n,a[105];
     Node* q[105];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    Node* root=newNode(a[0]);                   //@init
+    Node* root=newNode(a[0]);               //@init
     int head=0,tail=0,p=1;
     q[tail++]=root;
     while (head<tail&&p<n){
@@ -266,11 +309,11 @@ int main(){
     q[tail++]=root;
     while (head<tail){
         Node* u=q[head++];
-        printf("%d ",u->val);                   //@level
+        printf("%d ",u->val);               //@level
         if (u->l) q[tail++]=u->l;
         if (u->r) q[tail++]=u->r;
     }
-    printf("\n");                               //@done
+    printf("\n");                           //@done
     return 0;
 }
 `,
@@ -284,37 +327,43 @@ struct Node{
 };
 void pre(Node* r){
     if (!r) return;
-    cout<<r->val<<" ";                          //@pre
+    cout<<r->val<<" ";                      //@pre
     pre(r->l);
     pre(r->r);
 }
 void in(Node* r){
     if (!r) return;
     in(r->l);
-    cout<<r->val<<" ";                          //@in
+    cout<<r->val<<" ";                      //@in
     in(r->r);
 }
 void post(Node* r){
     if (!r) return;
     post(r->l);
     post(r->r);
-    cout<<r->val<<" ";                          //@post
+    cout<<r->val<<" ";                      //@post
 }
 int main(){
     int n;
     cin>>n;
     vector<int> a(n);
     for (int &x:a) cin>>x;
-    Node* root=new Node(a[0]);                  //@init
+    Node* root=new Node(a[0]);              //@init
     queue<Node*> q;
     q.push(root);
     int p=1;
     while (!q.empty()&&p<n){
         Node* u=q.front();
         q.pop();
-        if (p<n&&a[p]){ u->l=new Node(a[p]); q.push(u->l); }
+        if (p<n&&a[p]){
+            u->l=new Node(a[p]);
+            q.push(u->l);
+        }
         p++;
-        if (p<n&&a[p]){ u->r=new Node(a[p]); q.push(u->r); }
+        if (p<n&&a[p]){
+            u->r=new Node(a[p]);
+            q.push(u->r);
+        }
         p++;
     }
     pre(root);
@@ -328,126 +377,129 @@ int main(){
     while (!q.empty()){
         Node* u=q.front();
         q.pop();
-        cout<<u->val<<" ";                      //@level
+        cout<<u->val<<" ";                  //@level
         if (u->l) q.push(u->l);
         if (u->r) q.push(u->r);
     }
-    cout<<endl;                                 //@done
+    cout<<endl;                             //@done
     return 0;
 }
 `,
     python: String.raw`
 from collections import deque
 
-
 class Node:
-    def __init__(self, v):
-        self.val = v
-        self.l = None
-        self.r = None
+    def __init__(self,v):
+        self.val=v
+        self.l=None
+        self.r=None
 
-
-def pre(r, out):
+def pre(r,out):
     if r is None:
         return
-    out.append(r.val)                           #@pre
-    pre(r.l, out)
-    pre(r.r, out)
+    out.append(r.val)                       #@pre
+    pre(r.l,out)
+    pre(r.r,out)
 
-
-def inorder(r, out):
+def inorder(r,out):
     if r is None:
         return
-    inorder(r.l, out)
-    out.append(r.val)                           #@in
-    inorder(r.r, out)
+    inorder(r.l,out)
+    out.append(r.val)                       #@in
+    inorder(r.r,out)
 
-
-def post(r, out):
+def post(r,out):
     if r is None:
         return
-    post(r.l, out)
-    post(r.r, out)
-    out.append(r.val)                           #@post
+    post(r.l,out)
+    post(r.r,out)
+    out.append(r.val)                       #@post
 
-
-n = int(input())
-a = list(map(int, input().split()))
-root = Node(a[0])                               #@init
-q = deque([root])
-p = 1
-while q and p < n:
-    u = q.popleft()
-    if p < n and a[p]:
-        u.l = Node(a[p])
+n=int(input())
+a=list(map(int,input().split()))
+root=Node(a[0])                             #@init
+q=deque([root])
+p=1
+while q and p<n:
+    u=q.popleft()
+    if p<n and a[p]:
+        u.l=Node(a[p])
         q.append(u.l)
-    p += 1
-    if p < n and a[p]:
-        u.r = Node(a[p])
+    p+=1
+    if p<n and a[p]:
+        u.r=Node(a[p])
         q.append(u.r)
-    p += 1
-for f in (pre, inorder, post):
-    out = []
-    f(root, out)
+    p+=1
+for f in (pre,inorder,post):
+    out=[]
+    f(root,out)
     print(*out)
-q = deque([root])
-out = []
+q=deque([root])
+out=[]
 while q:
-    u = q.popleft()
-    out.append(u.val)                           #@level
+    u=q.popleft()
+    out.append(u.val)                       #@level
     if u.l:
         q.append(u.l)
     if u.r:
         q.append(u.r)
-print(*out)                                     #@done
+print(*out)                                 #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static class Node {
+public class Main{
+    static class Node{
         int val;
-        Node l, r;
-        Node(int v) { val = v; }
+        Node l,r;
+        Node(int v){
+            val=v;
+        }
     }
 
-    static StringBuilder sb = new StringBuilder();
+    static StringBuilder sb=new StringBuilder();
 
-    static void pre(Node r) {
-        if (r == null) return;
-        sb.append(r.val).append(' ');              //@pre
+    static void pre(Node r){
+        if (r==null) return;
+        sb.append(r.val).append(' ');       //@pre
         pre(r.l);
         pre(r.r);
     }
 
-    static void in(Node r) {
-        if (r == null) return;
+    static void in(Node r){
+        if (r==null) return;
         in(r.l);
-        sb.append(r.val).append(' ');              //@in
+        sb.append(r.val).append(' ');       //@in
         in(r.r);
     }
 
-    static void post(Node r) {
-        if (r == null) return;
+    static void post(Node r){
+        if (r==null) return;
         post(r.l);
         post(r.r);
-        sb.append(r.val).append(' ');              //@post
+        sb.append(r.val).append(' ');       //@post
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
-        Node root = new Node(a[0]);                 //@init
-        Queue<Node> q = new ArrayDeque<>();
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
+        Node root=new Node(a[0]);           //@init
+        Queue<Node> q=new ArrayDeque<>();
         q.add(root);
-        int p = 1;
-        while (!q.isEmpty() && p < n) {
-            Node u = q.poll();
-            if (p < n && a[p] != 0) { u.l = new Node(a[p]); q.add(u.l); }
+        int p=1;
+        while (!q.isEmpty()&&p<n){
+            Node u=q.poll();
+            if (p<n&&a[p]!=0){
+                u.l=new Node(a[p]);
+                q.add(u.l);
+            }
             p++;
-            if (p < n && a[p] != 0) { u.r = new Node(a[p]); q.add(u.r); }
+            if (p<n&&a[p]!=0){
+                u.r=new Node(a[p]);
+                q.add(u.r);
+            }
             p++;
         }
         pre(root);
@@ -458,13 +510,13 @@ public class Main {
         sb.append('\n');
         q.clear();
         q.add(root);
-        while (!q.isEmpty()) {
-            Node u = q.poll();
-            sb.append(u.val).append(' ');           //@level
-            if (u.l != null) q.add(u.l);
-            if (u.r != null) q.add(u.r);
+        while (!q.isEmpty()){
+            Node u=q.poll();
+            sb.append(u.val).append(' ');   //@level
+            if (u.l!=null) q.add(u.l);
+            if (u.r!=null) q.add(u.r);
         }
-        System.out.println(sb);                     //@done
+        System.out.println(sb);             //@done
     }
 }
 `,

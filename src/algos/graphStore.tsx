@@ -4,7 +4,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { formatEdges, parseEdges, randInt, randomGraph, type ParsedEdge } from './shared'
+import { formatGraph, type ParsedEdge, randInt, randomGraph, readGraph, readInput } from './shared'
 
 export interface StoreInput {
   n: number
@@ -92,15 +92,33 @@ function StoreView({ frame }: { frame: Frame<StoreState> }) {
 }
 
 function parse(text: string): ParseResult<StoreInput> {
-  const r = parseEdges(text, { weighted: false, directed: false, maxN: 6, maxM: 9, minM: 1 })
-  return r.ok ? { ok: true, value: r.value } : r
+  return readInput(text, (r) => {
+    const g = readGraph(r, { weighted: false, directed: false, maxN: 6, maxM: 9 })
+    r.end()
+    return g
+  })
 }
 
 export const graphStore: AlgoDef<StoreInput, StoreState> = {
   id: 'graph-store',
-  title: '图的存储：矩阵与邻接表',
+  title: '图的存储',
   tagline: '同一张图，既可以用一张表格记录，也可以给每个结点写一份邻居清单',
   kind: '数据结构',
+  slug: 'store',
+  name: '邻接表与邻接矩阵',
+  type: '存图',
+  statement: {
+    desc: [
+      '给定一张无向图，把它存成邻接表，并按结点编号从小到大，输出每个结点的所有邻居，邻居按照边在输入里出现的先后顺序排列。演示里同时画出了邻接矩阵，两种存法记录的是同一张图。',
+    ],
+    input: [
+      '第一行两个整数 n 和 m（2 ≤ n ≤ 6，1 ≤ m ≤ 9），表示结点数和边数。',
+      '接下来 m 行，每行两个整数 a、b，表示 a 和 b 之间有一条边（1 ≤ a, b ≤ n，没有重边和自环）。',
+    ],
+    output: [
+      'n 行，第 u 行先写 u 和冒号，再依次写出 u 的所有邻居，用空格隔开；没有邻居时只写冒号。',
+    ],
+  },
   intro: [
     '要在程序里处理图，第一步是把它存起来。邻接矩阵用一个二维数组 g：g[a][b] 为 1 就表示 a 和 b 之间有一条边，查询两个结点是否相邻只需要看一个格子；缺点是不管有没有边都要占 n×n 的空间，结点一多就放不下了。',
     '邻接表则给每个结点保存一份它的邻居的清单，只记真正存在的边，占用的空间是 O(n + m)，遍历一个结点的所有邻居也只需要走过它自己的清单。大部分比赛题目的图都比较稀疏，所以邻接表是最常用的存储方式，前面的 DFS、最短路演示用的都是它。',
@@ -117,15 +135,22 @@ export const graphStore: AlgoDef<StoreInput, StoreState> = {
     '重边（两个结点之间有多条边）和自环，在矩阵里会被覆盖成一个，要看题目是否需要保留。',
   ],
   complexity: { time: 'O(m)', space: 'O(n + m)', note: '这里的空间是邻接表的；邻接矩阵需要 O(n²)。录入 m 条边各需要常数时间。' },
-  inputHint: '输入边：a-b，用空格隔开，例如 1-2 1-3 2-4 3-4（结点 1～6，最多 9 条边）。',
   presets: [
-    { label: '四个结点', text: '1-2 1-3 2-4 3-4' },
-    { label: '一条星形', text: '1-2 1-3 1-4 1-5' },
-    { label: '稠密一些', text: '1-2 1-3 1-4 2-3 2-4 3-4' },
+    { label: '四个结点', text: '4 4\n1 2\n1 3\n2 4\n3 4' },
+    { label: '一条星形', text: '5 4\n1 2\n1 3\n1 4\n1 5' },
+    { label: '稠密一些', text: '4 6\n1 2\n1 3\n1 4\n2 3\n2 4\n3 4' },
   ],
   defaultInput: { n: 4, edges: [{ a: 1, b: 2, w: 1 }, { a: 1, b: 3, w: 1 }, { a: 2, b: 4, w: 1 }, { a: 3, b: 4, w: 1 }] },
   parse,
-  format: (v) => formatEdges(v.edges, { weighted: false, directed: false }),
+  format: (v) => formatGraph(v.n, v.edges, false),
+  answer: (v) => {
+    const adj: number[][] = Array.from({ length: v.n + 1 }, () => [])
+    for (const e of v.edges) {
+      adj[e.a].push(e.b)
+      adj[e.b].push(e.a)
+    }
+    return Array.from({ length: v.n }, (_, i) => `${i + 1}:${adj[i + 1].map((x) => ' ' + x).join('')}`).join('\n')
+  },
   random: () => {
     const n = randInt(4, 6)
     return { n, edges: randomGraph(n, randInt(0, 3), false) }
@@ -135,17 +160,17 @@ export const graphStore: AlgoDef<StoreInput, StoreState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int g[105][105],adj[105][105],deg[105];        //@init
+int g[105][105],adj[105][105],deg[105];     //@init
 int main(){
     int n,m,a,b;
     scanf("%d %d",&n,&m);
     for (int i=0;i<m;i++){
         scanf("%d %d",&a,&b);
-        g[a][b]=g[b][a]=1;                      //@matrix
-        adj[a][deg[a]++]=b;                     //@list
-        adj[b][deg[b]++]=a;                     //@list
+        g[a][b]=g[b][a]=1;                  //@matrix
+        adj[a][deg[a]++]=b;                 //@list
+        adj[b][deg[b]++]=a;                 //@list
     }
-    for (int u=1;u<=n;u++){                     //@done
+    for (int u=1;u<=n;u++){                 //@done
         printf("%d:",u);
         for (int i=0;i<deg[u];i++) printf(" %d",adj[u][i]);
         printf("\n");
@@ -156,18 +181,18 @@ int main(){
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int g[105][105];                                //@init
+int g[105][105];                            //@init
 vector<int> adj[105];
 int main(){
     int n,m,a,b;
     cin>>n>>m;
     for (int i=0;i<m;i++){
         cin>>a>>b;
-        g[a][b]=g[b][a]=1;                      //@matrix
-        adj[a].push_back(b);                    //@list
-        adj[b].push_back(a);                    //@list
+        g[a][b]=g[b][a]=1;                  //@matrix
+        adj[a].push_back(b);                //@list
+        adj[b].push_back(a);                //@list
     }
-    for (int u=1;u<=n;u++){                     //@done
+    for (int u=1;u<=n;u++){                 //@done
         cout<<u<<":";
         for (int v:adj[u]) cout<<" "<<v;
         cout<<endl;
@@ -176,36 +201,36 @@ int main(){
 }
 `,
     python: String.raw`
-n, m = map(int, input().split())
-g = [[0] * (n + 1) for _ in range(n + 1)]       #@init
-adj = [[] for _ in range(n + 1)]
+n,m=map(int,input().split())
+g=[[0]*(n+1) for _ in range(n+1)]           #@init
+adj=[[] for _ in range(n+1)]
 for _ in range(m):
-    a, b = map(int, input().split())
-    g[a][b] = g[b][a] = 1                       #@matrix
-    adj[a].append(b)                            #@list
-    adj[b].append(a)                            #@list
-for u in range(1, n + 1):                       #@done
-    print(str(u) + ":", *adj[u])
+    a,b=map(int,input().split())
+    g[a][b]=g[b][a]=1                       #@matrix
+    adj[a].append(b)                        #@list
+    adj[b].append(a)                        #@list
+for u in range(1,n+1):                      #@done
+    print(str(u)+":",*adj[u])
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        int[][] g = new int[n + 1][n + 1];          //@init
-        List<List<Integer>> adj = new ArrayList<>();
-        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());
-        for (int i = 0; i < m; i++) {
-            int a = sc.nextInt(), b = sc.nextInt();
-            g[a][b] = g[b][a] = 1;                  //@matrix
-            adj.get(a).add(b);                      //@list
-            adj.get(b).add(a);                      //@list
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        int[][] g=new int[n+1][n+1];        //@init
+        List<List<Integer>> adj=new ArrayList<>();
+        for (int i=0;i<=n;i++) adj.add(new ArrayList<>());
+        for (int i=0;i<m;i++){
+            int a=sc.nextInt(),b=sc.nextInt();
+            g[a][b]=g[b][a]=1;              //@matrix
+            adj.get(a).add(b);              //@list
+            adj.get(b).add(a);              //@list
         }
-        for (int u = 1; u <= n; u++) {              //@done
-            StringBuilder sb = new StringBuilder(u + ":");
-            for (int v : adj.get(u)) sb.append(' ').append(v);
+        for (int u=1;u<=n;u++){             //@done
+            StringBuilder sb=new StringBuilder(u+":");
+            for (int v:adj.get(u)) sb.append(' ').append(v);
             System.out.println(sb);
         }
     }

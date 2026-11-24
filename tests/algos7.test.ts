@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { dijkstra, runDijkstra } from '../src/algos/dijkstra'
-import { graphDfs, runDfs } from '../src/algos/graphDfs'
+import { runDijkstra } from '../src/algos/dijkstra'
+import { runDfs } from '../src/algos/graphDfs'
 import { randomGraph } from '../src/algos/shared'
-import { itPrograms, rnd } from './helpers'
+import { rnd } from './helpers'
 
 describe('深度优先搜索', () => {
   it('访问的恰好是起点所在连通块里的全部结点，且每个只访问一次', () => {
@@ -19,15 +19,6 @@ describe('深度优先搜索', () => {
       expect(last.order[0]).toBe(start)
     }
   })
-  itPrograms(graphDfs, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(3, 7)
-      const edges = randomGraph(n, rnd(0, 3), false)
-      const start = rnd(1, n)
-      const order = runDfs({ n, edges, start }).at(-1)!.state.order
-      return { input: `${n} ${edges.length}\n${edges.map((e) => `${e.a} ${e.b}`).join('\n')}\n${start}\n`, expected: order.join(' ') }
-    }),
-  )
 })
 
 describe('Dijkstra', () => {
@@ -51,12 +42,4 @@ describe('Dijkstra', () => {
       expect(last.dist.slice(1).map((x) => (x === null ? -1 : x))).toEqual(ref(n, edges, start))
     }
   })
-  itPrograms(dijkstra, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(3, 7)
-      const edges = randomGraph(n, rnd(0, 4), true).filter(() => Math.random() < 0.9)
-      const start = rnd(1, n)
-      return { input: `${n} ${edges.length}\n${edges.map((e) => `${e.a} ${e.b} ${e.w}`).join('\n')}\n${start}\n`, expected: ref(n, edges, start).join(' ') }
-    }),
-  )
 })

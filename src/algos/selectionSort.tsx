@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame } from '../engine/types'
-import { parseList, randList } from './shared'
+import { arrayInput, randList } from './shared'
 
 export interface SelState {
   cells: { id: number; v: number }[]
@@ -95,6 +95,21 @@ export const selectionSort: AlgoDef<number[], SelState> = {
   title: '选择排序',
   tagline: '每一轮从剩下的数里选出最小的，放到最前面',
   kind: '算法',
+  slug: 'sort',
+  name: '从小到大排序',
+  type: '排序',
+  statement: {
+    desc: [
+      '给定 n 个整数，用选择排序把它们从小到大排好序，输出排序之后的结果。演示里可以看到每一轮是怎样选出最小的数的。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 12）。',
+      '第二行 n 个整数，每个在 1～99 之间，可以有相同的数。',
+    ],
+    output: [
+      '一行 n 个整数，从小到大排列，用空格隔开。',
+    ],
+  },
   intro: [
     '选择排序的想法很直接：整个数组里最小的数应该排在第一位，那就把它找出来，和第一位交换；剩下的数里最小的应该排在第二位，再找出来，和第二位交换。如此重复，每一轮确定一个位置。',
     '和冒泡排序相比，它每一轮最多只交换一次，交换的次数最少是 0，最多是 n-1，所以当交换数据代价很高时它有一定的优势。不过它仍然需要在每一轮里扫描全部剩下的数，比较次数是固定的，与数据原来是否有序无关。',
@@ -111,32 +126,31 @@ export const selectionSort: AlgoDef<number[], SelState> = {
     '数据量到几万以上时，O(n²) 会超时，应该使用 sort。',
   ],
   complexity: { time: 'O(n²)', space: 'O(1)', note: '比较的次数固定为 n(n-1)/2，与输入的顺序无关；交换最多 n-1 次。' },
-  inputHint: '输入 2～12 个 1～99 的整数，空格隔开，回车或点“应用”。',
   presets: [
-    { label: '已经有序', text: '1 2 3 4 5 6 7' },
-    { label: '完全倒序', text: '9 8 7 6 5 4 3' },
-    { label: '有重复数', text: '4 2 4 1 3 2' },
+    { label: '已经有序', text: '7\n1 2 3 4 5 6 7' },
+    { label: '完全倒序', text: '7\n9 8 7 6 5 4 3' },
+    { label: '有重复数', text: '6\n4 2 4 1 3 2' },
   ],
   defaultInput: [5, 3, 8, 1, 9, 2, 7],
-  parse: (t) => parseList(t, { min: 2, max: 12, lo: 1, hi: 99 }),
-  format: (v) => v.join(' '),
+  ...arrayInput({ min: 2, max: 12, lo: 1, hi: 99 }),
+  answer: (v) => [...v].sort((a, b) => a - b).join(' '),
   random: () => randList(8),
   run: runSelectionSort,
   View: SelView,
   sources: {
     c: String.raw`
 #include <stdio.h>
-void selectionSort(int a[],int n){              //@init
-    for (int i=0;i<n-1;i++){                    //@pick
-        int m=i;                                //@pick
+void selectionSort(int a[],int n){             //@init
+    for (int i=0;i<n-1;i++){                   //@pick
+        int m=i;                               //@pick
         for (int j=i+1;j<n;j++){
-            if (a[j]<a[m]){                     //@cmp
-                m=j;                            //@newMin
+            if (a[j]<a[m]){                    //@cmp
+                m=j;                           //@newMin
             }
         }
-        int t=a[i];                             //@swap
-        a[i]=a[m];                              //@swap
-        a[m]=t;                                 //@swap
+        int t=a[i];                            //@swap
+        a[i]=a[m];                             //@swap
+        a[m]=t;                                //@swap
     }
 }
 int main(){
@@ -144,22 +158,22 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     selectionSort(a,n);
-    for (int i=0;i<n;i++) printf("%d ",a[i]);   //@done
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-void selectionSort(int a[],int n){              //@init
-    for (int i=0;i<n-1;i++){                    //@pick
-        int m=i;                                //@pick
+void selectionSort(int a[],int n){          //@init
+    for (int i=0;i<n-1;i++){                //@pick
+        int m=i;                            //@pick
         for (int j=i+1;j<n;j++){
-            if (a[j]<a[m]){                     //@cmp
-                m=j;                            //@newMin
+            if (a[j]<a[m]){                 //@cmp
+                m=j;                        //@newMin
             }
         }
-        swap(a[i],a[m]);                        //@swap
+        swap(a[i],a[m]);                    //@swap
     }
 }
 int main(){
@@ -167,52 +181,51 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     selectionSort(a,n);
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";      //@done
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
     return 0;
 }
 `,
     python: String.raw`
-def selection_sort(a):                          #@init
-    n = len(a)
-    for i in range(n - 1):                      #@pick
-        m = i                                   #@pick
-        for j in range(i + 1, n):
-            if a[j] < a[m]:                     #@cmp
-                m = j                           #@newMin
-        a[i], a[m] = a[m], a[i]                 #@swap
+def selection_sort(a):                      #@init
+    n=len(a)
+    for i in range(n-1):                    #@pick
+        m=i                                 #@pick
+        for j in range(i+1,n):
+            if a[j]<a[m]:                   #@cmp
+                m=j                         #@newMin
+        a[i],a[m]=a[m],a[i]                 #@swap
 
-
-n = int(input())
-a = list(map(int, input().split()))
+n=int(input())
+a=list(map(int,input().split()))
 selection_sort(a)
-print(*a)                                       #@done
+print(*a)                                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static void selectionSort(int[] a) {            //@init
-        int n = a.length;
-        for (int i = 0; i < n - 1; i++) {           //@pick
-            int m = i;                              //@pick
-            for (int j = i + 1; j < n; j++) {
-                if (a[j] < a[m]) {                  //@cmp
-                    m = j;                          //@newMin
+public class Main{
+    static void selectionSort(int[] a){         //@init
+        int n=a.length;
+        for (int i=0;i<n-1;i++){                //@pick
+            int m=i;                            //@pick
+            for (int j=i+1;j<n;j++){
+                if (a[j]<a[m]){                 //@cmp
+                    m=j;                        //@newMin
                 }
             }
-            int t = a[i];                           //@swap
-            a[i] = a[m];                            //@swap
-            a[m] = t;                               //@swap
+            int t=a[i];                         //@swap
+            a[i]=a[m];                          //@swap
+            a[m]=t;                             //@swap
         }
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
         selectionSort(a);
-        for (int x : a) System.out.print(x + " ");  //@done
+        for (int x:a) System.out.print(x+" ");  //@done
     }
 }
 `,

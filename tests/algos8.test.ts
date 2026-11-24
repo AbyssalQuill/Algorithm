@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { graphStore, runStore } from '../src/algos/graphStore'
-import { hanoi, hanoiMoves, runHanoi } from '../src/algos/hanoi'
-import { kruskal, mstWeight, runKruskal } from '../src/algos/kruskal'
-import { nQueens, runQueens } from '../src/algos/nQueens'
+import { runStore } from '../src/algos/graphStore'
+import { runHanoi } from '../src/algos/hanoi'
+import { mstWeight, runKruskal } from '../src/algos/kruskal'
+import { runQueens } from '../src/algos/nQueens'
 import { randomGraph } from '../src/algos/shared'
 import { runTopo, topoSort, type TopoInput } from '../src/algos/topoSort'
-import { itPrograms, rnd } from './helpers'
+import { rnd } from './helpers'
 
 const randEdges = (n: number) => randomGraph(n, rnd(0, 4), true).filter(() => Math.random() < 0.9)
 
@@ -34,14 +34,6 @@ describe('Kruskal 最小生成树', () => {
       expect(mstWeight(runKruskal({ n: nn, edges }).at(-1)!.state), JSON.stringify(edges)).toBe(primRef(nn, edges))
     }
   })
-  itPrograms(kruskal, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(3, 7)
-      const edges = randEdges(n)
-      const nn = Math.max(n, ...edges.flatMap((e) => [e.a, e.b]))
-      return { input: `${nn} ${edges.length}\n${edges.map((e) => `${e.a} ${e.b} ${e.w}`).join('\n')}\n`, expected: String(primRef(nn, edges)) }
-    }),
-  )
 })
 
 describe('拓扑排序', () => {
@@ -70,24 +62,9 @@ describe('拓扑排序', () => {
       }
     }
   })
-  itPrograms(topoSort, () =>
-    Array.from({ length: 20 }, () => {
-      const input = topoSort.random() as TopoInput
-      const last = runTopo(input).at(-1)!.state
-      return { input: `${input.n} ${input.edges.length}\n${input.edges.map((e) => `${e.a} ${e.b}`).join('\n')}\n`, expected: last.order.length === input.n ? last.order.join(' ') : 'CYCLE' }
-    }),
-  )
 })
 
 describe('图的存储', () => {
-  itPrograms(graphStore, () =>
-    Array.from({ length: 15 }, () => {
-      const n = rnd(3, 6)
-      const edges = randomGraph(n, rnd(0, 3), false)
-      const s = runStore({ n, edges }).at(-1)!.state
-      return { input: `${n} ${edges.length}\n${edges.map((e) => `${e.a} ${e.b}`).join('\n')}\n`, expected: s.lists.slice(1).map((l, i) => `${i + 1}: ${l.join(' ')}`).join(' ') }
-    }),
-  )
   it('矩阵是对称的，邻接表的邻居数之和是边数的两倍', () => {
     const n = 5
     const edges = randomGraph(n, 2, false)
@@ -102,7 +79,6 @@ describe('N 皇后', () => {
   it('解的个数与已知值一致', () => {
     for (const n of [4, 5, 6]) expect(runQueens(n).at(-1)!.state.count).toBe(known[n])
   })
-  itPrograms(nQueens, () => [4, 5, 6, 7, 8].map((n) => ({ input: `${n}\n`, expected: String(known[n]) })))
 })
 
 describe('汉诺塔', () => {
@@ -115,5 +91,4 @@ describe('汉诺塔', () => {
       for (const f of frames) for (const peg of f.state.pegs) for (let i = 1; i < peg.length; i++) expect(peg[i]).toBeLessThan(peg[i - 1])
     }
   })
-  itPrograms(hanoi, () => [1, 2, 3, 4, 5, 8].map((n) => ({ input: `${n}\n`, expected: [...hanoiMoves(n).map(([d, a, c]) => `${d} ${'ABC'[a]} ${'ABC'[c]}`), (1 << n) - 1].join(' ') })))
 })

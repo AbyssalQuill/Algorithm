@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface GcdInput {
   a: number
@@ -79,16 +79,33 @@ function GcdView({ frame }: { frame: Frame<GcdState> }) {
 }
 
 function parse(text: string): ParseResult<GcdInput> {
-  const v = toNums(text)
-  if (v.length !== 2 || v.some((x) => !Number.isInteger(x) || x < 1 || x > 9999)) return { ok: false, error: '请输入两个 1～9999 的正整数，例如：48 18' }
-  return { ok: true, value: { a: v[0], b: v[1] } }
+  return readInput(text, (r) => {
+    const a = r.int('a', 1, 9999)
+    const b = r.int('b', 1, 9999)
+    r.end()
+    return { a, b }
+  })
 }
 
 export const gcd: AlgoDef<GcdInput, GcdState> = {
   id: 'gcd',
-  title: '数论：辗转相除法',
+  title: '辗转相除法',
   tagline: '用“大数除以小数取余数”不断缩小，最后剩下的就是最大公约数',
   kind: '算法',
+  slug: 'gcd-lcm',
+  name: '最大公约数与最小公倍数',
+  type: '数论',
+  statement: {
+    desc: [
+      '给定两个正整数 a 和 b，求它们的最大公约数和最小公倍数。',
+    ],
+    input: [
+      '一行两个整数 a 和 b，用空格隔开（1 ≤ a, b ≤ 9999）。',
+    ],
+    output: [
+      '一行两个整数，依次是最大公约数和最小公倍数，用空格隔开。',
+    ],
+  },
   intro: [
     '两个数的最大公约数，最直接的求法是从小到大逐个试，慢而且笨。两千多年前欧几里得就给出了一个又快又漂亮的办法：辗转相除。用较大的数除以较小的数，取余数；然后拿较小的数和这个余数继续做同样的事，直到余数是 0 为止，这时除数就是答案。',
     '它背后的道理是：a 和 b 的公约数，一定整除 a - k·b，也就是余数 a % b。所以 a、b 的所有公约数，和 b、a%b 的所有公约数是同一批，最大公约数自然也相同。每一步，较大的数至少减少一半以上，所以步数只有 O(log n)，即使是十亿级的数，也只要几十步。',
@@ -105,7 +122,6 @@ export const gcd: AlgoDef<GcdInput, GcdState> = {
     '只记住了“较小的数除较大的数”而在代码里加了多余的交换判断，不但没有必要，还容易写错。',
   ],
   complexity: { time: 'O(log n)', space: 'O(1)', note: '每两步，较大的数至少减半，所以步数不超过 2·log₂n。' },
-  inputHint: '输入两个 1～9999 的正整数，例如 48 18。',
   presets: [
     { label: '48 和 18', text: '48 18' },
     { label: '互质的两个数', text: '35 64' },
@@ -114,6 +130,12 @@ export const gcd: AlgoDef<GcdInput, GcdState> = {
   defaultInput: { a: 48, b: 18 },
   parse,
   format: (v) => `${v.a} ${v.b}`,
+  answer: (v) => {
+    let x = v.a
+    let y = v.b
+    while (y) [x, y] = [y, x % y]
+    return `${x} ${(v.a / x) * v.b}`
+  },
   random: () => ({ a: randInt(10, 999), b: randInt(10, 999) }),
   run: runGcd,
   View: GcdView,
@@ -122,17 +144,17 @@ export const gcd: AlgoDef<GcdInput, GcdState> = {
 #include <stdio.h>
 int gcd(int a,int b){
     while (b){
-        int t=a%b;                              //@step
-        a=b;                                    //@step
-        b=t;                                    //@step
+        int t=a%b;                          //@step
+        a=b;                                //@step
+        b=t;                                //@step
     }
     return a;
 }
 int main(){
     int a,b;
     scanf("%d %d",&a,&b);
-    int g=gcd(a,b);                             //@init
-    printf("%d %d\n",g,a/g*b);                  //@done
+    int g=gcd(a,b);                         //@init
+    printf("%d %d\n",g,a/g*b);              //@done
     return 0;
 }
 `,
@@ -141,51 +163,50 @@ int main(){
 using namespace std;
 int gcd_(int a,int b){
     while (b){
-        int t=a%b;                              //@step
-        a=b;                                    //@step
-        b=t;                                    //@step
+        int t=a%b;                          //@step
+        a=b;                                //@step
+        b=t;                                //@step
     }
     return a;
 }
 int main(){
     int a,b;
     cin>>a>>b;
-    int g=gcd_(a,b);                            //@init
-    cout<<g<<" "<<a/g*b<<endl;                  //@done
+    int g=gcd_(a,b);                        //@init
+    cout<<g<<" "<<a/g*b<<endl;              //@done
     return 0;
 }
 `,
     python: String.raw`
-def gcd(a, b):
+def gcd(a,b):
     while b:
-        t = a % b                               #@step
-        a = b                                   #@step
-        b = t                                   #@step
+        t=a%b                               #@step
+        a=b                                 #@step
+        b=t                                 #@step
     return a
 
-
-a, b = map(int, input().split())
-g = gcd(a, b)                                   #@init
-print(g, a // g * b)                            #@done
+a,b=map(int,input().split())
+g=gcd(a,b)                                  #@init
+print(g,a//g*b)                             #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int gcd(int a, int b) {
-        while (b != 0) {
-            int t = a % b;                          //@step
-            a = b;                                  //@step
-            b = t;                                  //@step
+public class Main{
+    static int gcd(int a,int b){
+        while (b!=0){
+            int t=a%b;                      //@step
+            a=b;                            //@step
+            b=t;                            //@step
         }
         return a;
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int a = sc.nextInt(), b = sc.nextInt();
-        int g = gcd(a, b);                          //@init
-        System.out.println(g + " " + a / g * b);    //@done
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int a=sc.nextInt(),b=sc.nextInt();
+        int g=gcd(a,b);                     //@init
+        System.out.println(g+" "+a/g*b);    //@done
     }
 }
 `,

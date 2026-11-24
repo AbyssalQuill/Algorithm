@@ -3,7 +3,8 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { twoWindow } from './twoWindow'
+import { fail, randInt, readInput } from './shared'
 
 export interface TpInput {
   arr: number[]
@@ -94,22 +95,37 @@ function TpView({ frame }: { frame: Frame<TpState> }) {
 }
 
 function parse(text: string): ParseResult<TpInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「有序数组 | 目标和」，例如：1 3 4 6 8 11 | 10' }
-  const arr = toNums(parts[0])
-  const t = toNums(parts[1])
-  if (arr.length < 2 || arr.length > 14) return { ok: false, error: '数组里请放 2～14 个整数。' }
-  if (t.length !== 1) return { ok: false, error: '“|”右边只放一个目标和。' }
-  if (arr.some((x) => !Number.isInteger(x) || x < 0 || x > 99) || !Number.isInteger(t[0]) || t[0] < 0 || t[0] > 198) return { ok: false, error: '数组里的数是 0～99 的整数，目标和是 0～198 的整数。' }
-  for (let i = 1; i < arr.length; i++) if (arr[i] < arr[i - 1]) return { ok: false, error: '双指针要求数组已经从小到大排好序，请先排序再输入。' }
-  return { ok: true, value: { arr, target: t[0] } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 2, 14)
+    const arr = r.ints(n, '数', 0, 99)
+    const target = r.int('t', 0, 198)
+    r.end()
+    for (let i = 1; i < n; i++) if (arr[i] < arr[i - 1]) fail('双指针要求数组已经从小到大排好序，请先排序再输入。')
+    return { arr, target }
+  })
 }
 
 export const twoPointers: AlgoDef<TpInput, TpState> = {
   id: 'two-pointers',
-  title: '双指针：两数之和',
+  title: '双指针',
   tagline: '在有序数组里让两个指针从两端向中间靠拢，一趟就能找到和为目标的两个数',
   kind: '算法',
+  slug: 'two-sum',
+  name: '两数之和',
+  type: '相向双指针',
+  statement: {
+    desc: [
+      '给定一个从小到大排好序的数组和一个目标和 t，在数组里找两个不同位置的数，使它们的和恰好等于 t，输出这两个数的下标（从 0 开始，左边的在前）。如果有多组答案，输出左边下标最小的一组；左边下标相同时，输出右边下标最大的一组。找不到时输出 -1 -1。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 14）。',
+      '第二行 n 个从小到大排列的整数（可以有相同的数），每个在 0～99 之间。',
+      '第三行一个整数 t（0 ≤ t ≤ 198）。',
+    ],
+    output: [
+      '一行两个整数，是找到的两个下标，用空格隔开；找不到时输出 -1 -1。',
+    ],
+  },
   intro: [
     '问题是这样的：给一个从小到大排好的数组，找出两个数，使它们的和等于给定的目标。最直接的做法是枚举所有的数对，需要 O(n²) 次。',
     '利用“有序”这个条件可以做得更快。让 l 指向最小的数，r 指向最大的数，看它们的和：如果比目标小，说明最大的数都配不够，那么 l 指向的数无论和谁搭配都不可能达标，可以放心地排除它；如果比目标大，同理排除 r 指向的数。每看一次都能排除一个数，所以最多看 n 次就有结论。',
@@ -126,15 +142,21 @@ export const twoPointers: AlgoDef<TpInput, TpState> = {
     '要求输出所有满足条件的数对时，找到一个以后不能简单地退出，还要同时移动两个指针继续找，并处理好重复的数。',
   ],
   complexity: { time: 'O(n)', space: 'O(1)', note: '每一步都会排除一个数，所以最多检查 n-1 次。' },
-  inputHint: '格式：有序数组 | 目标和，例如 1 3 4 6 8 11 | 10（数组里 0～99，最多 14 个数）。',
   presets: [
-    { label: '找得到', text: '1 3 4 6 8 11 15 | 14' },
-    { label: '找不到', text: '1 3 4 6 8 11 15 | 2' },
-    { label: '有重复数', text: '2 2 5 5 9 | 10' },
+    { label: '找得到', text: '7\n1 3 4 6 8 11 15\n14' },
+    { label: '找不到', text: '7\n1 3 4 6 8 11 15\n2' },
+    { label: '有重复数', text: '5\n2 2 5 5 9\n10' },
   ],
   defaultInput: { arr: [1, 3, 4, 6, 8, 11, 15], target: 14 },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.target}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.target}`,
+  answer: (v) => {
+    const a = v.arr
+    for (let l = 0; l < a.length; l++) {
+      for (let r = a.length - 1; r > l; r--) if (a[l] + a[r] === v.target) return `${l} ${r}`
+    }
+    return '-1 -1'
+  },
   random: () => {
     const n = randInt(6, 10)
     const arr = Array.from({ length: n }, () => randInt(1, 40)).sort((a, b) => a - b)
@@ -151,19 +173,19 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     scanf("%d",&t);
-    int l=0,r=n-1;                              //@init
+    int l=0,r=n-1;                          //@init
     while (l<r){
-        int sum=a[l]+a[r];                      //@sum
+        int sum=a[l]+a[r];                  //@sum
         if (sum==t){
-            printf("%d %d\n",l,r);              //@hit
-            return 0;                           //@hit
+            printf("%d %d\n",l,r);          //@hit
+            return 0;                       //@hit
         }else if (sum<t){
-            l++;                                //@moveL
+            l++;                            //@moveL
         }else{
-            r--;                                //@moveR
+            r--;                            //@moveR
         }
     }
-    printf("-1 -1\n");                          //@miss
+    printf("-1 -1\n");                      //@miss
     return 0;
 }
 `,
@@ -175,67 +197,67 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     cin>>t;
-    int l=0,r=n-1;                              //@init
+    int l=0,r=n-1;                          //@init
     while (l<r){
-        int sum=a[l]+a[r];                      //@sum
+        int sum=a[l]+a[r];                  //@sum
         if (sum==t){
-            cout<<l<<" "<<r<<endl;              //@hit
-            return 0;                           //@hit
+            cout<<l<<" "<<r<<endl;          //@hit
+            return 0;                       //@hit
         }else if (sum<t){
-            l++;                                //@moveL
+            l++;                            //@moveL
         }else{
-            r--;                                //@moveR
+            r--;                            //@moveR
         }
     }
-    cout<<"-1 -1"<<endl;                        //@miss
+    cout<<"-1 -1"<<endl;                    //@miss
     return 0;
 }
 `,
     python: String.raw`
-def two_sum(a, t):
-    l, r = 0, len(a) - 1                        #@init
-    while l < r:
-        s = a[l] + a[r]                         #@sum
-        if s == t:
-            return l, r                         #@hit
-        elif s < t:
-            l += 1                              #@moveL
+def two_sum(a,t):
+    l,r=0,len(a)-1                          #@init
+    while l<r:
+        s=a[l]+a[r]                         #@sum
+        if s==t:
+            return l,r                      #@hit
+        elif s<t:
+            l+=1                            #@moveL
         else:
-            r -= 1                              #@moveR
-    return -1, -1                               #@miss
+            r-=1                            #@moveR
+    return -1,-1                            #@miss
 
-
-n = int(input())
-a = list(map(int, input().split()))
-t = int(input())
-print(*two_sum(a, t))
+n=int(input())
+a=list(map(int,input().split()))
+t=int(input())
+print(*two_sum(a,t))
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
-        int t = sc.nextInt();
-        int l = 0, r = n - 1;                       //@init
-        while (l < r) {
-            int sum = a[l] + a[r];                  //@sum
-            if (sum == t) {
-                System.out.println(l + " " + r);    //@hit
-                return;                             //@hit
-            } else if (sum < t) {
-                l++;                                //@moveL
-            } else {
-                r--;                                //@moveR
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
+        int t=sc.nextInt();
+        int l=0,r=n-1;                        //@init
+        while (l<r){
+            int sum=a[l]+a[r];                //@sum
+            if (sum==t){
+                System.out.println(l+" "+r);  //@hit
+                return;                       //@hit
+            }else if (sum<t){
+                l++;                          //@moveL
+            }else{
+                r--;                          //@moveR
             }
         }
-        System.out.println("-1 -1");                //@miss
+        System.out.println("-1 -1");          //@miss
     }
 }
 `,
   },
   problems: pickProblems('P1102', 'P1638'),
+  extra: [twoWindow],
 }

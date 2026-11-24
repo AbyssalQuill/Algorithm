@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame } from '../engine/types'
-import { parseList, randInt, randList } from './shared'
+import { arrayInput, randInt, randList } from './shared'
 
 interface LN {
   id: number
@@ -101,9 +101,24 @@ function ListDemoView({ frame }: { frame: Frame<ListState> }) {
 
 export const linkedList: AlgoDef<number[], ListState> = {
   id: 'linked-list',
-  title: '链表：反转',
+  title: '链表',
   tagline: '链表靠指针把结点串起来，反转它只需要让每个指针掉个头',
   kind: '数据结构',
+  slug: 'reverse',
+  name: '反转链表',
+  type: '指针操作',
+  statement: {
+    desc: [
+      '给定一个单链表，把它整个反转：原来的头结点变成尾结点，原来的尾结点变成头结点。链表各结点里依次存放着给定的 n 个整数。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 8），表示结点的个数。',
+      '第二行 n 个整数，依次是链表从头到尾各结点的值，每个数在 1～99 之间。',
+    ],
+    output: [
+      '一行 n 个整数，是反转之后的链表从头到尾各结点的值，用空格隔开。',
+    ],
+  },
   intro: [
     '链表的每个结点除了数据，还保存着下一个结点的地址。结点在内存里可以散落在任何地方，全靠这些指针串成一条链。所以在链表里插入或删除结点，不需要像数组那样搬动一大片元素，只要改几个指针；代价是不能按下标直接找到第 k 个，必须从头一个一个地走。',
     '反转链表是最经典的练习，它几乎把链表操作里最容易出错的地方都包含了。做法是用三个指针配合着走：prev 指向已经反转好的部分，cur 是当前要处理的结点，nxt 用来暂存 cur 的下一个结点。每一步让 cur 的 next 掉头指向 prev，再让两个指针一起向前走一格。',
@@ -120,15 +135,14 @@ export const linkedList: AlgoDef<number[], ListState> = {
     '手动用 new / malloc 创建的结点，用完要释放；比赛里通常不在意，工程里要记得。',
   ],
   complexity: { time: 'O(n)', space: 'O(1)', note: '只扫描一遍链表，只使用 prev、cur、nxt 三个指针。' },
-  inputHint: '输入 2～8 个 1～99 的整数，空格隔开，它们依次组成链表的各个结点。',
   presets: [
-    { label: '五个结点', text: '1 2 3 4 5' },
-    { label: '只有两个', text: '7 9' },
-    { label: '八个结点', text: '3 1 4 1 5 9 2 6' },
+    { label: '五个结点', text: '5\n1 2 3 4 5' },
+    { label: '只有两个', text: '2\n7 9' },
+    { label: '八个结点', text: '8\n3 1 4 1 5 9 2 6' },
   ],
   defaultInput: [1, 2, 3, 4, 5],
-  parse: (t) => parseList(t, { min: 2, max: 8, lo: 1, hi: 99 }),
-  format: (v) => v.join(' '),
+  ...arrayInput({ min: 2, max: 8, lo: 1, hi: 99, what: '结点的值' }),
+  answer: (v) => [...v].reverse().join(' '),
   random: () => randList(randInt(4, 7), 1, 60),
   run: runReverse,
   View: ListDemoView,
@@ -141,14 +155,14 @@ typedef struct Node{
     struct Node *next;
 } Node;
 Node* reverseList(Node* head){
-    Node *prev=NULL,*cur=head;                  //@init
+    Node *prev=NULL,*cur=head;              //@init
     while (cur){
-        Node* nxt=cur->next;                    //@save
-        cur->next=prev;                         //@flip
-        prev=cur;                               //@move
-        cur=nxt;                                //@move
+        Node* nxt=cur->next;                //@save
+        cur->next=prev;                     //@flip
+        prev=cur;                           //@move
+        cur=nxt;                            //@move
     }
-    return prev;                                //@done
+    return prev;                            //@done
 }
 int main(){
     int n;
@@ -179,14 +193,14 @@ struct Node{
     Node(int v):val(v){}
 };
 Node* reverseList(Node* head){
-    Node *prev=nullptr,*cur=head;               //@init
+    Node *prev=nullptr,*cur=head;           //@init
     while (cur){
-        Node* nxt=cur->next;                    //@save
-        cur->next=prev;                         //@flip
-        prev=cur;                               //@move
-        cur=nxt;                                //@move
+        Node* nxt=cur->next;                //@save
+        cur->next=prev;                     //@flip
+        prev=cur;                           //@move
+        cur=nxt;                            //@move
     }
-    return prev;                                //@done
+    return prev;                            //@done
 }
 int main(){
     int n,x;
@@ -209,73 +223,73 @@ int main(){
 `,
     python: String.raw`
 class Node:
-    def __init__(self, v):
-        self.val = v
-        self.next = None
-
+    def __init__(self,v):
+        self.val=v
+        self.next=None
 
 def reverse_list(head):
-    prev, cur = None, head                      #@init
+    prev,cur=None,head                      #@init
     while cur:
-        nxt = cur.next                          #@save
-        cur.next = prev                         #@flip
-        prev = cur                              #@move
-        cur = nxt                               #@move
-    return prev                                 #@done
+        nxt=cur.next                        #@save
+        cur.next=prev                       #@flip
+        prev=cur                            #@move
+        cur=nxt                             #@move
+    return prev                             #@done
 
-
-n = int(input())
-head = tail = None
-for x in map(int, input().split()):
-    p = Node(x)
+n=int(input())
+head=tail=None
+for x in map(int,input().split()):
+    p=Node(x)
     if head is None:
-        head = tail = p
+        head=tail=p
     else:
-        tail.next = p
-        tail = p
-head = reverse_list(head)
-out = []
+        tail.next=p
+        tail=p
+head=reverse_list(head)
+out=[]
 while head:
     out.append(head.val)
-    head = head.next
+    head=head.next
 print(*out)
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static class Node {
+public class Main{
+    static class Node{
         int val;
         Node next;
-        Node(int v) { val = v; }
-    }
-
-    static Node reverseList(Node head) {
-        Node prev = null, cur = head;               //@init
-        while (cur != null) {
-            Node nxt = cur.next;                    //@save
-            cur.next = prev;                        //@flip
-            prev = cur;                             //@move
-            cur = nxt;                              //@move
+        Node(int v){
+            val=v;
         }
-        return prev;                                //@done
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        Node head = null, tail = null;
-        for (int i = 0; i < n; i++) {
-            Node p = new Node(sc.nextInt());
-            if (head == null) head = tail = p;
-            else {
-                tail.next = p;
-                tail = p;
+    static Node reverseList(Node head){
+        Node prev=null,cur=head;            //@init
+        while (cur!=null){
+            Node nxt=cur.next;              //@save
+            cur.next=prev;                  //@flip
+            prev=cur;                       //@move
+            cur=nxt;                        //@move
+        }
+        return prev;                        //@done
+    }
+
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        Node head=null,tail=null;
+        for (int i=0;i<n;i++){
+            Node p=new Node(sc.nextInt());
+            if (head==null) head=tail=p;
+            else{
+                tail.next=p;
+                tail=p;
             }
         }
-        head = reverseList(head);
-        StringBuilder sb = new StringBuilder();
-        for (Node p = head; p != null; p = p.next) sb.append(p.val).append(' ');
+        head=reverseList(head);
+        StringBuilder sb=new StringBuilder();
+        for (Node p=head;p!=null;p=p.next) sb.append(p.val).append(' ');
         System.out.println(sb);
     }
 }

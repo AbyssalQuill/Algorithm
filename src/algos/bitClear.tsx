@@ -3,7 +3,9 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, toNums } from './shared'
+import { bitSubsets } from './bitSubsets'
+import { bitXor } from './bitXor'
+import { randInt, readInput } from './shared'
 
 export interface BitClearState {
   n0: number
@@ -65,16 +67,32 @@ function BitView({ frame }: { frame: Frame<BitClearState> }) {
 }
 
 function parse(text: string): ParseResult<number> {
-  const v = toNums(text)
-  if (v.length !== 1 || !Number.isInteger(v[0]) || v[0] < 1 || v[0] > 255) return { ok: false, error: '请输入一个 1～255 的整数，例如：180' }
-  return { ok: true, value: v[0] }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 255)
+    r.end()
+    return n
+  })
 }
 
 export const bitClear: AlgoDef<number, BitClearState> = {
-  id: 'bit-clear',
-  title: '位运算：n & (n-1)',
-  tagline: '一个小小的表达式能消掉二进制里最低位的 1，用它数 1 的个数、判断 2 的幂',
+  id: 'bitops',
+  title: '位运算',
+  tagline: '直接操作整数的二进制位：一个小小的表达式就能消掉最低位的 1，用它数 1 的个数、判断 2 的幂',
   kind: '算法',
+  slug: 'popcount',
+  name: '二进制中 1 的个数',
+  type: '统计',
+  statement: {
+    desc: [
+      '给定一个正整数 n，求它的二进制表示里有多少个 1。',
+    ],
+    input: [
+      '一行一个整数 n（1 ≤ n ≤ 255）。',
+    ],
+    output: [
+      '一行一个整数，是 n 的二进制里 1 的个数。',
+    ],
+  },
   intro: [
     '位运算直接操作整数的二进制位，速度快，写法短，是算法竞赛里的常用技巧。其中最有名的一个技巧是 n & (n-1)：它会把 n 的二进制里最低位的那个 1 变成 0，其他位保持不变。',
     '道理很简单：n-1 会让最低位的 1 变成 0，它右边原来全是 0 的位全部变成 1；这样 n 和 n-1 在这一段上一个是 1000…，一个是 0111…，按位与之后全是 0，而更高位两者相同，保持不变。反复执行 n &= n-1，每次消掉一个 1，直到 n 变成 0，执行的次数就是二进制里 1 的个数。',
@@ -91,7 +109,6 @@ export const bitClear: AlgoDef<number, BitClearState> = {
     '位运算的优先级低于比较运算符，写成 n&(n-1)==0 实际上是 n&((n-1)==0)，一定要加括号。',
   ],
   complexity: { time: 'O(1 的个数)', space: 'O(1)', note: '循环次数等于二进制里 1 的个数，最多就是位数（int 是 32），所以可以看作常数。' },
-  inputHint: '输入一个 1～255 的整数，演示它的 8 位二进制，例如 180。',
   presets: [
     { label: '180（10110100）', text: '180' },
     { label: '64（只有一个 1）', text: '64' },
@@ -100,6 +117,7 @@ export const bitClear: AlgoDef<number, BitClearState> = {
   defaultInput: 180,
   parse,
   format: (v) => String(v),
+  answer: (n) => String(n.toString(2).replace(/0/g, '').length),
   random: () => randInt(1, 255),
   run: runBitClear,
   View: BitView,
@@ -108,12 +126,12 @@ export const bitClear: AlgoDef<number, BitClearState> = {
 #include <stdio.h>
 int main(){
     int n,cnt=0;
-    scanf("%d",&n);                             //@init
+    scanf("%d",&n);                         //@init
     while (n){
-        n&=(n-1);                               //@clear
-        cnt++;                                  //@clear
+        n&=(n-1);                           //@clear
+        cnt++;                              //@clear
     }
-    printf("%d\n",cnt);                         //@done
+    printf("%d\n",cnt);                     //@done
     return 0;
 }
 `,
@@ -122,38 +140,39 @@ int main(){
 using namespace std;
 int main(){
     int n,cnt=0;
-    cin>>n;                                     //@init
+    cin>>n;                                 //@init
     while (n){
-        n&=(n-1);                               //@clear
-        cnt++;                                  //@clear
+        n&=(n-1);                           //@clear
+        cnt++;                              //@clear
     }
-    cout<<cnt<<endl;                            //@done
+    cout<<cnt<<endl;                        //@done
     return 0;
 }
 `,
     python: String.raw`
-n = int(input())                                #@init
-cnt = 0
+n=int(input())                              #@init
+cnt=0
 while n:
-    n &= n - 1                                  #@clear
-    cnt += 1                                    #@clear
-print(cnt)                                      #@done
+    n&=n-1                                  #@clear
+    cnt+=1                                  #@clear
+print(cnt)                                  #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        int n = new Scanner(System.in).nextInt();   //@init
-        int cnt = 0;
-        while (n != 0) {
-            n &= (n - 1);                           //@clear
-            cnt++;                                  //@clear
+public class Main{
+    public static void main(String[] args){
+        int n=new Scanner(System.in).nextInt();  //@init
+        int cnt=0;
+        while (n!=0){
+            n&=(n-1);                            //@clear
+            cnt++;                               //@clear
         }
-        System.out.println(cnt);                    //@done
+        System.out.println(cnt);                 //@done
     }
 }
 `,
   },
   problems: pickProblems('P1100', 'P1226'),
+  extra: [bitXor, bitSubsets],
 }

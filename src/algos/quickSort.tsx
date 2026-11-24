@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame } from '../engine/types'
-import { parseList, randList } from './shared'
+import { arrayInput, randList } from './shared'
 
 export interface QsState {
   cells: { id: number; v: number }[]
@@ -130,6 +130,21 @@ export const quickSort: AlgoDef<number[], QsState> = {
   title: '快速排序',
   tagline: '选一个基准，把比它小的放左边、比它大的放右边，再分别处理两边',
   kind: '算法',
+  slug: 'sort',
+  name: '从小到大排序',
+  type: '排序',
+  statement: {
+    desc: [
+      '给定 n 个整数，用快速排序把它们从小到大排好序，输出排序之后的结果。演示里可以看到基准数是怎样把数组分成两半的。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 12）。',
+      '第二行 n 个整数，每个在 1～99 之间，可以有相同的数。',
+    ],
+    output: [
+      '一行 n 个整数，从小到大排列，用空格隔开。',
+    ],
+  },
   intro: [
     '快速排序用的是“分治”的想法：先挑一个数作为基准，通过一趟扫描，把比基准小的数都换到它的左边，其余的留在右边。这一趟结束后，基准恰好落在它最终应该在的位置上，不会再动了。',
     '剩下的问题就变成了两个更小的同类问题：左边那一段怎么排，右边那一段怎么排。对它们各自重复同样的做法，直到每一段只剩一个数，整个数组就有序了。',
@@ -146,15 +161,14 @@ export const quickSort: AlgoDef<number[], QsState> = {
     '递归深度在最坏情况下会达到 n，数据很大时可能栈溢出。',
   ],
   complexity: { time: 'O(n log n)', space: 'O(log n)', note: '时间是平均情况；基准选得很差时最坏为 O(n²)。空间是递归占用的栈。' },
-  inputHint: '输入 2～12 个 1～99 的整数，空格隔开，回车或点“应用”。',
   presets: [
-    { label: '随便一组', text: '6 2 9 4 7 1 8 3' },
-    { label: '已经有序', text: '1 2 3 4 5 6 7 8' },
-    { label: '有重复数', text: '4 2 4 1 3 2 4' },
+    { label: '随便一组', text: '8\n6 2 9 4 7 1 8 3' },
+    { label: '已经有序', text: '8\n1 2 3 4 5 6 7 8' },
+    { label: '有重复数', text: '7\n4 2 4 1 3 2 4' },
   ],
   defaultInput: [6, 2, 9, 4, 7, 1, 8, 3],
-  parse: (t) => parseList(t, { min: 2, max: 12, lo: 1, hi: 99 }),
-  format: (v) => v.join(' '),
+  ...arrayInput({ min: 2, max: 12, lo: 1, hi: 99 }),
+  answer: (v) => [...v].sort((a, b) => a - b).join(' '),
   random: () => randList(8),
   run: runQuickSort,
   View: QsView,
@@ -162,23 +176,23 @@ export const quickSort: AlgoDef<number[], QsState> = {
     c: String.raw`
 #include <stdio.h>
 int partition(int a[],int lo,int hi){
-    int pivot=a[hi];                            //@pivot
-    int i=lo;                                   //@pivot
+    int pivot=a[hi];                           //@pivot
+    int i=lo;                                  //@pivot
     for (int j=lo;j<hi;j++){
-        if (a[j]<pivot){                        //@cmp
-            int t=a[i];                         //@swap
-            a[i]=a[j];                          //@swap
-            a[j]=t;                             //@swap
-            i++;                                //@swap
+        if (a[j]<pivot){                       //@cmp
+            int t=a[i];                        //@swap
+            a[i]=a[j];                         //@swap
+            a[j]=t;                            //@swap
+            i++;                               //@swap
         }
     }
-    int t=a[i];                                 //@place
-    a[i]=a[hi];                                 //@place
-    a[hi]=t;                                    //@place
+    int t=a[i];                                //@place
+    a[i]=a[hi];                                //@place
+    a[hi]=t;                                   //@place
     return i;
 }
 void quickSort(int a[],int lo,int hi){
-    if (lo>=hi) return;                         //@call
+    if (lo>=hi) return;                        //@call
     int p=partition(a,lo,hi);
     quickSort(a,lo,p-1);
     quickSort(a,p+1,hi);
@@ -187,8 +201,8 @@ int main(){
     int n,a[1005];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    quickSort(a,0,n-1);                         //@init
-    for (int i=0;i<n;i++) printf("%d ",a[i]);   //@done
+    quickSort(a,0,n-1);                        //@init
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
     return 0;
 }
 `,
@@ -196,19 +210,19 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 int partitionArr(int a[],int lo,int hi){
-    int pivot=a[hi];                            //@pivot
-    int i=lo;                                   //@pivot
+    int pivot=a[hi];                        //@pivot
+    int i=lo;                               //@pivot
     for (int j=lo;j<hi;j++){
-        if (a[j]<pivot){                        //@cmp
-            swap(a[i],a[j]);                    //@swap
-            i++;                                //@swap
+        if (a[j]<pivot){                    //@cmp
+            swap(a[i],a[j]);                //@swap
+            i++;                            //@swap
         }
     }
-    swap(a[i],a[hi]);                           //@place
+    swap(a[i],a[hi]);                       //@place
     return i;
 }
 void quickSort(int a[],int lo,int hi){
-    if (lo>=hi) return;                         //@call
+    if (lo>=hi) return;                     //@call
     int p=partitionArr(a,lo,hi);
     quickSort(a,lo,p-1);
     quickSort(a,p+1,hi);
@@ -217,71 +231,69 @@ int main(){
     int n,a[1005];
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
-    quickSort(a,0,n-1);                         //@init
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";      //@done
+    quickSort(a,0,n-1);                     //@init
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
     return 0;
 }
 `,
     python: String.raw`
-def partition(a, lo, hi):
-    pivot = a[hi]                               #@pivot
-    i = lo                                      #@pivot
-    for j in range(lo, hi):
-        if a[j] < pivot:                        #@cmp
-            a[i], a[j] = a[j], a[i]             #@swap
-            i += 1                              #@swap
-    a[i], a[hi] = a[hi], a[i]                   #@place
+def partition(a,lo,hi):
+    pivot=a[hi]                             #@pivot
+    i=lo                                    #@pivot
+    for j in range(lo,hi):
+        if a[j]<pivot:                      #@cmp
+            a[i],a[j]=a[j],a[i]             #@swap
+            i+=1                            #@swap
+    a[i],a[hi]=a[hi],a[i]                   #@place
     return i
 
-
-def quick_sort(a, lo, hi):
-    if lo >= hi:                                #@call
+def quick_sort(a,lo,hi):
+    if lo>=hi:                              #@call
         return
-    p = partition(a, lo, hi)
-    quick_sort(a, lo, p - 1)
-    quick_sort(a, p + 1, hi)
+    p=partition(a,lo,hi)
+    quick_sort(a,lo,p-1)
+    quick_sort(a,p+1,hi)
 
-
-n = int(input())
-a = list(map(int, input().split()))
-quick_sort(a, 0, n - 1)                         #@init
-print(*a)                                       #@done
+n=int(input())
+a=list(map(int,input().split()))
+quick_sort(a,0,n-1)                         #@init
+print(*a)                                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int partition(int[] a, int lo, int hi) {
-        int pivot = a[hi];                          //@pivot
-        int i = lo;                                 //@pivot
-        for (int j = lo; j < hi; j++) {
-            if (a[j] < pivot) {                     //@cmp
-                int t = a[i];                       //@swap
-                a[i] = a[j];                        //@swap
-                a[j] = t;                           //@swap
-                i++;                                //@swap
+public class Main{
+    static int partition(int[] a,int lo,int hi){
+        int pivot=a[hi];                        //@pivot
+        int i=lo;                               //@pivot
+        for (int j=lo;j<hi;j++){
+            if (a[j]<pivot){                    //@cmp
+                int t=a[i];                     //@swap
+                a[i]=a[j];                      //@swap
+                a[j]=t;                         //@swap
+                i++;                            //@swap
             }
         }
-        int t = a[i];                               //@place
-        a[i] = a[hi];                               //@place
-        a[hi] = t;                                  //@place
+        int t=a[i];                             //@place
+        a[i]=a[hi];                             //@place
+        a[hi]=t;                                //@place
         return i;
     }
 
-    static void quickSort(int[] a, int lo, int hi) {
-        if (lo >= hi) return;                       //@call
-        int p = partition(a, lo, hi);
-        quickSort(a, lo, p - 1);
-        quickSort(a, p + 1, hi);
+    static void quickSort(int[] a,int lo,int hi){
+        if (lo>=hi) return;                     //@call
+        int p=partition(a,lo,hi);
+        quickSort(a,lo,p-1);
+        quickSort(a,p+1,hi);
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
-        quickSort(a, 0, n - 1);                     //@init
-        for (int x : a) System.out.print(x + " ");  //@done
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
+        quickSort(a,0,n-1);                     //@init
+        for (int x:a) System.out.print(x+" ");  //@done
     }
 }
 `,

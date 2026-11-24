@@ -1,54 +1,58 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import { ALGOS, findAlgo } from '../algos'
+import { ALGOS, examplesOf, findAlgo } from '../algos'
 import { CodePanel } from '../components/CodePanel'
-import { IconArrow, IconDice } from '../components/icons'
+import { IconArrow } from '../components/icons'
 import { Player } from '../components/Player'
+import { ProblemCard } from '../components/ProblemCard'
 import { Problems } from '../components/Problems'
-import type { AnyAlgo } from '../engine/types'
+import type { AnyAlgo, AnyExample } from '../engine/types'
 import { usePlayer } from '../engine/usePlayer'
 import { useLang } from '../hooks'
 import NotFound from './NotFound'
 
 export default function Lab() {
   const { id } = useParams()
+  const [sp] = useSearchParams()
   const algo = findAlgo(id)
-  return algo ? <LabView key={algo.id} algo={algo} /> : <NotFound />
+  if (!algo) return <NotFound />
+  const list = examplesOf(algo)
+  const at = Math.max(0, list.findIndex((e) => e.slug === sp.get('ex')))
+  return <LabView key={`${algo.id}/${list[at].slug}`} algo={algo} list={list} at={at} />
 }
 
-function LabView({ algo }: { algo: AnyAlgo }) {
-  const [input, setInput] = useState(algo.defaultInput)
-  const [text, setText] = useState(algo.format(algo.defaultInput))
+function LabView({ algo, list, at }: { algo: AnyAlgo; list: AnyExample[]; at: number }) {
+  const ex = list[at]
+  const [input, setInput] = useState(ex.defaultInput)
+  const [text, setText] = useState(() => ex.format(ex.defaultInput))
   const [error, setError] = useState('')
-  const frames = useMemo(() => algo.run(input), [algo, input])
+  const frames = useMemo(() => ex.run(input), [ex, input])
+  const output = useMemo(() => ex.answer(input), [ex, input])
   const player = usePlayer(frames)
   const frame = frames[Math.min(player.index, frames.length - 1)]
   const [lang, setLang] = useLang()
-  const View = algo.View
+  const View = ex.View
 
-  const at = ALGOS.findIndex((a) => a.id === algo.id)
-  const prevAlgo = ALGOS[at - 1]
-  const nextAlgo = ALGOS[at + 1]
+  const here = ALGOS.findIndex((a) => a.id === algo.id)
+  const prevAlgo = ALGOS[here - 1]
+  const nextAlgo = ALGOS[here + 1]
 
   const apply = (t: string) => {
-    const r = algo.parse(t)
+    const r = ex.parse(t)
     if (r.ok) {
       setInput(r.value)
-      setText(algo.format(r.value))
+      setText(ex.format(r.value))
       setError('')
     } else {
+      setText(t)
       setError(r.error)
     }
   }
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    apply(text)
-  }
   const random = () => {
-    const v = algo.random()
+    const v = ex.random()
     setInput(v)
-    setText(algo.format(v))
+    setText(ex.format(v))
     setError('')
   }
 
@@ -101,47 +105,37 @@ function LabView({ algo }: { algo: AnyAlgo }) {
           <div className="cx" aria-label="复杂度">
             <span>
               <i>时间复杂度</i>
-              {algo.complexity.time}
+              {ex.complexity.time}
             </span>
             <span>
               <i>空间复杂度</i>
-              {algo.complexity.space}
+              {ex.complexity.space}
             </span>
           </div>
         </div>
         <p className="lab-tagline">{algo.tagline}</p>
-        {algo.complexity.note && <p className="cx-note">{algo.complexity.note}</p>}
+        {ex.complexity.note && <p className="cx-note">{ex.complexity.note}</p>}
       </header>
+
+      {list.length > 1 && (
+        <nav className="ex-tabs" aria-label="例题">
+          <span className="ex-tabs-label">例题</span>
+          {list.map((e, i) => (
+            <Link key={e.slug} to={i === 0 ? `/lab/${algo.id}` : `/lab/${algo.id}?ex=${e.slug}`} replace className={`ex-tab${i === at ? ' on' : ''}`} aria-current={i === at ? 'page' : undefined}>
+              <b>{i + 1}</b>
+              <span>
+                <strong>{e.name}</strong>
+                <i>{e.type}</i>
+              </span>
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      <ProblemCard ex={ex} index={at} text={text} onText={setText} error={error} output={output} onApply={apply} onRandom={random} />
 
       <div className="lab-grid">
         <section className="lab-left" aria-label="动画演示">
-          <form className="inputbar" onSubmit={onSubmit}>
-            <label htmlFor="lab-input">输入数据</label>
-            <div className="input-row">
-              <div className="field">
-                <input id="lab-input" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} autoComplete="off" aria-invalid={!!error} />
-              </div>
-              <button type="submit" className="btn btn-primary btn-sm">
-                应用
-              </button>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={random}>
-                <IconDice /> 随机
-              </button>
-            </div>
-            {algo.presets && (
-              <div className="chips" aria-label="示例数据">
-                {algo.presets.map((p: { label: string; text: string }) => (
-                  <button type="button" key={p.label} className="chip" onClick={() => apply(p.text)}>
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            )}
-            <p className={error ? 'hint err' : 'hint'} role={error ? 'alert' : undefined}>
-              {error || algo.inputHint}
-            </p>
-          </form>
-
           <div className="stage">
             <View frame={frame} />
           </div>
@@ -162,13 +156,21 @@ function LabView({ algo }: { algo: AnyAlgo }) {
         </section>
 
         <aside className="lab-right" aria-label="对应代码">
-          <CodePanel sources={algo.sources} step={frame.step} lang={lang} onLang={setLang} />
+          <CodePanel sources={ex.sources} step={frame.step} lang={lang} onLang={setLang} />
         </aside>
       </div>
 
       <section className="learn">
+        {ex.idea && ex.idea.length > 0 && (
+          <article className="learn-card learn-main learn-idea">
+            <h2>这道题怎么想</h2>
+            {ex.idea.map((t: string, i: number) => (
+              <p key={i}>{t}</p>
+            ))}
+          </article>
+        )}
         <article className="learn-card learn-main">
-          <h2>基本思路</h2>
+          <h2>{algo.title} 的基本思路</h2>
           {algo.intro.map((t: string, i: number) => (
             <p key={i}>{t}</p>
           ))}
@@ -191,17 +193,17 @@ function LabView({ algo }: { algo: AnyAlgo }) {
         </article>
       </section>
 
-      {algo.problems.length > 0 && (
+      {ex.problems.length > 0 && (
         <section className="lab-problems">
           <h2 className="section-title">
-            <span className="mark">洛谷例题</span>
+            <span className="mark">洛谷练习</span>
           </h2>
           <p className="section-sub">看懂演示以后，可以去洛谷上亲手写一遍。点击题目会在新的标签页里打开。</p>
-          <Problems list={algo.problems} />
+          <Problems list={ex.problems} />
         </section>
       )}
 
-      <nav className="lab-nav" aria-label="上一个 / 下一个演示">
+      <nav className="lab-nav" aria-label="上一个 / 下一个专题">
         {prevAlgo ? (
           <Link to={`/lab/${prevAlgo.id}`} className="lab-nav-a prev">
             <span>上一个</span>

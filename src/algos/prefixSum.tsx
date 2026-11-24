@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface PsInput {
   arr: number[]
@@ -94,16 +94,14 @@ function PsView({ frame }: { frame: Frame<PsState> }) {
 }
 
 function parse(text: string): ParseResult<PsInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「数组 | l r」，例如：3 1 4 1 5 9 2 6 | 3 6' }
-  const arr = toNums(parts[0])
-  const q = toNums(parts[1])
-  if (arr.length < 2 || arr.length > 10) return { ok: false, error: '数组里请放 2～10 个整数。' }
-  if (arr.some((x) => !Number.isInteger(x) || x < 0 || x > 99)) return { ok: false, error: '数组里的数是 0～99 的整数。' }
-  if (q.length !== 2 || q.some((x) => !Number.isInteger(x))) return { ok: false, error: '“|”右边写两个整数：区间的左端点 l 和右端点 r。' }
-  const [l, r] = q
-  if (l < 1 || r > arr.length || l > r) return { ok: false, error: `要满足 1 ≤ l ≤ r ≤ ${arr.length}（下标从 1 开始）。` }
-  return { ok: true, value: { arr, l, r } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 2, 10)
+    const arr = r.ints(n, '数', 0, 99)
+    const l = r.int('l', 1, n)
+    const rr = r.int('r', l, n)
+    r.end()
+    return { arr, l, r: rr }
+  })
 }
 
 export const prefixSum: AlgoDef<PsInput, PsState> = {
@@ -111,6 +109,21 @@ export const prefixSum: AlgoDef<PsInput, PsState> = {
   title: '前缀和',
   tagline: '先花一遍的时间累加成一张表，之后每次区间求和只需要做一次减法',
   kind: '算法',
+  slug: 'range-sum',
+  name: '区间求和',
+  type: '一维前缀和',
+  statement: {
+    desc: [
+      '给定一个长度为 n 的数组，求下标从 l 到 r（含两端，下标从 1 开始）的所有数之和。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 10），第二行 n 个整数，每个在 0～99 之间。',
+      '第三行两个整数 l 和 r（1 ≤ l ≤ r ≤ n）。',
+    ],
+    output: [
+      '一行一个整数，表示区间 [l, r] 里所有数的和。',
+    ],
+  },
   intro: [
     '假设要回答很多次这样的询问：数组里从第 l 个数到第 r 个数的和是多少？每次都从 l 加到 r，询问次数一多，时间就吃不消了。',
     '前缀和的想法是把累加的工作提前做完。先算出 s[i]，表示前 i 个数的总和。之后任意一段区间的和，都等于“到 r 为止的总和”减去“到 l-1 为止的总和”，多出来的部分正好就是这一段。建表花一遍 O(n)，之后每次询问只要一次减法。',
@@ -127,15 +140,15 @@ export const prefixSum: AlgoDef<PsInput, PsState> = {
     '数组从 0 开始存放时，s[l-1] 在 l=0 处会越界，这是下标从 1 开始存放的主要原因。',
   ],
   complexity: { time: 'O(n + q)', space: 'O(n)', note: '建表 O(n)，之后每次询问 O(1)，一共 q 次询问就是 O(n + q)。' },
-  inputHint: '格式：数组 | l r，例如 3 1 4 1 5 9 2 6 | 3 6（数组最多 10 个数，l 和 r 从 1 开始）。',
   presets: [
-    { label: '中间一段', text: '3 1 4 1 5 9 2 6 | 3 6' },
-    { label: '从头开始', text: '3 1 4 1 5 9 2 6 | 1 4' },
-    { label: '只有一个数', text: '3 1 4 1 5 9 2 6 | 5 5' },
+    { label: '中间一段', text: '8\n3 1 4 1 5 9 2 6\n3 6' },
+    { label: '从头开始', text: '8\n3 1 4 1 5 9 2 6\n1 4' },
+    { label: '只有一个数', text: '8\n3 1 4 1 5 9 2 6\n5 5' },
   ],
   defaultInput: { arr: [3, 1, 4, 1, 5, 9, 2, 6], l: 3, r: 6 },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.l} ${v.r}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.l} ${v.r}`,
+  answer: (v) => String(v.arr.slice(v.l - 1, v.r).reduce((x, y) => x + y, 0)),
   random: () => {
     const n = randInt(6, 9)
     const arr = Array.from({ length: n }, () => randInt(0, 20))
@@ -151,13 +164,13 @@ export const prefixSum: AlgoDef<PsInput, PsState> = {
 int main(){
     int n,l,r,a[1005],s[1005];
     scanf("%d",&n);
-    s[0]=0;                                     //@init
+    s[0]=0;                                 //@init
     for (int i=1;i<=n;i++){
         scanf("%d",&a[i]);
-        s[i]=s[i-1]+a[i];                       //@build
+        s[i]=s[i-1]+a[i];                   //@build
     }
     scanf("%d %d",&l,&r);
-    printf("%d\n",s[r]-s[l-1]);                 //@query
+    printf("%d\n",s[r]-s[l-1]);             //@query
     return 0;
 }
 `,
@@ -167,40 +180,40 @@ using namespace std;
 int main(){
     int n,l,r,a[1005],s[1005];
     cin>>n;
-    s[0]=0;                                     //@init
+    s[0]=0;                                 //@init
     for (int i=1;i<=n;i++){
         cin>>a[i];
-        s[i]=s[i-1]+a[i];                       //@build
+        s[i]=s[i-1]+a[i];                   //@build
     }
     cin>>l>>r;
-    cout<<s[r]-s[l-1]<<endl;                    //@query
+    cout<<s[r]-s[l-1]<<endl;                //@query
     return 0;
 }
 `,
     python: String.raw`
-n = int(input())
-a = [0] + list(map(int, input().split()))
-s = [0] * (n + 1)                               #@init
-for i in range(1, n + 1):
-    s[i] = s[i - 1] + a[i]                      #@build
-l, r = map(int, input().split())
-print(s[r] - s[l - 1])                          #@query
+n=int(input())
+a=[0]+list(map(int,input().split()))
+s=[0]*(n+1)                                 #@init
+for i in range(1,n+1):
+    s[i]=s[i-1]+a[i]                        #@build
+l,r=map(int,input().split())
+print(s[r]-s[l-1])                          #@query
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n + 1];
-        int[] s = new int[n + 1];                   //@init
-        for (int i = 1; i <= n; i++) {
-            a[i] = sc.nextInt();
-            s[i] = s[i - 1] + a[i];                 //@build
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n+1];
+        int[] s=new int[n+1];               //@init
+        for (int i=1;i<=n;i++){
+            a[i]=sc.nextInt();
+            s[i]=s[i-1]+a[i];               //@build
         }
-        int l = sc.nextInt(), r = sc.nextInt();
-        System.out.println(s[r] - s[l - 1]);        //@query
+        int l=sc.nextInt(),r=sc.nextInt();
+        System.out.println(s[r]-s[l-1]);    //@query
     }
 }
 `,

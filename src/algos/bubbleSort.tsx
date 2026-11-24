@@ -2,7 +2,8 @@ import { ArrayView, type Cell, type Pointer, type Tone } from '../components/Arr
 import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
-import type { AlgoDef, Frame, ParseResult } from '../engine/types'
+import type { AlgoDef, Frame } from '../engine/types'
+import { arrayInput } from './shared'
 
 export interface SortState {
   cells: { id: number; v: number }[]
@@ -82,22 +83,26 @@ function BubbleView({ frame }: { frame: Frame<SortState> }) {
   )
 }
 
-function parse(text: string): ParseResult<number[]> {
-  const nums = text
-    .trim()
-    .split(/[\s,，、]+/)
-    .filter(Boolean)
-    .map(Number)
-  if (nums.length < 2 || nums.length > 14) return { ok: false, error: '请输入 2～14 个整数，用空格隔开。' }
-  if (nums.some((x) => !Number.isInteger(x) || x < 1 || x > 99)) return { ok: false, error: '每个数都要是 1～99 之间的整数哦。' }
-  return { ok: true, value: nums }
-}
-
 export const bubbleSort: AlgoDef<number[], SortState> = {
   id: 'bubble-sort',
   title: '冒泡排序',
   tagline: '每一轮比较相邻的两个数，让较大的数一步步移动到最右边',
   kind: '算法',
+  slug: 'sort',
+  name: '从小到大排序',
+  type: '排序',
+  statement: {
+    desc: [
+      '给定 n 个整数，用冒泡排序把它们从小到大排好序，输出排序之后的结果。演示里可以看到每一轮比较和交换的过程。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 14）。',
+      '第二行 n 个整数，每个在 1～99 之间，可以有相同的数。',
+    ],
+    output: [
+      '一行 n 个整数，从小到大排列，用空格隔开。',
+    ],
+  },
   intro: [
     '冒泡排序是最容易理解的排序方法。每一轮从左向右，依次比较相邻的两个数，如果左边的比右边的大，就交换它们的位置。较大的数就像水里的气泡一样，一点一点浮到右端。',
     '一轮结束之后，尚未排好的数里最大的那个，必定已经来到了它最终的位置。重复 n-1 轮，整个数组就从小到大排好了。',
@@ -114,33 +119,32 @@ export const bubbleSort: AlgoDef<number[], SortState> = {
     '当 n 很大（比如十万）时，O(n²) 的时间会超限，应该改用 sort 等更快的排序方法。',
   ],
   complexity: { time: 'O(n²)', space: 'O(1)', note: '如果加上“一整趟没有交换就提前结束”的优化，最好情况是 O(n)。' },
-  inputHint: '输入 2～14 个 1～99 的整数，空格隔开，回车或点“应用”。',
   presets: [
-    { label: '已经有序', text: '1 2 3 4 5 6 7 8' },
-    { label: '完全倒序', text: '9 8 7 6 5 4 3 2' },
-    { label: '有重复数', text: '4 2 4 1 3 2' },
+    { label: '已经有序', text: '8\n1 2 3 4 5 6 7 8' },
+    { label: '完全倒序', text: '8\n9 8 7 6 5 4 3 2' },
+    { label: '有重复数', text: '6\n4 2 4 1 3 2' },
   ],
   defaultInput: [5, 3, 8, 1, 9, 2, 7],
-  parse,
-  format: (v) => v.join(' '),
+  ...arrayInput({ min: 2, max: 14, lo: 1, hi: 99 }),
+  answer: (v) => [...v].sort((a, b) => a - b).join(' '),
   random: () => Array.from({ length: 8 }, () => 1 + Math.floor(Math.random() * 95)),
   run: runBubbleSort,
   View: BubbleView,
   sources: {
     c: String.raw`
 #include <stdio.h>
-void bubbleSort(int a[],int n){          //@init
-    for (int i=0;i<n-1;i++){             //@outer
-        int swapped=0;                   //@outer
+void bubbleSort(int a[],int n){                //@init
+    for (int i=0;i<n-1;i++){                   //@outer
+        int swapped=0;                         //@outer
         for (int j=0;j<n-1-i;j++){
-            if (a[j]>a[j+1]){            //@cmp
-                int temp=a[j];           //@swap
-                a[j]=a[j+1];             //@swap
-                a[j+1]=temp;             //@swap
-                swapped=1;               //@swap
+            if (a[j]>a[j+1]){                  //@cmp
+                int temp=a[j];                 //@swap
+                a[j]=a[j+1];                   //@swap
+                a[j+1]=temp;                   //@swap
+                swapped=1;                     //@swap
             }
         }
-        if (!swapped) break;             //@pass
+        if (!swapped) break;                   //@pass
     }
 }
 int main(){
@@ -148,23 +152,23 @@ int main(){
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
     bubbleSort(a,n);
-    for (int i=0;i<n;i++) printf("%d ",a[i]);   //@done
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-void bubbleSort(int a[],int n){          //@init
-    for (int i=0;i<n-1;i++){             //@outer
-        bool swapped=false;              //@outer
+void bubbleSort(int a[],int n){             //@init
+    for (int i=0;i<n-1;i++){                //@outer
+        bool swapped=false;                 //@outer
         for (int j=0;j<n-1-i;j++){
-            if (a[j]>a[j+1]){            //@cmp
-                swap(a[j],a[j+1]);       //@swap
-                swapped=true;            //@swap
+            if (a[j]>a[j+1]){               //@cmp
+                swap(a[j],a[j+1]);          //@swap
+                swapped=true;               //@swap
             }
         }
-        if (!swapped) break;             //@pass
+        if (!swapped) break;                //@pass
     }
 }
 int main(){
@@ -172,55 +176,54 @@ int main(){
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
     bubbleSort(a,n);
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";   //@done
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
     return 0;
 }
 `,
     python: String.raw`
-def bubble_sort(a):                      #@init
-    n = len(a)
-    for i in range(n - 1):               #@outer
-        swapped = False                  #@outer
-        for j in range(n - 1 - i):
-            if a[j] > a[j + 1]:          #@cmp
-                a[j], a[j + 1] = a[j + 1], a[j]   #@swap
-                swapped = True           #@swap
-        if not swapped:                  #@pass
-            break                        #@pass
+def bubble_sort(a):                         #@init
+    n=len(a)
+    for i in range(n-1):                    #@outer
+        swapped=False                       #@outer
+        for j in range(n-1-i):
+            if a[j]>a[j+1]:                 #@cmp
+                a[j],a[j+1]=a[j+1],a[j]     #@swap
+                swapped=True                #@swap
+        if not swapped:                     #@pass
+            break                           #@pass
 
-
-n = int(input())
-a = list(map(int, input().split()))
+n=int(input())
+a=list(map(int,input().split()))
 bubble_sort(a)
-print(*a)                                #@done
+print(*a)                                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static void bubbleSort(int[] a) {            //@init
-        int n = a.length;
-        for (int i = 0; i < n - 1; i++) {        //@outer
-            boolean swapped = false;             //@outer
-            for (int j = 0; j < n - 1 - i; j++) {
-                if (a[j] > a[j + 1]) {           //@cmp
-                    int temp = a[j];             //@swap
-                    a[j] = a[j + 1];             //@swap
-                    a[j + 1] = temp;             //@swap
-                    swapped = true;              //@swap
+public class Main{
+    static void bubbleSort(int[] a){            //@init
+        int n=a.length;
+        for (int i=0;i<n-1;i++){                //@outer
+            boolean swapped=false;              //@outer
+            for (int j=0;j<n-1-i;j++){
+                if (a[j]>a[j+1]){               //@cmp
+                    int temp=a[j];              //@swap
+                    a[j]=a[j+1];                //@swap
+                    a[j+1]=temp;                //@swap
+                    swapped=true;               //@swap
                 }
             }
-            if (!swapped) break;                 //@pass
+            if (!swapped) break;                //@pass
         }
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
         bubbleSort(a);
-        for (int x : a) System.out.print(x + " ");   //@done
+        for (int x:a) System.out.print(x+" ");  //@done
     }
 }
 `,

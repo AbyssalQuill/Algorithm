@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALGOS } from '../src/algos'
+import { ALL_EXAMPLES } from '../src/algos'
 import { runBinarySearch } from '../src/algos/binarySearch'
 import { runBracket } from '../src/algos/bracketStack'
 import { runBubbleSort } from '../src/algos/bubbleSort'
@@ -23,37 +23,54 @@ describe('parseMarked / toRanges', () => {
   })
 })
 
-describe('每个演示：帧里的每个步骤标签，在四种语言的代码里都有对应的行', () => {
-  for (const algo of ALGOS) {
-    it(algo.id, () => {
+describe('每个例题：帧里的每个步骤标签，在四种语言的代码里都有对应的行', () => {
+  for (const { algo, ex } of ALL_EXAMPLES) {
+    const name = `${algo.id}/${ex.slug}`
+    it(name, () => {
       // 只用默认输入走不到所有分支，所以把默认值、预设、随机输入的帧合在一起看
       const inputs = [
-        algo.defaultInput,
-        ...(algo.presets ?? []).map((p) => {
-          const r = algo.parse(p.text)
-          if (!r.ok) throw new Error(`${algo.id} 预设 ${p.label} 无法解析`)
+        ex.defaultInput,
+        ...(ex.presets ?? []).map((p) => {
+          const r = ex.parse(p.text)
+          if (!r.ok) throw new Error(`${name} 预设 ${p.label} 无法解析：${r.error}`)
           return r.value
         }),
-        ...Array.from({ length: 80 }, () => algo.random()),
+        ...Array.from({ length: 80 }, () => ex.random()),
       ]
-      const steps = new Set(inputs.flatMap((v) => algo.run(v).map((f) => f.step)))
+      const steps = new Set(inputs.flatMap((v) => ex.run(v).map((f) => f.step)))
       for (const l of LANGS) {
-        const { marks } = parseMarked(algo.sources[l.id], l.id)
-        for (const s of steps) expect(marks[s], `${algo.id} / ${l.label} 缺少标签 ${s}`).toBeTruthy()
+        const { marks } = parseMarked(ex.sources[l.id], l.id)
+        for (const s of steps) expect(marks[s], `${name} / ${l.label} 缺少标签 ${s}`).toBeTruthy()
         // 反过来：代码里的标签都应该被某一帧用到，避免写错字母
-        for (const k of Object.keys(marks)) expect(steps.has(k), `${algo.id} / ${l.label} 的标签 ${k} 没有任何一帧使用`).toBe(true)
+        for (const k of Object.keys(marks)) expect(steps.has(k), `${name} / ${l.label} 的标签 ${k} 没有任何一帧使用`).toBe(true)
       }
     })
-    it(`${algo.id}：随机输入都能解析、能生成帧`, () => {
+    it(`${name}：随机输入都能被自己解析，并且格式前后一致`, () => {
       for (let i = 0; i < 30; i++) {
-        const v = algo.random()
-        const r = algo.parse(algo.format(v))
-        expect(r.ok, `${algo.id} 随机输入 ${algo.format(v)} 无法被自己解析`).toBe(true)
-        expect(algo.run(v).length).toBeGreaterThan(1)
+        const v = ex.random()
+        const text = ex.format(v)
+        const r = ex.parse(text)
+        expect(r.ok, `${name} 随机输入无法被自己解析：${text}`).toBe(true)
+        if (r.ok) expect(ex.format(r.value), `${name} 解析后再格式化不一致`).toBe(text)
+        expect(ex.run(v).length).toBeGreaterThan(1)
+        expect(typeof ex.answer(v)).toBe('string')
       }
-      for (const p of algo.presets ?? []) expect(algo.parse(p.text).ok, `${algo.id} 预设 ${p.label}`).toBe(true)
+      expect(ex.parse(ex.format(ex.defaultInput)).ok, `${name} 默认输入`).toBe(true)
+      for (const p of ex.presets ?? []) expect(ex.parse(p.text).ok, `${name} 预设 ${p.label}`).toBe(true)
+    })
+    it(`${name}：题面完整`, () => {
+      expect(ex.statement.desc.length).toBeGreaterThan(0)
+      expect(ex.statement.input.length).toBeGreaterThan(0)
+      expect(ex.statement.output.length).toBeGreaterThan(0)
+      expect(ex.name.length).toBeGreaterThan(0)
     })
   }
+  it('每个专题里的例题 slug 不重复', () => {
+    for (const { algo } of ALL_EXAMPLES) {
+      const slugs = ALL_EXAMPLES.filter((x) => x.algo === algo).map((x) => x.ex.slug)
+      expect(new Set(slugs).size, algo.id).toBe(slugs.length)
+    }
+  })
 })
 
 describe('冒泡排序', () => {

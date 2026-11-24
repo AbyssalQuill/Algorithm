@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface JoInput {
   n: number
@@ -89,19 +89,33 @@ function JoView({ frame }: { frame: Frame<JoState> }) {
 }
 
 function parse(text: string): ParseResult<JoInput> {
-  const v = toNums(text)
-  if (v.length !== 2 || v.some((x) => !Number.isInteger(x))) return { ok: false, error: '请输入两个整数：人数 n 和出列的报数 m，例如：7 3' }
-  const [n, m] = v
-  if (n < 2 || n > 12) return { ok: false, error: '演示里的人数请取 2～12。' }
-  if (m < 1 || m > 12) return { ok: false, error: '报数 m 请取 1～12。' }
-  return { ok: true, value: { n, m } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 2, 12)
+    const m = r.int('m', 1, 12)
+    r.end()
+    return { n, m }
+  })
 }
 
 export const josephusQueue: AlgoDef<JoInput, JoState> = {
   id: 'josephus-queue',
-  title: '队列：约瑟夫问题',
+  title: '队列',
   tagline: '队列遵循“先进先出”的规则，用它来模拟一圈人报数、淘汰的过程',
   kind: '数据结构',
+  slug: 'josephus',
+  name: '约瑟夫问题',
+  type: '模拟',
+  statement: {
+    desc: [
+      'n 个人围成一圈，从 1 到 n 编号。从 1 号开始报数，报到 m 的人出列，然后下一个人重新从 1 开始报，直到所有人都出列。按出列的先后顺序，输出每个人的编号。',
+    ],
+    input: [
+      '一行两个整数 n 和 m，用空格隔开（2 ≤ n ≤ 12，1 ≤ m ≤ 12）。',
+    ],
+    output: [
+      '一行 n 个整数，是出列的顺序，用空格隔开。',
+    ],
+  },
   intro: [
     '队列是和栈相反的数据结构：先来的先走。就像排队买票，新来的人站到队尾，每次办完事离开的一定是队头的人。对应的两个基本操作叫作入队（push）和出队（pop）。',
     '约瑟夫问题是队列最经典的练习：n 个人围成一圈，从第一个人开始报数，报到 m 的人出列，然后从下一个人开始重新报数，直到所有人都出列。把圈拉直，就是一支队伍：每次让队头的人报数，没报到 m 的回到队尾，报到 m 的就不再回来。',
@@ -118,7 +132,6 @@ export const josephusQueue: AlgoDef<JoInput, JoState> = {
     '把 cnt==m 写成 cnt>=m 在这里碰巧不会出错，但含义不清楚，容易在改题以后留下隐患。',
   ],
   complexity: { time: 'O(n·m)', space: 'O(n)', note: '每个人最多入队 m 次，所以操作总数是 n·m 的量级。' },
-  inputHint: '格式：人数 n 和报数 m，例如 7 3（n 最大 12）。',
   presets: [
     { label: '7 个人报 3', text: '7 3' },
     { label: '报 1 就出列', text: '6 1' },
@@ -127,6 +140,19 @@ export const josephusQueue: AlgoDef<JoInput, JoState> = {
   defaultInput: { n: 7, m: 3 },
   parse,
   format: (v) => `${v.n} ${v.m}`,
+  answer: (v) => {
+    const q = Array.from({ length: v.n }, (_, i) => i + 1)
+    const out: number[] = []
+    let cnt = 0
+    while (q.length) {
+      const x = q.shift()!
+      if (++cnt === v.m) {
+        out.push(x)
+        cnt = 0
+      } else q.push(x)
+    }
+    return out.join(' ')
+  },
   random: () => ({ n: randInt(5, 10), m: randInt(2, 5) }),
   run: runJosephus,
   View: JoView,
@@ -137,18 +163,18 @@ int q[100005];
 int main(){
     int n,m,head=0,tail=0,cnt=0;
     scanf("%d %d",&n,&m);
-    for (int i=1;i<=n;i++) q[tail++]=i;         //@init
+    for (int i=1;i<=n;i++) q[tail++]=i;     //@init
     while (head<tail){
-        int x=q[head++];                        //@pop
-        cnt++;                                  //@pop
-        if (cnt==m){                            //@out
-            printf("%d ",x);                    //@out
-            cnt=0;                              //@out
+        int x=q[head++];                    //@pop
+        cnt++;                              //@pop
+        if (cnt==m){                        //@out
+            printf("%d ",x);                //@out
+            cnt=0;                          //@out
         }else{
-            q[tail++]=x;                        //@back
+            q[tail++]=x;                    //@back
         }
     }
-    printf("\n");                               //@done
+    printf("\n");                           //@done
     return 0;
 }
 `,
@@ -159,61 +185,61 @@ int main(){
     int n,m;
     cin>>n>>m;
     queue<int> q;
-    for (int i=1;i<=n;i++) q.push(i);           //@init
+    for (int i=1;i<=n;i++) q.push(i);       //@init
     int cnt=0;
     while (!q.empty()){
-        int x=q.front();                        //@pop
-        q.pop();                                //@pop
-        cnt++;                                  //@pop
-        if (cnt==m){                            //@out
-            cout<<x<<" ";                       //@out
-            cnt=0;                              //@out
+        int x=q.front();                    //@pop
+        q.pop();                            //@pop
+        cnt++;                              //@pop
+        if (cnt==m){                        //@out
+            cout<<x<<" ";                   //@out
+            cnt=0;                          //@out
         }else{
-            q.push(x);                          //@back
+            q.push(x);                      //@back
         }
     }
-    cout<<endl;                                 //@done
+    cout<<endl;                             //@done
     return 0;
 }
 `,
     python: String.raw`
 from collections import deque
 
-n, m = map(int, input().split())
-q = deque(range(1, n + 1))                      #@init
-cnt = 0
-res = []
+n,m=map(int,input().split())
+q=deque(range(1,n+1))                       #@init
+cnt=0
+res=[]
 while q:
-    x = q.popleft()                             #@pop
-    cnt += 1                                    #@pop
-    if cnt == m:                                #@out
-        res.append(x)                           #@out
-        cnt = 0                                 #@out
+    x=q.popleft()                           #@pop
+    cnt+=1                                  #@pop
+    if cnt==m:                              #@out
+        res.append(x)                       #@out
+        cnt=0                               #@out
     else:
-        q.append(x)                             #@back
-print(*res)                                     #@done
+        q.append(x)                         #@back
+print(*res)                                 #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        Queue<Integer> q = new ArrayDeque<>();
-        for (int i = 1; i <= n; i++) q.add(i);      //@init
-        int cnt = 0;
-        while (!q.isEmpty()) {
-            int x = q.poll();                       //@pop
-            cnt++;                                  //@pop
-            if (cnt == m) {                         //@out
-                System.out.print(x + " ");          //@out
-                cnt = 0;                            //@out
-            } else {
-                q.add(x);                           //@back
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        Queue<Integer> q=new ArrayDeque<>();
+        for (int i=1;i<=n;i++) q.add(i);    //@init
+        int cnt=0;
+        while (!q.isEmpty()){
+            int x=q.poll();                 //@pop
+            cnt++;                          //@pop
+            if (cnt==m){                    //@out
+                System.out.print(x+" ");    //@out
+                cnt=0;                      //@out
+            }else{
+                q.add(x);                   //@back
             }
         }
-        System.out.println();                       //@done
+        System.out.println();               //@done
     }
 }
 `,

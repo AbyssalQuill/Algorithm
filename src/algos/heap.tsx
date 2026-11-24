@@ -4,7 +4,7 @@ import { TreeView, type TNode } from '../components/TreeView'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, randList, splitBar, toNums } from './shared'
+import { randInt, randList, readInput } from './shared'
 
 export interface HeapInput {
   vals: number[]
@@ -166,21 +166,35 @@ function HeapView({ frame }: { frame: Frame<HeapState> }) {
 }
 
 function parse(text: string): ParseResult<HeapInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「依次插入的数 | 弹出几次」，例如：5 3 8 1 9 2 | 3' }
-  const vals = toNums(parts[0])
-  const k = toNums(parts[1])
-  if (vals.length < 2 || vals.length > 10) return { ok: false, error: '请放 2～10 个要插入的数。' }
-  if (vals.some((v) => !Number.isInteger(v) || v < 1 || v > 99)) return { ok: false, error: '数都是 1～99 的整数。' }
-  if (k.length !== 1 || !Number.isInteger(k[0]) || k[0] < 1 || k[0] > vals.length) return { ok: false, error: `弹出的次数请取 1～${vals.length}。` }
-  return { ok: true, value: { vals, pops: k[0] } }
+  return readInput(text, (r) => {
+    const m = r.int('m', 2, 10)
+    const pops = r.int('k', 1, m)
+    const vals = r.ints(m, '数', 1, 99)
+    r.end()
+    return { vals, pops }
+  })
 }
 
 export const heap: AlgoDef<HeapInput, HeapState> = {
   id: 'heap',
-  title: '堆：插入与弹出',
+  title: '堆',
   tagline: '用数组存放的完全二叉树，堆顶永远是最小的数，插入和弹出都只沿着一条路径走',
   kind: '数据结构',
+  slug: 'push-pop',
+  name: '插入与弹出',
+  type: '小根堆',
+  statement: {
+    desc: [
+      '依次把 m 个整数插入一个小根堆（堆顶是当前最小的数），然后连续弹出 k 次堆顶，按弹出的先后顺序输出这些数。',
+    ],
+    input: [
+      '第一行两个整数 m 和 k（2 ≤ m ≤ 10，1 ≤ k ≤ m）。',
+      '第二行 m 个整数，每个在 1～99 之间，按这个顺序依次插入。',
+    ],
+    output: [
+      '一行 k 个整数，是依次弹出的数，用空格隔开。',
+    ],
+  },
   intro: [
     '堆是一棵完全二叉树，并且每个结点都不大于它的两个孩子（这是小根堆；反过来就是大根堆）。所以最小的数一定在最顶上。完全二叉树有一个很方便的性质：可以直接存放在数组里，位置 i 的左右孩子是 2i 和 2i+1，父结点是 i/2，不需要任何指针。',
     '插入时先把新数放在数组末尾，再和父结点比较，比父结点小就交换，一路向上，这叫上浮。弹出时取走堆顶，把末尾的数搬到堆顶补缺，再和较小的孩子比较，比孩子大就交换，一路向下，这叫下沉。两种操作最多走过树的高度那么多步，所以都是 O(log n)。',
@@ -197,15 +211,15 @@ export const heap: AlgoDef<HeapInput, HeapState> = {
     '堆只能快速地取出最小值，不能快速地查找任意一个数，也不能对整个堆做有序遍历。',
   ],
   complexity: { time: 'O(log n)', space: 'O(n)', note: '插入和弹出都是 O(log n)，取堆顶是 O(1)。' },
-  inputHint: '格式：依次插入的数 | 弹出几次，例如 5 3 8 1 9 2 | 3（最多 10 个数）。',
   presets: [
-    { label: '随便一组', text: '5 3 8 1 9 2 | 3' },
-    { label: '递增插入', text: '1 2 3 4 5 6 7 | 2' },
-    { label: '递减插入', text: '7 6 5 4 3 2 1 | 3' },
+    { label: '随便一组', text: '6 3\n5 3 8 1 9 2' },
+    { label: '递增插入', text: '7 2\n1 2 3 4 5 6 7' },
+    { label: '递减插入', text: '7 3\n7 6 5 4 3 2 1' },
   ],
   defaultInput: { vals: [5, 3, 8, 1, 9, 2], pops: 3 },
   parse,
-  format: (v) => `${v.vals.join(' ')} | ${v.pops}`,
+  format: (v) => `${v.vals.length} ${v.pops}\n${v.vals.join(' ')}`,
+  answer: (v) => [...v.vals].sort((a, b) => a - b).slice(0, v.pops).join(' '),
   random: () => {
     const vals = randList(randInt(6, 9), 1, 60)
     return { vals, pops: randInt(1, Math.min(4, vals.length)) }
@@ -215,29 +229,29 @@ export const heap: AlgoDef<HeapInput, HeapState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int h[1005],n=0;                                //@init
+int h[1005],n=0;                            //@init
 void push(int x){
-    h[++n]=x;                                   //@push
+    h[++n]=x;                               //@push
     int i=n;
-    while (i>1&&h[i]<h[i/2]){                   //@up
-        int t=h[i];                             //@swapUp
-        h[i]=h[i/2];                            //@swapUp
-        h[i/2]=t;                               //@swapUp
-        i/=2;                                   //@swapUp
+    while (i>1&&h[i]<h[i/2]){               //@up
+        int t=h[i];                         //@swapUp
+        h[i]=h[i/2];                        //@swapUp
+        h[i/2]=t;                           //@swapUp
+        i/=2;                               //@swapUp
     }
 }
 int pop(){
-    int top=h[1];                               //@pop
-    h[1]=h[n--];                                //@moveLast
+    int top=h[1];                           //@pop
+    h[1]=h[n--];                            //@moveLast
     int i=1;
     while (2*i<=n){
-        int c=2*i;                              //@pickChild
-        if (c+1<=n&&h[c+1]<h[c]) c++;           //@pickChild
-        if (h[c]>=h[i]) break;                  //@down
-        int t=h[i];                             //@swapDown
-        h[i]=h[c];                              //@swapDown
-        h[c]=t;                                 //@swapDown
-        i=c;                                    //@swapDown
+        int c=2*i;                          //@pickChild
+        if (c+1<=n&&h[c+1]<h[c]) c++;       //@pickChild
+        if (h[c]>=h[i]) break;              //@down
+        int t=h[i];                         //@swapDown
+        h[i]=h[c];                          //@swapDown
+        h[c]=t;                             //@swapDown
+        i=c;                                //@swapDown
     }
     return top;
 }
@@ -249,32 +263,32 @@ int main(){
         push(x);
     }
     for (int i=0;i<k;i++) printf("%d ",pop());
-    printf("\n");                               //@done
+    printf("\n");                           //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int h[1005],n=0;                                //@init
+int h[1005],n=0;                            //@init
 void push(int x){
-    h[++n]=x;                                   //@push
+    h[++n]=x;                               //@push
     int i=n;
-    while (i>1&&h[i]<h[i/2]){                   //@up
-        swap(h[i],h[i/2]);                      //@swapUp
-        i/=2;                                   //@swapUp
+    while (i>1&&h[i]<h[i/2]){               //@up
+        swap(h[i],h[i/2]);                  //@swapUp
+        i/=2;                               //@swapUp
     }
 }
 int pop(){
-    int top=h[1];                               //@pop
-    h[1]=h[n--];                                //@moveLast
+    int top=h[1];                           //@pop
+    h[1]=h[n--];                            //@moveLast
     int i=1;
     while (2*i<=n){
-        int c=2*i;                              //@pickChild
-        if (c+1<=n&&h[c+1]<h[c]) c++;           //@pickChild
-        if (h[c]>=h[i]) break;                  //@down
-        swap(h[i],h[c]);                        //@swapDown
-        i=c;                                    //@swapDown
+        int c=2*i;                          //@pickChild
+        if (c+1<=n&&h[c+1]<h[c]) c++;       //@pickChild
+        if (h[c]>=h[i]) break;              //@down
+        swap(h[i],h[c]);                    //@swapDown
+        i=c;                                //@swapDown
     }
     return top;
 }
@@ -286,85 +300,82 @@ int main(){
         push(x);
     }
     for (int i=0;i<k;i++) cout<<pop()<<" ";
-    cout<<endl;                                 //@done
+    cout<<endl;                             //@done
     return 0;
 }
 `,
     python: String.raw`
-h = [0]                                         #@init
-
+h=[0]                                       #@init
 
 def push(x):
-    h.append(x)                                 #@push
-    i = len(h) - 1
-    while i > 1 and h[i] < h[i // 2]:           #@up
-        h[i], h[i // 2] = h[i // 2], h[i]       #@swapUp
-        i //= 2                                 #@swapUp
-
+    h.append(x)                             #@push
+    i=len(h)-1
+    while i>1 and h[i]<h[i//2]:             #@up
+        h[i],h[i//2]=h[i//2],h[i]           #@swapUp
+        i//=2                               #@swapUp
 
 def pop():
-    top = h[1]                                  #@pop
-    h[1] = h[-1]                                #@moveLast
-    h.pop()                                     #@moveLast
-    n = len(h) - 1
-    i = 1
-    while 2 * i <= n:
-        c = 2 * i                               #@pickChild
-        if c + 1 <= n and h[c + 1] < h[c]:      #@pickChild
-            c += 1                              #@pickChild
-        if h[c] >= h[i]:                        #@down
+    top=h[1]                                #@pop
+    h[1]=h[-1]                              #@moveLast
+    h.pop()                                 #@moveLast
+    n=len(h)-1
+    i=1
+    while 2*i<=n:
+        c=2*i                               #@pickChild
+        if c+1<=n and h[c+1]<h[c]:          #@pickChild
+            c+=1                            #@pickChild
+        if h[c]>=h[i]:                      #@down
             break
-        h[i], h[c] = h[c], h[i]                 #@swapDown
-        i = c                                   #@swapDown
+        h[i],h[c]=h[c],h[i]                 #@swapDown
+        i=c                                 #@swapDown
     return top
 
-
-m, k = map(int, input().split())
-for x in map(int, input().split()):
+m,k=map(int,input().split())
+for x in map(int,input().split()):
     push(x)
-print(*[pop() for _ in range(k)])               #@done
+print(*[pop() for _ in range(k)])           #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int[] h = new int[1005];
-    static int n = 0;                               //@init
+public class Main{
+    static int[] h=new int[1005];
+    static int n=0;                         //@init
 
-    static void push(int x) {
-        h[++n] = x;                                 //@push
-        int i = n;
-        while (i > 1 && h[i] < h[i / 2]) {          //@up
-            int t = h[i];                           //@swapUp
-            h[i] = h[i / 2];                        //@swapUp
-            h[i / 2] = t;                           //@swapUp
-            i /= 2;                                 //@swapUp
+    static void push(int x){
+        h[++n]=x;                           //@push
+        int i=n;
+        while (i>1&&h[i]<h[i/2]){           //@up
+            int t=h[i];                     //@swapUp
+            h[i]=h[i/2];                    //@swapUp
+            h[i/2]=t;                       //@swapUp
+            i/=2;                           //@swapUp
         }
     }
 
-    static int pop() {
-        int top = h[1];                             //@pop
-        h[1] = h[n--];                              //@moveLast
-        int i = 1;
-        while (2 * i <= n) {
-            int c = 2 * i;                          //@pickChild
-            if (c + 1 <= n && h[c + 1] < h[c]) c++; //@pickChild
-            if (h[c] >= h[i]) break;                //@down
-            int t = h[i];                           //@swapDown
-            h[i] = h[c];                            //@swapDown
-            h[c] = t;                               //@swapDown
-            i = c;                                  //@swapDown
+    static int pop(){
+        int top=h[1];                       //@pop
+        h[1]=h[n--];                        //@moveLast
+        int i=1;
+        while (2*i<=n){
+            int c=2*i;                      //@pickChild
+            if (c+1<=n&&h[c+1]<h[c]) c++;   //@pickChild
+            if (h[c]>=h[i]) break;          //@down
+            int t=h[i];                     //@swapDown
+            h[i]=h[c];                      //@swapDown
+            h[c]=t;                         //@swapDown
+            i=c;                            //@swapDown
         }
         return top;
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int m = sc.nextInt(), k = sc.nextInt();
-        for (int i = 0; i < m; i++) push(sc.nextInt());
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < k; i++) sb.append(pop()).append(' ');
-        System.out.println(sb);                     //@done
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int m=sc.nextInt(),k=sc.nextInt();
+        for (int i=0;i<m;i++) push(sc.nextInt());
+        StringBuilder sb=new StringBuilder();
+        for (int i=0;i<k;i++) sb.append(pop()).append(' ');
+        System.out.println(sb);             //@done
     }
 }
 `,

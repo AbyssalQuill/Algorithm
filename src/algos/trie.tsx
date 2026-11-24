@@ -3,7 +3,7 @@ import { TreeView, type TNode } from '../components/TreeView'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 export interface TrieInput {
   words: string[]
@@ -149,24 +149,39 @@ function TrieView({ frame }: { frame: Frame<TrieState> }) {
 }
 
 function parse(text: string): ParseResult<TrieInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「若干个单词 | 要查询的单词」，例如：cat car cart dog | car' }
-  const words = parts[0].trim().split(/\s+/).filter(Boolean)
-  const q = parts[1].trim()
-  if (words.length < 1 || words.length > 6) return { ok: false, error: '请放 1～6 个要插入的单词。' }
-  if (words.some((w) => !/^[a-z]{1,5}$/.test(w)) || !/^[a-z]{1,5}$/.test(q)) return { ok: false, error: '单词只能由小写英文字母组成，每个 1～5 个字母。' }
-  const total = new Set(words.flatMap((w) => [...w].map((_, i) => w.slice(0, i + 1)))).size
-  if (total > 18) return { ok: false, error: '这些单词合起来的结点太多，画不下啦，请换短一点或者前缀更相近的单词。' }
-  return { ok: true, value: { words, query: q } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 6)
+    const words = Array.from({ length: n }, (_, k) => r.word(`第 ${k + 1} 个单词`, /^[a-z]{1,5}$/, '只能由 1～5 个小写字母组成'))
+    const query = r.word('要查询的单词', /^[a-z]{1,5}$/, '只能由 1～5 个小写字母组成')
+    r.end()
+    const total = new Set(words.flatMap((w) => [...w].map((_, i) => w.slice(0, i + 1)))).size
+    if (total > 18) fail('这些单词合起来的结点太多，画不下，请换短一点或者前缀更相近的单词。')
+    return { words, query }
+  })
 }
 
 const rw = (len: number) => Array.from({ length: len }, () => 'abc'[randInt(0, 2)]).join('')
 
 export const trie: AlgoDef<TrieInput, TrieState> = {
   id: 'trie',
-  title: '字典树 Trie',
-  tagline: '让有相同前缀的单词共用同一段路，查找一个单词只需要走它的长度那么多步',
+  title: 'Trie',
+  tagline: '字典树：让有相同前缀的单词共用同一段路，查找一个单词只需要走它的长度那么多步',
   kind: '数据结构',
+  slug: 'search',
+  name: '查找单词',
+  type: '前缀树',
+  statement: {
+    desc: [
+      '把 n 个由小写字母组成的单词依次插入一棵字典树（Trie），然后判断给定的单词 w 是不是插入过的单词。只是某个单词的前缀、但没有被单独插入过的字符串，不算。',
+    ],
+    input: [
+      '第一行一个整数 n（1 ≤ n ≤ 6），第二行 n 个单词，每个由 1～5 个小写字母组成。',
+      '第三行一个单词 w，同样由 1～5 个小写字母组成。单词合起来的字典树最多 18 个结点。',
+    ],
+    output: [
+      '一行。w 是插入过的单词输出 YES，否则输出 NO。',
+    ],
+  },
   intro: [
     '字典树（也叫前缀树）是专门用来存放一大批字符串的树。树里的每一条边对应一个字母，从根走到某个结点所经过的字母连起来，就是一个字符串。cat、car、cart 都以 ca 开头，所以它们共用 c→a 这一段，到第三个字母才分开，节省了空间。',
     '插入一个单词，就是从根开始按字母逐个往下走：这条路已经有了就直接走，没有就新建一个结点。最后在单词末尾的结点上做一个“结束”标记。查询的时候同样按字母往下走，路中途断了就说明不存在；走完了还要检查终点有没有“结束”标记，才能区分它是完整的单词还是只是某个单词的前缀。',
@@ -183,15 +198,15 @@ export const trie: AlgoDef<TrieInput, TrieState> = {
     '查询前缀和查询完整单词要分清：前者只看路是否走得通，后者还要检查结束标记。',
   ],
   complexity: { time: 'O(L)', space: 'O(总字符数)', note: 'L 是单词的长度。插入和查询只取决于单词有多长，与单词的个数无关。' },
-  inputHint: '格式：若干个单词 | 要查询的单词，例如 cat car cart dog | car（小写字母，每个最多 5 个）。',
   presets: [
-    { label: '是单词', text: 'cat car cart dog | car' },
-    { label: '只是前缀', text: 'cat car cart dog | ca' },
-    { label: '不存在', text: 'cat car cart dog | cow' },
+    { label: '是单词', text: '4\ncat car cart dog\ncar' },
+    { label: '只是前缀', text: '4\ncat car cart dog\nca' },
+    { label: '不存在', text: '4\ncat car cart dog\ncow' },
   ],
   defaultInput: { words: ['cat', 'car', 'cart', 'dog'], query: 'car' },
   parse,
-  format: (v) => `${v.words.join(' ')} | ${v.query}`,
+  format: (v) => `${v.words.length}\n${v.words.join(' ')}\n${v.query}`,
+  answer: (v) => (v.words.includes(v.query) ? 'YES' : 'NO'),
   random: () => {
     const words = Array.from({ length: randInt(3, 5) }, () => rw(randInt(2, 4)))
     const r = Math.random()
@@ -204,25 +219,25 @@ export const trie: AlgoDef<TrieInput, TrieState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int ch[1005][26],cnt=1;                         //@init
+int ch[1005][26],cnt=1;                     //@init
 int isEnd[1005];
 void insert(char *s){
-    int p=0;                                    //@insStart
+    int p=0;                                //@insStart
     for (int i=0;s[i];i++){
         int x=s[i]-'a';
-        if (!ch[p][x]) ch[p][x]=cnt++;          //@create
-        p=ch[p][x];                             //@walk
+        if (!ch[p][x]) ch[p][x]=cnt++;      //@create
+        p=ch[p][x];                         //@walk
     }
-    isEnd[p]=1;                                 //@mark
+    isEnd[p]=1;                             //@mark
 }
 int query(char *s){
-    int p=0;                                    //@qStart
+    int p=0;                                //@qStart
     for (int i=0;s[i];i++){
         int x=s[i]-'a';
-        if (!ch[p][x]) return 0;                //@qMiss
-        p=ch[p][x];                             //@qWalk
+        if (!ch[p][x]) return 0;            //@qMiss
+        p=ch[p][x];                         //@qWalk
     }
-    return isEnd[p];                            //@qEnd
+    return isEnd[p];                        //@qEnd
 }
 int main(){
     int n;
@@ -240,25 +255,25 @@ int main(){
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int ch[1005][26],cnt=1;                         //@init
+int ch[1005][26],cnt=1;                     //@init
 bool isEnd[1005];
 void insert(const string &s){
-    int p=0;                                    //@insStart
+    int p=0;                                //@insStart
     for (char c:s){
         int x=c-'a';
-        if (!ch[p][x]) ch[p][x]=cnt++;          //@create
-        p=ch[p][x];                             //@walk
+        if (!ch[p][x]) ch[p][x]=cnt++;      //@create
+        p=ch[p][x];                         //@walk
     }
-    isEnd[p]=true;                              //@mark
+    isEnd[p]=true;                          //@mark
 }
 bool query(const string &s){
-    int p=0;                                    //@qStart
+    int p=0;                                //@qStart
     for (char c:s){
         int x=c-'a';
-        if (!ch[p][x]) return false;            //@qMiss
-        p=ch[p][x];                             //@qWalk
+        if (!ch[p][x]) return false;        //@qMiss
+        p=ch[p][x];                         //@qWalk
     }
-    return isEnd[p];                            //@qEnd
+    return isEnd[p];                        //@qEnd
 }
 int main(){
     int n;
@@ -274,68 +289,65 @@ int main(){
 }
 `,
     python: String.raw`
-ch = [{}]                                       #@init
-is_end = [False]
-
+ch=[{}]                                     #@init
+is_end=[False]
 
 def insert(s):
-    p = 0                                       #@insStart
+    p=0                                     #@insStart
     for c in s:
         if c not in ch[p]:
-            ch.append({})                       #@create
-            is_end.append(False)                #@create
-            ch[p][c] = len(ch) - 1              #@create
-        p = ch[p][c]                            #@walk
-    is_end[p] = True                            #@mark
-
+            ch.append({})                   #@create
+            is_end.append(False)            #@create
+            ch[p][c]=len(ch)-1              #@create
+        p=ch[p][c]                          #@walk
+    is_end[p]=True                          #@mark
 
 def query(s):
-    p = 0                                       #@qStart
+    p=0                                     #@qStart
     for c in s:
         if c not in ch[p]:
-            return False                        #@qMiss
-        p = ch[p][c]                            #@qWalk
-    return is_end[p]                            #@qEnd
+            return False                    #@qMiss
+        p=ch[p][c]                          #@qWalk
+    return is_end[p]                        #@qEnd
 
-
-n = int(input())
-for _ in range(n):
-    insert(input().strip())
+n=int(input())
+for w in input().split():
+    insert(w)
 print("YES" if query(input().strip()) else "NO")
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int[][] ch = new int[1005][26];
-    static boolean[] isEnd = new boolean[1005];
-    static int cnt = 1;                             //@init
+public class Main{
+    static int[][] ch=new int[1005][26];
+    static boolean[] isEnd=new boolean[1005];
+    static int cnt=1;                         //@init
 
-    static void insert(String s) {
-        int p = 0;                                  //@insStart
-        for (char c : s.toCharArray()) {
-            int x = c - 'a';
-            if (ch[p][x] == 0) ch[p][x] = cnt++;    //@create
-            p = ch[p][x];                           //@walk
+    static void insert(String s){
+        int p=0;                              //@insStart
+        for (char c:s.toCharArray()){
+            int x=c-'a';
+            if (ch[p][x]==0) ch[p][x]=cnt++;  //@create
+            p=ch[p][x];                       //@walk
         }
-        isEnd[p] = true;                            //@mark
+        isEnd[p]=true;                        //@mark
     }
 
-    static boolean query(String s) {
-        int p = 0;                                  //@qStart
-        for (char c : s.toCharArray()) {
-            int x = c - 'a';
-            if (ch[p][x] == 0) return false;        //@qMiss
-            p = ch[p][x];                           //@qWalk
+    static boolean query(String s){
+        int p=0;                              //@qStart
+        for (char c:s.toCharArray()){
+            int x=c-'a';
+            if (ch[p][x]==0) return false;    //@qMiss
+            p=ch[p][x];                       //@qWalk
         }
-        return isEnd[p];                            //@qEnd
+        return isEnd[p];                      //@qEnd
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
         while (n-- > 0) insert(sc.next());
-        System.out.println(query(sc.next()) ? "YES" : "NO");
+        System.out.println(query(sc.next())?"YES":"NO");
     }
 }
 `,

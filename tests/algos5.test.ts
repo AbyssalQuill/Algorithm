@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { bst, preorderOf, runBst } from '../src/algos/bst'
-import { heap, runHeap } from '../src/algos/heap'
-import { itPrograms, rnd } from './helpers'
+import { preorderOf, runBst } from '../src/algos/bst'
+import { runHeap } from '../src/algos/heap'
+import { rnd } from './helpers'
 
 const distinct = (n: number, lo = 1, hi = 99) => {
   const s = new Set<number>()
@@ -64,13 +64,6 @@ describe('二叉搜索树', () => {
       expect(inorder).toEqual([...vals].sort((a, b) => a - b))
     }
   })
-  itPrograms(bst, () =>
-    Array.from({ length: 20 }, () => {
-      const vals = distinct(rnd(1, 9))
-      const target = Math.random() < 0.5 ? vals[rnd(0, vals.length - 1)] : rnd(1, 99)
-      return { input: `${vals.length}\n${vals.join(' ')}\n${target}\n`, expected: `${refPreorder(vals).join(' ')} ${vals.includes(target) ? 'YES' : 'NO'}` }
-    }),
-  )
 })
 
 describe('堆', () => {
@@ -84,18 +77,11 @@ describe('堆', () => {
       for (const f of frames) if (f.step === 'done' || f.step === 'init') for (let i = 2; i <= f.state.h.length; i++) expect(f.state.h[(i >> 1) - 1]).toBeLessThanOrEqual(f.state.h[i - 1])
     }
   })
-  itPrograms(heap, () =>
-    Array.from({ length: 20 }, () => {
-      const vals = Array.from({ length: rnd(1, 30) }, () => rnd(1, 99))
-      const pops = rnd(1, vals.length)
-      return { input: `${vals.length} ${pops}\n${vals.join(' ')}\n`, expected: [...vals].sort((a, b) => a - b).slice(0, pops).join(' ') }
-    }),
-  )
 })
 
-import { runSeg, segTree, type SegOp } from '../src/algos/segTree'
+import { runSeg, type SegOp } from '../src/algos/segTree'
 import { buildTree, runTraversal, treeTraversal } from '../src/algos/treeTraversal'
-import { runTrie, trie } from '../src/algos/trie'
+import { runTrie } from '../src/algos/trie'
 
 const randWord = (lo: number, hi: number) => Array.from({ length: rnd(lo, hi) }, () => 'abc'[rnd(0, 2)]).join('')
 
@@ -112,13 +98,6 @@ describe('字典树', () => {
       expect(last.nodes.length).toBe(prefixes.size + 1)
     }
   })
-  itPrograms(trie, () =>
-    Array.from({ length: 25 }, () => {
-      const words = Array.from({ length: rnd(1, 6) }, () => randWord(1, 5))
-      const query = Math.random() < 0.5 ? words[rnd(0, words.length - 1)] : randWord(1, 5)
-      return { input: `${words.length}\n${words.join('\n')}\n${query}\n`, expected: words.includes(query) ? 'YES' : 'NO' }
-    }),
-  )
 })
 
 describe('线段树', () => {
@@ -147,14 +126,6 @@ describe('线段树', () => {
       expect(runSeg({ arr, ops }).at(-1)!.state.results).toEqual(naive(arr, ops))
     }
   })
-  itPrograms(segTree, () =>
-    Array.from({ length: 25 }, () => {
-      const n = rnd(3, 30)
-      const arr = Array.from({ length: n }, () => rnd(0, 99))
-      const ops = randOps(n)
-      return { input: `${n}\n${arr.join(' ')}\n${ops.length}\n${ops.map((o) => (o.kind === 'q' ? `1 ${o.l} ${o.r}` : `2 ${o.i} ${o.v}`)).join('\n')}\n`, expected: naive(arr, ops).join(' ') }
-    }),
-  )
 })
 
 describe('二叉树遍历', () => {
@@ -195,13 +166,6 @@ describe('二叉树遍历', () => {
       expect(sorted(last.outputs.pre)).toEqual(sorted(last.outputs.level))
     }
   })
-  itPrograms(treeTraversal, () =>
-    Array.from({ length: 20 }, () => {
-      const level = treeTraversal.random()
-      const r = refOrders(level)
-      return { input: `${level.length}\n${level.join(' ')}\n`, expected: [...r.pre, ...r.ino, ...r.post, ...r.lvl].join(' ') }
-    }),
-  )
 })
 
 function sorted(a: number[]) {

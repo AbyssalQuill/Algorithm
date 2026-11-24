@@ -2,8 +2,8 @@ import { GridView, type GridCell } from '../components/GridView'
 import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
-import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar } from './shared'
+import type { Example, Frame, ParseResult } from '../engine/types'
+import { randInt, readInput } from './shared'
 
 export interface LcsInput {
   a: string
@@ -169,46 +169,67 @@ function LcsView({ frame }: { frame: Frame<LcsState> }) {
 }
 
 function parse(text: string): ParseResult<LcsInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「字符串 A | 字符串 B」，例如：ABCBD | BDCAB' }
-  const a = parts[0].trim().toUpperCase()
-  const b = parts[1].trim().toUpperCase()
-  if (!/^[A-Z]{1,8}$/.test(a) || !/^[A-Z]{1,8}$/.test(b)) return { ok: false, error: '两个字符串都只能由字母组成，长度 1～8。' }
-  return { ok: true, value: { a, b } }
+  return readInput(text, (r) => {
+    const a = r.word('字符串 A', /^[A-Z]{1,8}$/, '只能由 1～8 个大写字母组成')
+    const b = r.word('字符串 B', /^[A-Z]{1,8}$/, '只能由 1～8 个大写字母组成')
+    r.end()
+    return { a, b }
+  })
 }
 
 const randStr = (len: number) => Array.from({ length: len }, () => 'ABCD'[randInt(0, 3)]).join('')
 
-export const lcs: AlgoDef<LcsInput, LcsState> = {
-  id: 'lcs',
-  title: '动态规划：最长公共子序列',
-  tagline: '把大问题拆成小问题，每个小问题只算一次，结果填进表格里反复使用',
-  kind: '算法',
-  intro: [
+export const lcs: Example<LcsInput, LcsState> = {
+  slug: 'lcs',
+  name: '最长公共子序列',
+  type: '两个序列的二维状态',
+  statement: {
+    desc: [
+      '给定两个字符串 A 和 B，求它们的最长公共子序列的长度，并输出其中一个最长公共子序列。子序列是从字符串里删去若干个字符（可以一个也不删），其余字符保持原来的先后顺序得到的串，这些字符在原串里不要求连续。',
+    ],
+    input: [
+      '两行，第一行是字符串 A，第二行是字符串 B，都由 1～8 个大写字母组成。',
+    ],
+    output: [
+      '第一行一个整数，是最长公共子序列的长度。',
+      '第二行一个字符串，是其中一个最长公共子序列。最长的公共子序列可能不止一个，这里规定回溯时遇到“向上”和“向左”都可以的情况，选择向上；长度是 0 时这一行为空。',
+    ],
+  },
+  idea: [
     '给两个字符串，找出它们最长的公共子序列。子序列的意思是：从原字符串里按顺序取出一些字符（可以不连续），比如 ACD 是 ABCD 的子序列，而 CAD 不是。直接枚举 A 的所有子序列再逐个检查，数量是指数级的，根本算不完。',
     '动态规划的做法是先把问题缩小。设 dp[i][j] 为 A 的前 i 个字符与 B 的前 j 个字符的答案，只看最后一对字符：如果它们相同，这一对一定可以配上，答案就是 dp[i-1][j-1] 加一；如果不同，它们至少有一个用不上，答案是丢掉其中一个后的两种情况里较大的。把表格从左上角填到右下角，右下角的数就是最终答案。',
-  ],
-  points: [
-    '状态：dp[i][j] 表示 A 的前 i 个字符和 B 的前 j 个字符的最长公共子序列长度。第 0 行、第 0 列表示其中一个是空串，都是 0。',
     '转移：a[i]==b[j] 时 dp[i][j]=dp[i-1][j-1]+1；否则 dp[i][j]=max(dp[i-1][j], dp[i][j-1])。每个格子只依赖它左边、上边和左上角的格子，所以按行从左到右填就保证用到的值都已经算好了。',
-    '字符串下标从 0 开始，而表格的下标从 1 开始，所以比较的是 a[i-1] 和 b[j-1]，这是最容易写错的地方。',
     '只知道长度还不够时，可以从右下角沿着“值来自哪里”往回走，遇到相同的字符就记下来，最后把记下的字符倒过来，就是一个具体的公共子序列。',
   ],
-  pitfalls: [
-    '比较字符时写成 a[i]==b[j]，下标与表格错开了一位。',
-    '最长公共子序列往往不止一种，回溯时遇到上、左相等的情况选哪一边，会得到不同但长度相同的答案。',
-    '这张表格是 O(n·m) 的，字符串长到十万时既存不下，也算不完，需要换别的思路。',
-  ],
   complexity: { time: 'O(n·m)', space: 'O(n·m)', note: 'n、m 是两个字符串的长度。只求长度时，可以只保留相邻两行，空间降到 O(m)。' },
-  inputHint: '格式：字符串 A | 字符串 B，例如 ABCBD | BDCAB（只能是字母，每个最多 8 个）。',
   presets: [
-    { label: '有公共部分', text: 'ABCBD | BDCAB' },
-    { label: '完全相同', text: 'ALGO | ALGO' },
-    { label: '没有公共字符', text: 'ABC | XYZ' },
+    { label: '有公共部分', text: 'ABCBD\nBDCAB' },
+    { label: '完全相同', text: 'ALGO\nALGO' },
+    { label: '没有公共字符', text: 'ABC\nXYZ' },
   ],
   defaultInput: { a: 'ABCBD', b: 'BDCAB' },
   parse,
-  format: (v) => `${v.a} | ${v.b}`,
+  format: (v) => `${v.a}\n${v.b}`,
+  answer: (v) => {
+    const n = v.a.length
+    const m = v.b.length
+    const dp = Array.from({ length: n + 1 }, () => Array<number>(m + 1).fill(0))
+    for (let i = 1; i <= n; i++) {
+      for (let j = 1; j <= m; j++) dp[i][j] = v.a[i - 1] === v.b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1])
+    }
+    let res = ''
+    let i = n
+    let j = m
+    while (i > 0 && j > 0) {
+      if (v.a[i - 1] === v.b[j - 1]) {
+        res = v.a[i - 1] + res
+        i--
+        j--
+      } else if (dp[i - 1][j] >= dp[i][j - 1]) i--
+      else j--
+    }
+    return `${dp[n][m]}\n${res}`
+  },
   random: () => ({ a: randStr(randInt(4, 6)), b: randStr(randInt(4, 6)) }),
   run: runLcs,
   View: LcsView,
@@ -217,34 +238,36 @@ export const lcs: AlgoDef<LcsInput, LcsState> = {
 #include <stdio.h>
 #include <string.h>
 int dp[105][105];
-int max(int x,int y){ return x>y?x:y; }
+int max(int x,int y){
+    return x>y?x:y;
+}
 int main(){
     char a[105],b[105],res[105];
     scanf("%s %s",a,b);
-    int n=strlen(a),m=strlen(b);                        //@init
+    int n=strlen(a),m=strlen(b);                      //@init
     for (int i=1;i<=n;i++){
         for (int j=1;j<=m;j++){
             if (a[i-1]==b[j-1]){
-                dp[i][j]=dp[i-1][j-1]+1;                //@match
+                dp[i][j]=dp[i-1][j-1]+1;              //@match
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);    //@skip
+                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);  //@skip
             }
         }
     }
     int i=n,j=m,k=0;
     while (i>0&&j>0){
         if (a[i-1]==b[j-1]){
-            res[k++]=a[i-1];                            //@tmatch
-            i--;                                        //@tmatch
-            j--;                                        //@tmatch
+            res[k++]=a[i-1];                          //@tmatch
+            i--;                                      //@tmatch
+            j--;                                      //@tmatch
         }else if (dp[i-1][j]>=dp[i][j-1]){
-            i--;                                        //@tup
+            i--;                                      //@tup
         }else{
-            j--;                                        //@tleft
+            j--;                                      //@tleft
         }
     }
-    printf("%d\n",dp[n][m]);                            //@done
-    for (int t=k-1;t>=0;t--) putchar(res[t]);           //@done
+    printf("%d\n",dp[n][m]);                          //@done
+    for (int t=k-1;t>=0;t--) putchar(res[t]);         //@done
     printf("\n");
     return 0;
 }
@@ -256,13 +279,13 @@ int dp[105][105];
 int main(){
     string a,b;
     cin>>a>>b;
-    int n=a.size(),m=b.size();                          //@init
+    int n=a.size(),m=b.size();                        //@init
     for (int i=1;i<=n;i++){
         for (int j=1;j<=m;j++){
             if (a[i-1]==b[j-1]){
-                dp[i][j]=dp[i-1][j-1]+1;                //@match
+                dp[i][j]=dp[i-1][j-1]+1;              //@match
             }else{
-                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);    //@skip
+                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);  //@skip
             }
         }
     }
@@ -270,78 +293,78 @@ int main(){
     int i=n,j=m;
     while (i>0&&j>0){
         if (a[i-1]==b[j-1]){
-            res+=a[i-1];                                //@tmatch
-            i--;                                        //@tmatch
-            j--;                                        //@tmatch
+            res+=a[i-1];                              //@tmatch
+            i--;                                      //@tmatch
+            j--;                                      //@tmatch
         }else if (dp[i-1][j]>=dp[i][j-1]){
-            i--;                                        //@tup
+            i--;                                      //@tup
         }else{
-            j--;                                        //@tleft
+            j--;                                      //@tleft
         }
     }
     reverse(res.begin(),res.end());
-    cout<<dp[n][m]<<endl<<res<<endl;                    //@done
+    cout<<dp[n][m]<<endl<<res<<endl;                  //@done
     return 0;
 }
 `,
     python: String.raw`
-a = input()
-b = input()
-n, m = len(a), len(b)                                   #@init
-dp = [[0] * (m + 1) for _ in range(n + 1)]
-for i in range(1, n + 1):
-    for j in range(1, m + 1):
-        if a[i - 1] == b[j - 1]:
-            dp[i][j] = dp[i - 1][j - 1] + 1             #@match
+a=input()
+b=input()
+n,m=len(a),len(b)                                #@init
+dp=[[0]*(m+1) for _ in range(n+1)]
+for i in range(1,n+1):
+    for j in range(1,m+1):
+        if a[i-1]==b[j-1]:
+            dp[i][j]=dp[i-1][j-1]+1              #@match
         else:
-            dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])  #@skip
-res = []
-i, j = n, m
-while i > 0 and j > 0:
-    if a[i - 1] == b[j - 1]:
-        res.append(a[i - 1])                            #@tmatch
-        i -= 1                                          #@tmatch
-        j -= 1                                          #@tmatch
-    elif dp[i - 1][j] >= dp[i][j - 1]:
-        i -= 1                                          #@tup
+            dp[i][j]=max(dp[i-1][j],dp[i][j-1])  #@skip
+res=[]
+i,j=n,m
+while i>0 and j>0:
+    if a[i-1]==b[j-1]:
+        res.append(a[i-1])                       #@tmatch
+        i-=1                                     #@tmatch
+        j-=1                                     #@tmatch
+    elif dp[i-1][j]>=dp[i][j-1]:
+        i-=1                                     #@tup
     else:
-        j -= 1                                          #@tleft
-print(dp[n][m])                                         #@done
-print(''.join(reversed(res)))                           #@done
+        j-=1                                     #@tleft
+print(dp[n][m])                                  #@done
+print(''.join(reversed(res)))                    #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String a = sc.next(), b = sc.next();
-        int n = a.length(), m = b.length();                 //@init
-        int[][] dp = new int[n + 1][m + 1];
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                if (a.charAt(i - 1) == b.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1] + 1;        //@match
-                } else {
-                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);   //@skip
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        String a=sc.next(),b=sc.next();
+        int n=a.length(),m=b.length();                         //@init
+        int[][] dp=new int[n+1][m+1];
+        for (int i=1;i<=n;i++){
+            for (int j=1;j<=m;j++){
+                if (a.charAt(i-1)==b.charAt(j-1)){
+                    dp[i][j]=dp[i-1][j-1]+1;                   //@match
+                }else{
+                    dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);  //@skip
                 }
             }
         }
-        StringBuilder res = new StringBuilder();
-        int i = n, j = m;
-        while (i > 0 && j > 0) {
-            if (a.charAt(i - 1) == b.charAt(j - 1)) {
-                res.append(a.charAt(i - 1));                //@tmatch
-                i--;                                        //@tmatch
-                j--;                                        //@tmatch
-            } else if (dp[i - 1][j] >= dp[i][j - 1]) {
-                i--;                                        //@tup
-            } else {
-                j--;                                        //@tleft
+        StringBuilder res=new StringBuilder();
+        int i=n,j=m;
+        while (i>0&&j>0){
+            if (a.charAt(i-1)==b.charAt(j-1)){
+                res.append(a.charAt(i-1));                     //@tmatch
+                i--;                                           //@tmatch
+                j--;                                           //@tmatch
+            }else if (dp[i-1][j]>=dp[i][j-1]){
+                i--;                                           //@tup
+            }else{
+                j--;                                           //@tleft
             }
         }
-        System.out.println(dp[n][m]);                       //@done
-        System.out.println(res.reverse());                  //@done
+        System.out.println(dp[n][m]);                          //@done
+        System.out.println(res.reverse());                     //@done
     }
 }
 `,

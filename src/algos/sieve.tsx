@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface SvState {
   n: number
@@ -102,17 +102,32 @@ function SvView({ frame }: { frame: Frame<SvState> }) {
 }
 
 function parse(text: string): ParseResult<number> {
-  const v = toNums(text)
-  if (v.length !== 1 || !Number.isInteger(v[0])) return { ok: false, error: '请输入一个整数 n，例如：50' }
-  if (v[0] < 10 || v[0] > 60) return { ok: false, error: '演示里的 n 请取 10～60。' }
-  return { ok: true, value: v[0] }
+  return readInput(text, (r) => {
+    const n = r.int('n', 10, 60)
+    r.end()
+    return n
+  })
 }
 
 export const sieve: AlgoDef<number, SvState> = {
   id: 'sieve',
-  title: '埃氏筛法',
+  title: '埃氏筛',
   tagline: '不去逐个判断，而是用质数去划掉它们的倍数，剩下的就是质数',
   kind: '算法',
+  slug: 'primes',
+  name: '求质数',
+  type: '筛法',
+  statement: {
+    desc: [
+      '给定一个整数 n，按从小到大的顺序，输出 2 到 n 之间的所有质数。',
+    ],
+    input: [
+      '一行一个整数 n（10 ≤ n ≤ 60）。',
+    ],
+    output: [
+      '一行若干个质数，用空格隔开。',
+    ],
+  },
   intro: [
     '要找出 1 到 n 里所有的质数，可以逐个数去试除，但更快的办法是反过来想：每找到一个质数，就把它的所有倍数划掉。2 是质数，所以 4、6、8 都不是；3 是质数，所以 6、9、12 都不是……一直做下去，剩下没有被划掉的数就是质数。',
     '这个方法叫埃拉托斯特尼筛法，简称埃氏筛。它有一个小小的优化：对质数 i，只需要从 i×i 开始划。因为比 i×i 小的倍数，比如 i×2、i×3，它们有更小的因数，早在处理那些更小的质数时就被划掉了。同样的道理，只需要检查到 i×i≤n 为止。',
@@ -129,7 +144,6 @@ export const sieve: AlgoDef<number, SvState> = {
     '数据达到千万级时，埃氏筛会偏慢，可以改用线性筛（欧拉筛），让每个合数只被划一次。',
   ],
   complexity: { time: 'O(n log log n)', space: 'O(n)', note: '几乎接近线性：n 在一千万以内时，通常一秒左右就能筛完。' },
-  inputHint: '输入一个整数 n（10～60），筛出 2 到 n 里的所有质数。',
   presets: [
     { label: '到 30', text: '30' },
     { label: '到 50', text: '50' },
@@ -138,24 +152,29 @@ export const sieve: AlgoDef<number, SvState> = {
   defaultInput: 50,
   parse,
   format: (v) => String(v),
+  answer: (n) => {
+    const out: number[] = []
+    for (let i = 2; i <= n; i++) if (Array.from({ length: i - 2 }, (_, k) => k + 2).every((d) => i % d !== 0)) out.push(i)
+    return out.join(' ')
+  },
   random: () => randInt(20, 60),
   run: runSieve,
   View: SvView,
   sources: {
     c: String.raw`
 #include <stdio.h>
-int comp[1005];                                 //@init
+int comp[1005];                             //@init
 int main(){
     int n;
     scanf("%d",&n);
     for (int i=2;i*i<=n;i++){
-        if (!comp[i]){                          //@check
-            for (int j=i*i;j<=n;j+=i)           //@cross
-                comp[j]=1;                      //@cross
+        if (!comp[i]){                      //@check
+            for (int j=i*i;j<=n;j+=i)       //@cross
+                comp[j]=1;                  //@cross
         }
     }
-    for (int i=2;i<=n;i++)                      //@done
-        if (!comp[i]) printf("%d ",i);          //@done
+    for (int i=2;i<=n;i++)                  //@done
+        if (!comp[i]) printf("%d ",i);      //@done
     printf("\n");
     return 0;
 }
@@ -163,52 +182,52 @@ int main(){
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-bool comp[1005];                                //@init
+bool comp[1005];                            //@init
 int main(){
     int n;
     cin>>n;
     for (int i=2;i*i<=n;i++){
-        if (!comp[i]){                          //@check
-            for (int j=i*i;j<=n;j+=i)           //@cross
-                comp[j]=true;                   //@cross
+        if (!comp[i]){                      //@check
+            for (int j=i*i;j<=n;j+=i)       //@cross
+                comp[j]=true;               //@cross
         }
     }
-    for (int i=2;i<=n;i++)                      //@done
-        if (!comp[i]) cout<<i<<" ";             //@done
+    for (int i=2;i<=n;i++)                  //@done
+        if (!comp[i]) cout<<i<<" ";         //@done
     cout<<endl;
     return 0;
 }
 `,
     python: String.raw`
-n = int(input())
-comp = [False] * (n + 1)                        #@init
-i = 2
-while i * i <= n:
-    if not comp[i]:                             #@check
-        for j in range(i * i, n + 1, i):        #@cross
-            comp[j] = True                      #@cross
-    i += 1
-for i in range(2, n + 1):                       #@done
-    if not comp[i]:                             #@done
-        print(i, end=' ')                       #@done
+n=int(input())
+comp=[False]*(n+1)                          #@init
+i=2
+while i*i<=n:
+    if not comp[i]:                         #@check
+        for j in range(i*i,n+1,i):          #@cross
+            comp[j]=True                    #@cross
+    i+=1
+for i in range(2,n+1):                      #@done
+    if not comp[i]:                         #@done
+        print(i,end=' ')                    #@done
 print()
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        boolean[] comp = new boolean[n + 1];        //@init
-        for (int i = 2; i * i <= n; i++) {
-            if (!comp[i]) {                         //@check
-                for (int j = i * i; j <= n; j += i) //@cross
-                    comp[j] = true;                 //@cross
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        boolean[] comp=new boolean[n+1];            //@init
+        for (int i=2;i*i<=n;i++){
+            if (!comp[i]){                          //@check
+                for (int j=i*i;j<=n;j+=i)           //@cross
+                    comp[j]=true;                   //@cross
             }
         }
-        for (int i = 2; i <= n; i++)                //@done
-            if (!comp[i]) System.out.print(i + " ");//@done
+        for (int i=2;i<=n;i++)                      //@done
+            if (!comp[i]) System.out.print(i+" ");  //@done
         System.out.println();
     }
 }

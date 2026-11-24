@@ -2,7 +2,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { toNums } from './shared'
+import { readInput } from './shared'
 
 export interface HanoiState {
   n: number
@@ -74,16 +74,32 @@ function HanoiView({ frame }: { frame: Frame<HanoiState> }) {
 }
 
 function parse(text: string): ParseResult<number> {
-  const v = toNums(text)
-  if (v.length !== 1 || !Number.isInteger(v[0]) || v[0] < 1 || v[0] > 5) return { ok: false, error: '盘子的个数请取 1～5。' }
-  return { ok: true, value: v[0] }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 5)
+    r.end()
+    return n
+  })
 }
 
 export const hanoi: AlgoDef<number, HanoiState> = {
   id: 'hanoi',
-  title: '递归：汉诺塔',
+  title: '递归',
   tagline: '把大问题拆成两个更小的同类问题，递归会自己记住每一层的进度',
   kind: '算法',
+  slug: 'hanoi',
+  name: '汉诺塔',
+  type: '分解成子问题',
+  statement: {
+    desc: [
+      '汉诺塔有三根柱子 A、B、C。开始时 A 柱上有 n 个盘子，从上到下按从小到大叠放，盘子的编号是 1 到 n，1 号最小。每次只能移动一个盘子，并且大盘子不能放在小盘子上面。请给出把所有盘子从 A 柱移到 C 柱的方案。',
+    ],
+    input: [
+      '一行一个整数 n（1 ≤ n ≤ 5）。',
+    ],
+    output: [
+      '先输出每一步的移动，每行写成“k X Y”，表示把 k 号盘子从 X 柱移到 Y 柱；最后一行输出总的移动次数，它是最少的次数 2ⁿ − 1。',
+    ],
+  },
   intro: [
     '汉诺塔有三根柱子，A 柱上从大到小叠着 n 个盘子，要全部搬到 C 柱上：每次只能搬一个盘子，并且大盘子永远不能放在小盘子上面。直接想每一步怎么搬很难，但递归的想法很简单：只要能搬走上面的 n-1 个盘子，剩下的最大一个就能一步搬过去。',
     '所以搬 n 个盘子分三步：先把上面的 n-1 个从 A 搬到 B（借助 C），再把最大的一个从 A 搬到 C，最后把 B 上的 n-1 个搬到 C（借助 A）。其中“搬 n-1 个”正是同样的问题，只是规模小了一点，一直缩小到 0 个盘子时什么也不用做，这就是递归的边界。',
@@ -100,7 +116,6 @@ export const hanoi: AlgoDef<number, HanoiState> = {
     '把输出放在递归的前面或者后面，输出的步骤顺序就会是错的，一定要放在两次递归调用的中间。',
   ],
   complexity: { time: 'O(2ⁿ)', space: 'O(n)', note: '搬 n 个盘子需要 2ⁿ - 1 步；空间是递归的深度 n。' },
-  inputHint: '输入盘子的个数（1～5）。',
   presets: [
     { label: '3 个盘子', text: '3' },
     { label: '4 个盘子', text: '4' },
@@ -109,6 +124,18 @@ export const hanoi: AlgoDef<number, HanoiState> = {
   defaultInput: 3,
   parse,
   format: (v) => String(v),
+  answer: (n) => {
+    const out: string[] = []
+    const move = (k: number, a: string, b: string, c: string) => {
+      if (k === 0) return
+      move(k - 1, a, c, b)
+      out.push(`${k} ${a} ${c}`)
+      move(k - 1, b, a, c)
+    }
+    move(n, 'A', 'B', 'C')
+    out.push(String(2 ** n - 1))
+    return out.join('\n')
+  },
   random: () => 2 + Math.floor(Math.random() * 3),
   run: runHanoi,
   View: HanoiView,
@@ -118,14 +145,14 @@ export const hanoi: AlgoDef<number, HanoiState> = {
 void hanoi(int n,char a,char b,char c){
     if (n==0) return;
     hanoi(n-1,a,c,b);
-    printf("%d %c %c\n",n,a,c);                 //@move
+    printf("%d %c %c\n",n,a,c);             //@move
     hanoi(n-1,b,a,c);
 }
 int main(){
     int n;
     scanf("%d",&n);
-    hanoi(n,'A','B','C');                       //@init
-    printf("%d\n",(1<<n)-1);                    //@done
+    hanoi(n,'A','B','C');                   //@init
+    printf("%d\n",(1<<n)-1);                //@done
     return 0;
 }
 `,
@@ -135,45 +162,44 @@ using namespace std;
 void hanoi(int n,char a,char b,char c){
     if (n==0) return;
     hanoi(n-1,a,c,b);
-    cout<<n<<" "<<a<<" "<<c<<endl;             //@move
+    cout<<n<<" "<<a<<" "<<c<<endl;          //@move
     hanoi(n-1,b,a,c);
 }
 int main(){
     int n;
     cin>>n;
-    hanoi(n,'A','B','C');                       //@init
-    cout<<(1<<n)-1<<endl;                       //@done
+    hanoi(n,'A','B','C');                   //@init
+    cout<<(1<<n)-1<<endl;                   //@done
     return 0;
 }
 `,
     python: String.raw`
-def hanoi(n, a, b, c):
-    if n == 0:
+def hanoi(n,a,b,c):
+    if n==0:
         return
-    hanoi(n - 1, a, c, b)
-    print(n, a, c)                              #@move
-    hanoi(n - 1, b, a, c)
+    hanoi(n-1,a,c,b)
+    print(n,a,c)                            #@move
+    hanoi(n-1,b,a,c)
 
-
-n = int(input())
-hanoi(n, 'A', 'B', 'C')                         #@init
-print((1 << n) - 1)                             #@done
+n=int(input())
+hanoi(n,'A','B','C')                        #@init
+print((1<<n)-1)                             #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static void hanoi(int n, char a, char b, char c) {
-        if (n == 0) return;
-        hanoi(n - 1, a, c, b);
-        System.out.println(n + " " + a + " " + c);  //@move
-        hanoi(n - 1, b, a, c);
+public class Main{
+    static void hanoi(int n,char a,char b,char c){
+        if (n==0) return;
+        hanoi(n-1,a,c,b);
+        System.out.println(n+" "+a+" "+c);  //@move
+        hanoi(n-1,b,a,c);
     }
 
-    public static void main(String[] args) {
-        int n = new Scanner(System.in).nextInt();
-        hanoi(n, 'A', 'B', 'C');                    //@init
-        System.out.println((1 << n) - 1);           //@done
+    public static void main(String[] args){
+        int n=new Scanner(System.in).nextInt();
+        hanoi(n,'A','B','C');               //@init
+        System.out.println((1<<n)-1);       //@done
     }
 }
 `,

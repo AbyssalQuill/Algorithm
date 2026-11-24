@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame } from '../engine/types'
-import { parseList, randList } from './shared'
+import { arrayInput, randList } from './shared'
 
 type Item = { id: number; v: number }
 
@@ -172,6 +172,21 @@ export const mergeSort: AlgoDef<number[], MsState> = {
   title: '归并排序',
   tagline: '先对半拆开分别排好，再把两个有序的部分合并成一个',
   kind: '算法',
+  slug: 'sort',
+  name: '从小到大排序',
+  type: '排序',
+  statement: {
+    desc: [
+      '给定 n 个整数，用归并排序把它们从小到大排好序，输出排序之后的结果。演示里可以看到数组怎样被拆开、又怎样被合并。',
+    ],
+    input: [
+      '第一行一个整数 n（2 ≤ n ≤ 10）。',
+      '第二行 n 个整数，每个在 1～99 之间，可以有相同的数。',
+    ],
+    output: [
+      '一行 n 个整数，从小到大排列，用空格隔开。',
+    ],
+  },
   intro: [
     '归并排序是“分治”思想的典型例子。要给一个数组排序，先把它从中间分成两半，让两半各自排好序，最后只需要把两个有序的序列合并成一个有序序列。至于两半怎么排好，就继续对半拆，一直拆到每一段只剩一个数，一个数当然是有序的。',
     '合并是关键的一步：两个有序序列各有一个指针，指向各自最小的数，每次比较两个指针所指的数，把较小的取出来放到辅助数组里，指针后移。一边取完后，另一边剩下的直接接上。合并 n 个数只需要扫描一遍。',
@@ -188,15 +203,14 @@ export const mergeSort: AlgoDef<number[], MsState> = {
     '递归的边界写成 l>r 而不是 l>=r，会让只剩一个数的区间继续往下分，造成无限递归。',
   ],
   complexity: { time: 'O(n log n)', space: 'O(n)', note: '无论数据原来是什么顺序，时间都是 O(n log n)；需要额外的 O(n) 辅助数组。' },
-  inputHint: '输入 2～10 个 1～99 的整数，空格隔开，回车或点“应用”。',
   presets: [
-    { label: '随便一组', text: '6 2 9 4 7 1 8 3' },
-    { label: '已经有序', text: '1 2 3 4 5 6 7 8' },
-    { label: '有重复数', text: '4 2 4 1 3 2 4' },
+    { label: '随便一组', text: '8\n6 2 9 4 7 1 8 3' },
+    { label: '已经有序', text: '8\n1 2 3 4 5 6 7 8' },
+    { label: '有重复数', text: '7\n4 2 4 1 3 2 4' },
   ],
   defaultInput: [6, 2, 9, 4, 7, 1, 8, 3],
-  parse: (t) => parseList(t, { min: 2, max: 10, lo: 1, hi: 99 }),
-  format: (v) => v.join(' '),
+  ...arrayInput({ min: 2, max: 10, lo: 1, hi: 99 }),
+  answer: (v) => [...v].sort((a, b) => a - b).join(' '),
   random: () => randList(8),
   run: runMergeSort,
   View: MsView,
@@ -205,25 +219,25 @@ export const mergeSort: AlgoDef<number[], MsState> = {
 #include <stdio.h>
 int tmp[1005];
 void mergeSort(int a[],int l,int r){
-    if (l>=r) return;                           //@call
-    int mid=(l+r)/2;                            //@split
+    if (l>=r) return;                          //@call
+    int mid=(l+r)/2;                           //@split
     mergeSort(a,l,mid);
     mergeSort(a,mid+1,r);
-    int i=l,j=mid+1,k=l;                        //@merge
+    int i=l,j=mid+1,k=l;                       //@merge
     while (i<=mid&&j<=r){
-        if (a[i]<=a[j]) tmp[k++]=a[i++];        //@takeL
-        else tmp[k++]=a[j++];                   //@takeR
+        if (a[i]<=a[j]) tmp[k++]=a[i++];       //@takeL
+        else tmp[k++]=a[j++];                  //@takeR
     }
-    while (i<=mid) tmp[k++]=a[i++];             //@restL
-    while (j<=r) tmp[k++]=a[j++];               //@restR
-    for (int p=l;p<=r;p++) a[p]=tmp[p];         //@copy
+    while (i<=mid) tmp[k++]=a[i++];            //@restL
+    while (j<=r) tmp[k++]=a[j++];              //@restR
+    for (int p=l;p<=r;p++) a[p]=tmp[p];        //@copy
 }
 int main(){
     int n,a[1005];
     scanf("%d",&n);
     for (int i=0;i<n;i++) scanf("%d",&a[i]);
-    mergeSort(a,0,n-1);                         //@init
-    for (int i=0;i<n;i++) printf("%d ",a[i]);   //@done
+    mergeSort(a,0,n-1);                        //@init
+    for (int i=0;i<n;i++) printf("%d ",a[i]);  //@done
     return 0;
 }
 `,
@@ -232,88 +246,87 @@ int main(){
 using namespace std;
 int tmp[1005];
 void mergeSort(int a[],int l,int r){
-    if (l>=r) return;                           //@call
-    int mid=(l+r)/2;                            //@split
+    if (l>=r) return;                       //@call
+    int mid=(l+r)/2;                        //@split
     mergeSort(a,l,mid);
     mergeSort(a,mid+1,r);
-    int i=l,j=mid+1,k=l;                        //@merge
+    int i=l,j=mid+1,k=l;                    //@merge
     while (i<=mid&&j<=r){
-        if (a[i]<=a[j]) tmp[k++]=a[i++];        //@takeL
-        else tmp[k++]=a[j++];                   //@takeR
+        if (a[i]<=a[j]) tmp[k++]=a[i++];    //@takeL
+        else tmp[k++]=a[j++];               //@takeR
     }
-    while (i<=mid) tmp[k++]=a[i++];             //@restL
-    while (j<=r) tmp[k++]=a[j++];               //@restR
-    for (int p=l;p<=r;p++) a[p]=tmp[p];         //@copy
+    while (i<=mid) tmp[k++]=a[i++];         //@restL
+    while (j<=r) tmp[k++]=a[j++];           //@restR
+    for (int p=l;p<=r;p++) a[p]=tmp[p];     //@copy
 }
 int main(){
     int n,a[1005];
     cin>>n;
     for (int i=0;i<n;i++) cin>>a[i];
-    mergeSort(a,0,n-1);                         //@init
-    for (int i=0;i<n;i++) cout<<a[i]<<" ";      //@done
+    mergeSort(a,0,n-1);                     //@init
+    for (int i=0;i<n;i++) cout<<a[i]<<" ";  //@done
     return 0;
 }
 `,
     python: String.raw`
-def merge_sort(a, l, r, tmp):
-    if l >= r:                                  #@call
+def merge_sort(a,l,r,tmp):
+    if l>=r:                                #@call
         return
-    mid = (l + r) // 2                          #@split
-    merge_sort(a, l, mid, tmp)
-    merge_sort(a, mid + 1, r, tmp)
-    i, j, k = l, mid + 1, l                     #@merge
-    while i <= mid and j <= r:
-        if a[i] <= a[j]:
-            tmp[k] = a[i]                       #@takeL
-            i += 1                              #@takeL
+    mid=(l+r)//2                            #@split
+    merge_sort(a,l,mid,tmp)
+    merge_sort(a,mid+1,r,tmp)
+    i,j,k=l,mid+1,l                         #@merge
+    while i<=mid and j<=r:
+        if a[i]<=a[j]:
+            tmp[k]=a[i]                     #@takeL
+            i+=1                            #@takeL
         else:
-            tmp[k] = a[j]                       #@takeR
-            j += 1                              #@takeR
-        k += 1
-    while i <= mid:
-        tmp[k] = a[i]                           #@restL
-        i += 1                                  #@restL
-        k += 1
-    while j <= r:
-        tmp[k] = a[j]                           #@restR
-        j += 1                                  #@restR
-        k += 1
-    a[l:r + 1] = tmp[l:r + 1]                   #@copy
+            tmp[k]=a[j]                     #@takeR
+            j+=1                            #@takeR
+        k+=1
+    while i<=mid:
+        tmp[k]=a[i]                         #@restL
+        i+=1                                #@restL
+        k+=1
+    while j<=r:
+        tmp[k]=a[j]                         #@restR
+        j+=1                                #@restR
+        k+=1
+    a[l:r+1]=tmp[l:r+1]                     #@copy
 
-
-n = int(input())
-a = list(map(int, input().split()))
-merge_sort(a, 0, n - 1, [0] * n)               #@init
-print(*a)                                       #@done
+n=int(input())
+a=list(map(int,input().split()))
+merge_sort(a,0,n-1,[0]*n)                   #@init
+print(*a)                                   #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int[] tmp = new int[1005];
+public class Main{
+    static int[] tmp=new int[1005];
 
-    static void mergeSort(int[] a, int l, int r) {
-        if (l >= r) return;                         //@call
-        int mid = (l + r) / 2;                      //@split
-        mergeSort(a, l, mid);
-        mergeSort(a, mid + 1, r);
-        int i = l, j = mid + 1, k = l;              //@merge
-        while (i <= mid && j <= r) {
-            if (a[i] <= a[j]) tmp[k++] = a[i++];    //@takeL
-            else tmp[k++] = a[j++];                 //@takeR
+    static void mergeSort(int[] a,int l,int r){
+        if (l>=r) return;                       //@call
+        int mid=(l+r)/2;                        //@split
+        mergeSort(a,l,mid);
+        mergeSort(a,mid+1,r);
+        int i=l,j=mid+1,k=l;                    //@merge
+        while (i<=mid&&j<=r){
+            if (a[i]<=a[j]) tmp[k++]=a[i++];    //@takeL
+            else tmp[k++]=a[j++];               //@takeR
         }
-        while (i <= mid) tmp[k++] = a[i++];         //@restL
-        while (j <= r) tmp[k++] = a[j++];           //@restR
-        for (int p = l; p <= r; p++) a[p] = tmp[p]; //@copy
+        while (i<=mid) tmp[k++]=a[i++];         //@restL
+        while (j<=r) tmp[k++]=a[j++];           //@restR
+        for (int p=l;p<=r;p++) a[p]=tmp[p];     //@copy
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
-        mergeSort(a, 0, n - 1);                     //@init
-        for (int x : a) System.out.print(x + " ");  //@done
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
+        mergeSort(a,0,n-1);                     //@init
+        for (int x:a) System.out.print(x+" ");  //@done
     }
 }
 `,

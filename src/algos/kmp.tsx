@@ -4,7 +4,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 export interface KmpInput {
   text: string
@@ -159,22 +159,36 @@ function KmpView({ frame }: { frame: Frame<KmpState> }) {
 }
 
 function parse(text: string): ParseResult<KmpInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「文本 | 模式串」，例如：ababcabababc | abab' }
-  const t = parts[0].trim()
-  const p = parts[1].trim()
-  if (!/^[a-z]{1,14}$/.test(t) || !/^[a-z]{1,6}$/.test(p)) return { ok: false, error: '只能用小写字母，文本最长 14 个，模式串最长 6 个。' }
-  if (p.length > t.length) return { ok: false, error: '模式串不能比文本更长。' }
-  return { ok: true, value: { text: t, pat: p } }
+  return readInput(text, (r) => {
+    const t = r.word('文本串 t', /^[a-z]{1,14}$/, '只能由 1～14 个小写字母组成')
+    const p = r.word('模式串 p', /^[a-z]{1,6}$/, '只能由 1～6 个小写字母组成')
+    r.end()
+    if (p.length > t.length) fail('模式串不能比文本串更长。')
+    return { text: t, pat: p }
+  })
 }
 
 const rs = (len: number) => Array.from({ length: len }, () => 'ab'[randInt(0, 1)]).join('')
 
 export const kmp: AlgoDef<KmpInput, KmpState> = {
   id: 'kmp',
-  title: '字符串匹配：KMP',
-  tagline: '失配时不让文本回头，而是利用模式串自己的前缀和后缀，让模式串跳到合适的位置继续',
+  title: 'KMP',
+  tagline: '字符串匹配：失配时不让文本回头，而是利用模式串自己的前缀和后缀，让模式串跳到合适的位置继续',
   kind: '算法',
+  slug: 'match',
+  name: '模式串匹配',
+  type: '字符串匹配',
+  statement: {
+    desc: [
+      '给定一个文本串 t 和一个模式串 p，找出 p 在 t 中每一次出现的起始位置（下标从 0 开始）。不同的出现位置可以互相重叠。',
+    ],
+    input: [
+      '一行两个字符串 t 和 p，用空格隔开，都只含小写字母。t 的长度是 1～14，p 的长度是 1～6，并且 p 不比 t 长。',
+    ],
+    output: [
+      '一行，按从小到大的顺序输出所有起始位置，用空格隔开；一次都没有出现时输出 -1。',
+    ],
+  },
   intro: [
     '在一段很长的文本里找一个模式串，最朴素的方法是把模式串放在文本的每个位置上，逐个字符比较，一旦失配就后移一格从头再来，最坏要 O(nm)。可是失配的时候，我们其实已经知道了不少信息：前面那一段文本和模式串的前缀是相同的，这些信息被朴素的做法浪费了。',
     'KMP 算法把这些信息用起来：它先对模式串自己做一次预处理，算出 next 数组，nxt[i] 是模式串前 i+1 个字符里，最长的“既是前缀又是后缀”的部分的长度（不能是整个串）。匹配时如果在第 j 个字符失配，说明前 j 个字符是已经对上的，其中长度为 nxt[j-1] 的前缀和后缀相同，就不必从头比起，让 j 直接退到 nxt[j-1] 继续比较。文本的指针永远不后退，所以总时间是 O(n + m)。',
@@ -191,15 +205,19 @@ export const kmp: AlgoDef<KmpInput, KmpState> = {
     '字符串很短时，朴素匹配往往更快更简单，不必每次都用 KMP；它的价值体现在文本很长、模式串有大量重复的场合。',
   ],
   complexity: { time: 'O(n + m)', space: 'O(m)', note: 'n 是文本长度，m 是模式串长度。建 next 表 O(m)，匹配 O(n)。' },
-  inputHint: '格式：文本 | 模式串，小写字母，例如 ababcabababc | abab（文本最长 14 个，模式串最长 6 个）。',
   presets: [
-    { label: '有重叠的匹配', text: 'abababab | abab' },
-    { label: '会失配', text: 'ababcabababc | ababc' },
-    { label: '找不到', text: 'aaaaaaab | aaab' },
+    { label: '有重叠的匹配', text: 'abababab abab' },
+    { label: '会失配', text: 'ababcabababc ababc' },
+    { label: '找不到', text: 'aaaaaaab aaab' },
   ],
   defaultInput: { text: 'ababcabababc', pat: 'abab' },
   parse,
-  format: (v) => `${v.text} | ${v.pat}`,
+  format: (v) => `${v.text} ${v.pat}`,
+  answer: (v) => {
+    const pos: number[] = []
+    for (let i = 0; i + v.pat.length <= v.text.length; i++) if (v.text.startsWith(v.pat, i)) pos.push(i)
+    return pos.length ? pos.join(' ') : '-1'
+  },
   random: () => {
     const pat = rs(randInt(2, 4))
     return { text: rs(randInt(7, 12)), pat }
@@ -215,22 +233,22 @@ int main(){
     int nxt[105],res[105],rc=0;
     scanf("%s %s",t,p);
     int n=strlen(t),m=strlen(p);
-    nxt[0]=0;                                   //@init
+    nxt[0]=0;                                     //@init
     for (int i=1,j=0;i<m;i++){
-        while (j>0&&p[i]!=p[j]) j=nxt[j-1];     //@pFall
-        if (p[i]==p[j]) j++;                    //@pExtend
-        nxt[i]=j;                               //@pSet
+        while (j>0&&p[i]!=p[j]) j=nxt[j-1];       //@pFall
+        if (p[i]==p[j]) j++;                      //@pExtend
+        nxt[i]=j;                                 //@pSet
     }
     for (int i=0,j=0;i<n;i++){
-        while (j>0&&t[i]!=p[j]) j=nxt[j-1];     //@fall
-        if (t[i]==p[j]) j++;                    //@hit,miss
+        while (j>0&&t[i]!=p[j]) j=nxt[j-1];       //@fall
+        if (t[i]==p[j]) j++;                      //@hit,miss
         if (j==m){
-            res[rc++]=i-m+1;                    //@found
+            res[rc++]=i-m+1;                      //@found
             j=nxt[j-1];
         }
     }
     if (rc==0) printf("-1");
-    for (int i=0;i<rc;i++) printf("%d ",res[i]);    //@done
+    for (int i=0;i<rc;i++) printf("%d ",res[i]);  //@done
     printf("\n");
     return 0;
 }
@@ -242,75 +260,75 @@ int main(){
     string t,p;
     cin>>t>>p;
     int n=t.size(),m=p.size();
-    vector<int> nxt(m,0),res;                   //@init
+    vector<int> nxt(m,0),res;                //@init
     for (int i=1,j=0;i<m;i++){
-        while (j>0&&p[i]!=p[j]) j=nxt[j-1];     //@pFall
-        if (p[i]==p[j]) j++;                    //@pExtend
-        nxt[i]=j;                               //@pSet
+        while (j>0&&p[i]!=p[j]) j=nxt[j-1];  //@pFall
+        if (p[i]==p[j]) j++;                 //@pExtend
+        nxt[i]=j;                            //@pSet
     }
     for (int i=0,j=0;i<n;i++){
-        while (j>0&&t[i]!=p[j]) j=nxt[j-1];     //@fall
-        if (t[i]==p[j]) j++;                    //@hit,miss
+        while (j>0&&t[i]!=p[j]) j=nxt[j-1];  //@fall
+        if (t[i]==p[j]) j++;                 //@hit,miss
         if (j==m){
-            res.push_back(i-m+1);               //@found
+            res.push_back(i-m+1);            //@found
             j=nxt[j-1];
         }
     }
     if (res.empty()) cout<<-1;
-    for (int x:res) cout<<x<<" ";               //@done
+    for (int x:res) cout<<x<<" ";            //@done
     cout<<endl;
     return 0;
 }
 `,
     python: String.raw`
-t, p = input().split()
-n, m = len(t), len(p)
-nxt = [0] * m                                   #@init
-j = 0
-for i in range(1, m):
-    while j > 0 and p[i] != p[j]:
-        j = nxt[j - 1]                          #@pFall
-    if p[i] == p[j]:
-        j += 1                                  #@pExtend
-    nxt[i] = j                                  #@pSet
-res = []
-j = 0
+t,p=input().split()
+n,m=len(t),len(p)
+nxt=[0]*m                                   #@init
+j=0
+for i in range(1,m):
+    while j>0 and p[i]!=p[j]:
+        j=nxt[j-1]                          #@pFall
+    if p[i]==p[j]:
+        j+=1                                #@pExtend
+    nxt[i]=j                                #@pSet
+res=[]
+j=0
 for i in range(n):
-    while j > 0 and t[i] != p[j]:
-        j = nxt[j - 1]                          #@fall
-    if t[i] == p[j]:
-        j += 1                                  #@hit,miss
-    if j == m:
-        res.append(i - m + 1)                   #@found
-        j = nxt[j - 1]
-print(*(res if res else [-1]))                  #@done
+    while j>0 and t[i]!=p[j]:
+        j=nxt[j-1]                          #@fall
+    if t[i]==p[j]:
+        j+=1                                #@hit,miss
+    if j==m:
+        res.append(i-m+1)                   #@found
+        j=nxt[j-1]
+print(*(res if res else [-1]))              #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String t = sc.next(), p = sc.next();
-        int n = t.length(), m = p.length();
-        int[] nxt = new int[m];                     //@init
-        for (int i = 1, j = 0; i < m; i++) {
-            while (j > 0 && p.charAt(i) != p.charAt(j)) j = nxt[j - 1];     //@pFall
-            if (p.charAt(i) == p.charAt(j)) j++;    //@pExtend
-            nxt[i] = j;                             //@pSet
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        String t=sc.next(),p=sc.next();
+        int n=t.length(),m=p.length();
+        int[] nxt=new int[m];                                  //@init
+        for (int i=1,j=0;i<m;i++){
+            while (j>0&&p.charAt(i)!=p.charAt(j)) j=nxt[j-1];  //@pFall
+            if (p.charAt(i)==p.charAt(j)) j++;                 //@pExtend
+            nxt[i]=j;                                          //@pSet
         }
-        List<Integer> res = new ArrayList<>();
-        for (int i = 0, j = 0; i < n; i++) {
-            while (j > 0 && t.charAt(i) != p.charAt(j)) j = nxt[j - 1];     //@fall
-            if (t.charAt(i) == p.charAt(j)) j++;    //@hit,miss
-            if (j == m) {
-                res.add(i - m + 1);                 //@found
-                j = nxt[j - 1];
+        List<Integer> res=new ArrayList<>();
+        for (int i=0,j=0;i<n;i++){
+            while (j>0&&t.charAt(i)!=p.charAt(j)) j=nxt[j-1];  //@fall
+            if (t.charAt(i)==p.charAt(j)) j++;                 //@hit,miss
+            if (j==m){
+                res.add(i-m+1);                                //@found
+                j=nxt[j-1];
             }
         }
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb=new StringBuilder();
         if (res.isEmpty()) sb.append(-1);
-        for (int x : res) sb.append(x).append(' ');     //@done
+        for (int x:res) sb.append(x).append(' ');              //@done
         System.out.println(sb);
     }
 }

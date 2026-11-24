@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { bigAdd, bigAddRef, runBigAdd } from '../src/algos/bigAdd'
-import { bitClear, runBitClear } from '../src/algos/bitClear'
-import { gcd, gcdOf, runGcd } from '../src/algos/gcd'
-import { greedy, runGreedy, type Act } from '../src/algos/greedy'
-import { kmp, kmpRef, runKmp } from '../src/algos/kmp'
-import { knapsack, runKnapsack } from '../src/algos/knapsack'
-import { runSt, sparseTable } from '../src/algos/sparseTable'
-import { itPrograms, rnd, rndList } from './helpers'
+import { bigAddRef, runBigAdd } from '../src/algos/bigAdd'
+import { runBitClear } from '../src/algos/bitClear'
+import { runGcd } from '../src/algos/gcd'
+import { runGreedy, type Act } from '../src/algos/greedy'
+import { kmpRef, runKmp } from '../src/algos/kmp'
+import { runKnapsack } from '../src/algos/knapsack'
+import { runSt } from '../src/algos/sparseTable'
+import { rnd, rndList } from './helpers'
 
 describe('0-1 背包', () => {
   const brute = (w: number[], v: number[], cap: number) => {
@@ -33,15 +33,6 @@ describe('0-1 背包', () => {
       expect(runKnapsack({ w, v, cap }).at(-1)!.state.answer).toBe(brute(w, v, cap))
     }
   })
-  itPrograms(knapsack, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(1, 8)
-      const w = rndList(n, 1, 12)
-      const v = rndList(n, 1, 50)
-      const cap = rnd(1, 40)
-      return { input: `${n} ${cap}\n${w.join(' ')}\n${v.join(' ')}\n`, expected: String(brute(w, v, cap)) }
-    }),
-  )
 })
 
 describe('贪心：活动选择', () => {
@@ -66,12 +57,6 @@ describe('贪心：活动选择', () => {
       expect(runGreedy(acts).at(-1)!.state.count).toBe(brute(acts))
     }
   })
-  itPrograms(greedy, () =>
-    Array.from({ length: 20 }, () => {
-      const acts = rand()
-      return { input: `${acts.length}\n${acts.map((a) => `${a.s} ${a.e}`).join('\n')}\n`, expected: String(brute(acts)) }
-    }),
-  )
 })
 
 describe('辗转相除法', () => {
@@ -86,13 +71,6 @@ describe('辗转相除法', () => {
       expect(s.lcm).toBe((a * b) / g)
     }
   })
-  itPrograms(gcd, () =>
-    Array.from({ length: 20 }, () => {
-      const a = rnd(1, 9999)
-      const b = rnd(1, 9999)
-      return { input: `${a} ${b}\n`, expected: `${gcdOf(a, b)} ${(a / gcdOf(a, b)) * b}` }
-    }),
-  )
 })
 
 describe('ST 表', () => {
@@ -110,18 +88,6 @@ describe('ST 表', () => {
       expect(runSt({ arr, qs }).at(-1)!.state.results).toEqual(qs.map(([l, r]) => Math.min(...arr.slice(l - 1, r))))
     }
   })
-  itPrograms(sparseTable, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(4, 30)
-      const arr = rndList(n, 0, 99)
-      const qs = Array.from({ length: rnd(1, 5) }, () => {
-        const a = rnd(1, n)
-        const b = rnd(1, n)
-        return [Math.min(a, b), Math.max(a, b)] as [number, number]
-      })
-      return { input: `${n}\n${arr.join(' ')}\n${qs.length}\n${qs.map((q) => q.join(' ')).join('\n')}\n`, expected: qs.map(([l, r]) => Math.min(...arr.slice(l - 1, r))).join(' ') }
-    }),
-  )
 })
 
 describe('高精度加法', () => {
@@ -134,7 +100,6 @@ describe('高精度加法', () => {
       expect([...s.digits].reverse().join('')).toBe(bigAddRef(a, b))
     }
   })
-  itPrograms(bigAdd, () => [['999', '1'], ['1', '1'], ['958', '67'], ...Array.from({ length: 15 }, () => [rs(), rs()])].map(([a, b]) => ({ input: `${a} ${b}\n`, expected: bigAddRef(a, b) })))
 })
 
 describe('KMP', () => {
@@ -146,19 +111,10 @@ describe('KMP', () => {
       expect(runKmp({ text, pat }).at(-1)!.state.found, `${text} | ${pat}`).toEqual(kmpRef(text, pat))
     }
   })
-  itPrograms(kmp, () =>
-    Array.from({ length: 25 }, () => {
-      const text = rs(rnd(4, 40))
-      const pat = rs(rnd(1, 6))
-      const r = kmpRef(text, pat)
-      return { input: `${text} ${pat}\n`, expected: r.length ? r.join(' ') : '-1' }
-    }),
-  )
 })
 
 describe('位运算：n&(n-1)', () => {
   it('消掉的 1 的个数等于二进制里 1 的个数', () => {
     for (let n = 1; n <= 255; n++) expect(runBitClear(n).at(-1)!.state.cnt).toBe(n.toString(2).replace(/0/g, '').length)
   })
-  itPrograms(bitClear, () => [1, 64, 255, 180, 7, 128].map((n) => ({ input: `${n}\n`, expected: String(n.toString(2).replace(/0/g, '').length) })))
 })

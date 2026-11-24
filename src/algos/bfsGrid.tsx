@@ -3,7 +3,8 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt } from './shared'
+import { bfsGraph } from './bfsGraph'
+import { fail, randInt, readInput } from './shared'
 
 /** 迷宫：每一行是一个字符串，. 是路，# 是墙，S 是起点，T 是终点 */
 export type Maze = string[]
@@ -152,16 +153,16 @@ function BfsView({ frame }: { frame: Frame<BfsState> }) {
 }
 
 function parse(text: string): ParseResult<Maze> {
-  const rows = text.trim().split(/[\s/|｜]+/).filter(Boolean)
-  if (rows.length < 2 || rows.length > 8) return { ok: false, error: '迷宫请写 2～8 行，每行之间用空格隔开。' }
-  const w = rows[0].length
-  if (w < 2 || w > 9) return { ok: false, error: '每一行请写 2～9 个字符。' }
-  if (rows.some((r) => r.length !== w)) return { ok: false, error: '每一行的长度必须相同。' }
-  if (rows.some((r) => /[^.#ST]/.test(r))) return { ok: false, error: '只能使用 .（路）、#（墙）、S（起点）、T（终点）这四种字符。' }
-  const all = rows.join('')
-  if ([...all].filter((c) => c === 'S').length !== 1) return { ok: false, error: '需要恰好一个起点 S。' }
-  if ([...all].filter((c) => c === 'T').length !== 1) return { ok: false, error: '需要恰好一个终点 T。' }
-  return { ok: true, value: rows }
+  return readInput(text, (r) => {
+    const n = r.int('n', 2, 8)
+    const m = r.int('m', 2, 9)
+    const rows = Array.from({ length: n }, (_, i) => r.word(`第 ${i + 1} 行`, new RegExp(`^[.#ST]{${m}}$`), `要恰好有 ${m} 个字符，并且只能用 . # S T 这四种`))
+    r.end()
+    const all = rows.join('')
+    if ([...all].filter((c) => c === 'S').length !== 1) fail('需要恰好一个起点 S。')
+    if ([...all].filter((c) => c === 'T').length !== 1) fail('需要恰好一个终点 T。')
+    return rows
+  })
 }
 
 function randomMaze(): Maze {
@@ -176,10 +177,25 @@ function randomMaze(): Maze {
 }
 
 export const bfsGrid: AlgoDef<Maze, BfsState> = {
-  id: 'bfs-grid',
-  title: '广度优先搜索：迷宫最短路',
-  tagline: '从起点出发，像水波一样一层一层向外扩散，第一次碰到终点时走的就是最短路线',
+  id: 'bfs',
+  title: 'BFS',
+  tagline: '广度优先搜索：从起点出发，像水波一样一层一层向外扩散，第一次碰到终点时走的就是最短路线',
   kind: '算法',
+  slug: 'maze',
+  name: '迷宫最短路',
+  type: '网格最短路',
+  statement: {
+    desc: [
+      '有一个 n 行 m 列的迷宫，. 表示空地，# 表示墙，S 是起点，T 是终点。每一步可以向上、下、左、右走到相邻的空地，不能走出迷宫，也不能穿过墙。求从 S 走到 T 最少需要几步，走不到时输出 -1。',
+    ],
+    input: [
+      '第一行两个整数 n 和 m（2 ≤ n ≤ 8，2 ≤ m ≤ 9）。',
+      '接下来 n 行，每行一个长度为 m 的字符串，只包含 . # S T 四种字符，S 和 T 各出现恰好一次。',
+    ],
+    output: [
+      '一行一个整数，是最少的步数；走不到时输出 -1。',
+    ],
+  },
   intro: [
     '在迷宫里找最短路线，广度优先搜索（BFS）是最自然的办法。想象在起点滴下一滴水：它先流到距离为 1 的所有格子，再流到距离为 2 的所有格子，一层一层向外扩散。因为是按距离从近到远的顺序处理，所以第一次碰到终点时，用的步数一定是最少的。',
     '实现靠的是队列。队头永远是当前最近的格子：取出它，把它四周还没到过的格子放进队尾，并把它们的距离记为“当前距离加一”。队列保证了“先发现的先处理”，这正好就是一层一层向外扩的顺序。',
@@ -196,15 +212,38 @@ export const bfsGrid: AlgoDef<Maze, BfsState> = {
     '这个办法只适用于每一步代价相同的情况。如果每条边的权值不同，要改用 Dijkstra 算法。',
   ],
   complexity: { time: 'O(n·m)', space: 'O(n·m)', note: '每个格子最多入队、出队一次，每次检查 4 个方向。' },
-  inputHint: '每一行之间用空格隔开：. 是路，# 是墙，S 是起点，T 是终点（最多 8 行，每行最多 9 个字符）。',
   presets: [
-    { label: '绕远路', text: 'S..#.... .#.#.##. .#...#.. .####.#. ......#T' },
-    { label: '没有路', text: 'S..#.... ...#.... ...#..T. ...#....' },
-    { label: '空旷', text: 'S...... ....... ....... ......T' },
+    { label: '绕远路', text: '5 8\nS..#....\n.#.#.##.\n.#...#..\n.####.#.\n......#T' },
+    { label: '没有路', text: '4 8\nS..#....\n...#....\n...#..T.\n...#....' },
+    { label: '空旷', text: '4 7\nS......\n.......\n.......\n......T' },
   ],
   defaultInput: ['S..#....', '.#.#.##.', '.#...#..', '.####.#.', '......#T'],
   parse,
-  format: (v) => v.join(' '),
+  format: (v) => `${v.length} ${v[0].length}\n${v.join('\n')}`,
+  answer: (g) => {
+    const n = g.length
+    const m = g[0].length
+    const dist = Array.from({ length: n }, () => Array<number>(m).fill(-1))
+    const at = (ch: string) => {
+      const i = g.findIndex((row) => row.includes(ch))
+      return [i, g[i].indexOf(ch)]
+    }
+    const [sx, sy] = at('S')
+    const [tx, ty] = at('T')
+    dist[sx][sy] = 0
+    const q = [[sx, sy]]
+    while (q.length) {
+      const [x, y] = q.shift()!
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx
+        const ny = y + dy
+        if (nx < 0 || nx >= n || ny < 0 || ny >= m || g[nx][ny] === '#' || dist[nx][ny] !== -1) continue
+        dist[nx][ny] = dist[x][y] + 1
+        q.push([nx, ny])
+      }
+    }
+    return String(dist[tx][ty])
+  },
   random: randomMaze,
   run: runBfs,
   View: BfsView,
@@ -225,20 +264,20 @@ int main(){
             dist[i][j]=-1;
         }
     }
-    dist[sx][sy]=0;                                     //@init
-    qx[tail]=sx; qy[tail++]=sy;                         //@init
+    dist[sx][sy]=0;                                          //@init
+    qx[tail]=sx; qy[tail++]=sy;                              //@init
     while (head<tail){
-        int x=qx[head],y=qy[head++];                    //@pop
-        if (x==tx&&y==ty) break;                        //@found
-        for (int d=0;d<4;d++){                          //@expand
-            int nx=x+dx[d],ny=y+dy[d];                  //@expand
-            if (nx<0||nx>=n||ny<0||ny>=m) continue;     //@expand
-            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;   //@expand
-            dist[nx][ny]=dist[x][y]+1;                  //@expand
-            qx[tail]=nx; qy[tail++]=ny;                 //@expand
+        int x=qx[head],y=qy[head++];                         //@pop
+        if (x==tx&&y==ty) break;                             //@found
+        for (int d=0;d<4;d++){                               //@expand
+            int nx=x+dx[d],ny=y+dy[d];                       //@expand
+            if (nx<0||nx>=n||ny<0||ny>=m) continue;          //@expand
+            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;  //@expand
+            dist[nx][ny]=dist[x][y]+1;                       //@expand
+            qx[tail]=nx; qy[tail++]=ny;                      //@expand
         }
     }
-    printf("%d\n",dist[tx][ty]);                        //@done
+    printf("%d\n",dist[tx][ty]);                             //@done
     return 0;
 }
 `,
@@ -259,87 +298,93 @@ int main(){
         }
     }
     queue<pair<int,int>> q;
-    dist[sx][sy]=0;                                     //@init
-    q.push({sx,sy});                                    //@init
+    dist[sx][sy]=0;                                          //@init
+    q.push({sx,sy});                                         //@init
     while (!q.empty()){
-        auto [x,y]=q.front();                           //@pop
-        q.pop();                                        //@pop
-        if (x==tx&&y==ty) break;                        //@found
-        for (int d=0;d<4;d++){                          //@expand
-            int nx=x+dx[d],ny=y+dy[d];                  //@expand
-            if (nx<0||nx>=n||ny<0||ny>=m) continue;     //@expand
-            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;   //@expand
-            dist[nx][ny]=dist[x][y]+1;                  //@expand
-            q.push({nx,ny});                            //@expand
+        auto [x,y]=q.front();                                //@pop
+        q.pop();                                             //@pop
+        if (x==tx&&y==ty) break;                             //@found
+        for (int d=0;d<4;d++){                               //@expand
+            int nx=x+dx[d],ny=y+dy[d];                       //@expand
+            if (nx<0||nx>=n||ny<0||ny>=m) continue;          //@expand
+            if (g[nx][ny]=='#'||dist[nx][ny]!=-1) continue;  //@expand
+            dist[nx][ny]=dist[x][y]+1;                       //@expand
+            q.push({nx,ny});                                 //@expand
         }
     }
-    cout<<dist[tx][ty]<<endl;                           //@done
+    cout<<dist[tx][ty]<<endl;                                //@done
     return 0;
 }
 `,
     python: String.raw`
 from collections import deque
 
-n, m = map(int, input().split())
-g = [input() for _ in range(n)]
-dist = [[-1] * m for _ in range(n)]
+n,m=map(int,input().split())
+g=[input() for _ in range(n)]
+dist=[[-1]*m for _ in range(n)]
 for i in range(n):
     for j in range(m):
-        if g[i][j] == 'S':
-            sx, sy = i, j
-        if g[i][j] == 'T':
-            tx, ty = i, j
-dx = [1, -1, 0, 0]
-dy = [0, 0, 1, -1]
-q = deque()
-dist[sx][sy] = 0                                        #@init
-q.append((sx, sy))                                      #@init
+        if g[i][j]=='S':
+            sx,sy=i,j
+        if g[i][j]=='T':
+            tx,ty=i,j
+dx=[1,-1,0,0]
+dy=[0,0,1,-1]
+q=deque()
+dist[sx][sy]=0                                  #@init
+q.append((sx,sy))                               #@init
 while q:
-    x, y = q.popleft()                                  #@pop
-    if (x, y) == (tx, ty):                              #@found
-        break                                           #@found
-    for d in range(4):                                  #@expand
-        nx, ny = x + dx[d], y + dy[d]                   #@expand
-        if nx < 0 or nx >= n or ny < 0 or ny >= m:      #@expand
-            continue                                    #@expand
-        if g[nx][ny] == '#' or dist[nx][ny] != -1:      #@expand
-            continue                                    #@expand
-        dist[nx][ny] = dist[x][y] + 1                   #@expand
-        q.append((nx, ny))                              #@expand
-print(dist[tx][ty])                                     #@done
+    x,y=q.popleft()                             #@pop
+    if (x,y)==(tx,ty):                          #@found
+        break                                   #@found
+    for d in range(4):                          #@expand
+        nx,ny=x+dx[d],y+dy[d]                   #@expand
+        if nx<0 or nx>=n or ny<0 or ny>=m:      #@expand
+            continue                            #@expand
+        if g[nx][ny]=='#' or dist[nx][ny]!=-1:  #@expand
+            continue                            #@expand
+        dist[nx][ny]=dist[x][y]+1               #@expand
+        q.append((nx,ny))                       #@expand
+print(dist[tx][ty])                             #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        int[] dx = {1, -1, 0, 0}, dy = {0, 0, 1, -1};
-        String[] g = new String[n];
-        int[][] dist = new int[n][m];
-        int sx = 0, sy = 0, tx = 0, ty = 0;
-        for (int i = 0; i < n; i++) {
-            g[i] = sc.next();
-            for (int j = 0; j < m; j++) {
-                dist[i][j] = -1;
-                if (g[i].charAt(j) == 'S') { sx = i; sy = j; }
-                if (g[i].charAt(j) == 'T') { tx = i; ty = j; }
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        int[] dx={1,-1,0,0},dy={0,0,1,-1};
+        String[] g=new String[n];
+        int[][] dist=new int[n][m];
+        int sx=0,sy=0,tx=0,ty=0;
+        for (int i=0;i<n;i++){
+            g[i]=sc.next();
+            for (int j=0;j<m;j++){
+                dist[i][j]=-1;
+                if (g[i].charAt(j)=='S'){
+                    sx=i;
+                    sy=j;
+                }
+                if (g[i].charAt(j)=='T'){
+                    tx=i;
+                    ty=j;
+                }
             }
         }
-        Queue<int[]> q = new ArrayDeque<>();
-        dist[sx][sy] = 0;                                       //@init
-        q.add(new int[]{sx, sy});                               //@init
-        while (!q.isEmpty()) {
-            int[] cur = q.poll();                               //@pop
-            int x = cur[0], y = cur[1];                         //@pop
-            if (x == tx && y == ty) break;                      //@found
-            for (int d = 0; d < 4; d++) {                       //@expand
-                int nx = x + dx[d], ny = y + dy[d];             //@expand
-                if (nx < 0 || nx >= n || ny < 0 || ny >= m) continue;   //@expand
-                if (g[nx].charAt(ny) == '#' || dist[nx][ny] != -1) continue;   //@expand
-                dist[nx][ny] = dist[x][y] + 1;                  //@expand
-                q.add(new int[]{nx, ny});                       //@expand
+        Queue<int[]> q=new ArrayDeque<>();
+        dist[sx][sy]=0;                                         //@init
+        q.add(new int[]{sx,sy});                                //@init
+        while (!q.isEmpty()){
+            int[] cur=q.poll();                                 //@pop
+            int x=cur[0],y=cur[1];                              //@pop
+            if (x==tx&&y==ty) break;                            //@found
+            for (int d=0;d<4;d++){                              //@expand
+                int nx=x+dx[d],ny=y+dy[d];                      //@expand
+                if (nx<0||nx>=n||ny<0||ny>=m) continue;         //@expand
+                if (g[nx].charAt(ny)=='#'||dist[nx][ny]!=-1) continue;  //@expand
+                dist[nx][ny]=dist[x][y]+1;                      //@expand
+                q.add(new int[]{nx,ny});                        //@expand
             }
         }
         System.out.println(dist[tx][ty]);                       //@done
@@ -348,4 +393,5 @@ public class Main {
 `,
   },
   problems: pickProblems('P1443', 'P1162'),
+  extra: [bfsGraph],
 }

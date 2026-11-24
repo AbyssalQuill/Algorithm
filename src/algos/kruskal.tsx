@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { formatEdges, parseEdges, randInt, randomGraph, type ParsedEdge } from './shared'
+import { formatGraph, type ParsedEdge, randInt, randomGraph, readGraph, readInput } from './shared'
 
 export interface KruskalInput {
   n: number
@@ -81,15 +81,33 @@ function KruskalView({ frame }: { frame: Frame<KruskalState> }) {
 }
 
 function parse(text: string): ParseResult<KruskalInput> {
-  const r = parseEdges(text, { weighted: true, directed: false, maxN: 7, maxM: 11, minM: 2 })
-  return r.ok ? { ok: true, value: r.value } : r
+  return readInput(text, (r) => {
+    const g = readGraph(r, { weighted: true, directed: false, maxN: 7, maxM: 11, minM: 2 })
+    r.end()
+    return g
+  })
 }
 
 export const kruskal: AlgoDef<KruskalInput, KruskalState> = {
   id: 'kruskal',
-  title: '最小生成树：Kruskal',
+  title: 'Kruskal',
   tagline: '把边按权值排好队，从小到大挑，只要不形成环就选下',
   kind: '算法',
+  slug: 'mst',
+  name: '最小生成树',
+  type: '选边',
+  statement: {
+    desc: [
+      '给定一张带权无向图，从中选出若干条边，使所有结点连通，并且选出的边的权值之和最小。求这个最小的权值和；如果图本身不连通，输出 -1。',
+    ],
+    input: [
+      '第一行两个整数 n 和 m（2 ≤ n ≤ 7，2 ≤ m ≤ 11），表示结点数和边数。',
+      '接下来 m 行，每行三个整数 a、b、w，表示 a 和 b 之间有一条权值为 w 的边（1 ≤ w ≤ 99，没有重边和自环）。',
+    ],
+    output: [
+      '一行一个整数，是最小的权值和；图不连通时输出 -1。',
+    ],
+  },
   intro: [
     '一个带权的无向连通图里，用最少的边（n-1 条）把所有结点连成一棵树，并且让这些边的权值之和最小，这样的树叫最小生成树。修路、铺管道、拉网线都是这类问题：既要全部连通，又要花费最少。',
     'Kruskal 的做法是贪心：把所有边按权值从小到大排好，依次检查。如果这条边的两端还不连通，就选下它；如果两端已经连通了，再加就会形成环，直接放弃。判断“是否已经连通”，正是并查集最擅长的事。',
@@ -106,15 +124,29 @@ export const kruskal: AlgoDef<KruskalInput, KruskalState> = {
     '权值相同的边先后顺序不同，选出的树可能不同，但总权值一定相同。',
   ],
   complexity: { time: 'O(m log m)', space: 'O(n + m)', note: '时间主要花在对 m 条边排序上；并查集的操作近似常数。' },
-  inputHint: '输入边：a-b:权值，用空格隔开，例如 1-2:4 1-3:2 2-3:1 2-4:5 3-4:8（结点 1～7，最多 11 条边）。',
   presets: [
-    { label: '四个结点', text: '1-2:4 1-3:2 2-3:1 2-4:5 3-4:8' },
-    { label: '有一个环要放弃', text: '1-2:1 2-3:2 1-3:3 3-4:4 4-5:5 2-5:6' },
-    { label: '图不连通', text: '1-2:3 2-3:5 4-5:2' },
+    { label: '四个结点', text: '4 5\n1 2 4\n1 3 2\n2 3 1\n2 4 5\n3 4 8' },
+    { label: '有一个环要放弃', text: '5 6\n1 2 1\n2 3 2\n1 3 3\n3 4 4\n4 5 5\n2 5 6' },
+    { label: '图不连通', text: '5 3\n1 2 3\n2 3 5\n4 5 2' },
   ],
   defaultInput: { n: 4, edges: [{ a: 1, b: 2, w: 4 }, { a: 1, b: 3, w: 2 }, { a: 2, b: 3, w: 1 }, { a: 2, b: 4, w: 5 }, { a: 3, b: 4, w: 8 }] },
   parse,
-  format: (v) => formatEdges(v.edges, { weighted: true, directed: false }),
+  format: (v) => formatGraph(v.n, v.edges, true),
+  answer: (v) => {
+    const fa = Array.from({ length: v.n + 1 }, (_, i) => i)
+    const find = (x: number): number => (fa[x] === x ? x : (fa[x] = find(fa[x])))
+    let total = 0
+    let cnt = 0
+    for (const e of [...v.edges].sort((x, y) => x.w - y.w)) {
+      const ra = find(e.a)
+      const rb = find(e.b)
+      if (ra === rb) continue
+      fa[ra] = rb
+      total += e.w
+      cnt++
+    }
+    return String(cnt === v.n - 1 ? total : -1)
+  },
   random: () => {
     const n = randInt(5, 7)
     return { n, edges: randomGraph(n, randInt(2, 4), true).filter((_, i, a) => Math.random() < 0.92 || i < a.length - 3) }
@@ -132,7 +164,7 @@ int main(){
     int n,m;
     scanf("%d %d",&n,&m);
     for (int i=0;i<m;i++) scanf("%d %d %d",&ea[i],&eb[i],&ew[i]);
-    for (int i=1;i<m;i++){                      //@init
+    for (int i=1;i<m;i++){                  //@init
         int a=ea[i],b=eb[i],w=ew[i],j=i-1;
         while (j>=0&&ew[j]>w){
             ea[j+1]=ea[j]; eb[j+1]=eb[j]; ew[j+1]=ew[j];
@@ -143,20 +175,22 @@ int main(){
     for (int i=1;i<=n;i++) fa[i]=i;
     int total=0,cnt=0;
     for (int i=0;i<m;i++){
-        int ra=find(ea[i]),rb=find(eb[i]);      //@consider
-        if (ra==rb) continue;                   //@reject
-        fa[ra]=rb;                              //@accept
-        total+=ew[i];                           //@accept
-        cnt++;                                  //@accept
+        int ra=find(ea[i]),rb=find(eb[i]);  //@consider
+        if (ra==rb) continue;               //@reject
+        fa[ra]=rb;                          //@accept
+        total+=ew[i];                       //@accept
+        cnt++;                              //@accept
     }
-    printf("%d\n",cnt==n-1?total:-1);           //@done
+    printf("%d\n",cnt==n-1?total:-1);       //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-struct E{ int a,b,w; };
+struct E{
+    int a,b,w;
+};
 int fa[105];
 int find(int x){
     return fa[x]==x?x:(fa[x]=find(fa[x]));
@@ -166,67 +200,68 @@ int main(){
     cin>>n>>m;
     vector<E> es(m);
     for (auto &e:es) cin>>e.a>>e.b>>e.w;
-    stable_sort(es.begin(),es.end(),[](const E &x,const E &y){ return x.w<y.w; });   //@init
+    stable_sort(es.begin(),es.end(),[](const E &x,const E &y){  //@init
+        return x.w<y.w;                                         //@init
+    });                                                         //@init
     for (int i=1;i<=n;i++) fa[i]=i;
     int total=0,cnt=0;
     for (auto &e:es){
-        int ra=find(e.a),rb=find(e.b);          //@consider
-        if (ra==rb) continue;                   //@reject
-        fa[ra]=rb;                              //@accept
-        total+=e.w;                             //@accept
-        cnt++;                                  //@accept
+        int ra=find(e.a),rb=find(e.b);                          //@consider
+        if (ra==rb) continue;                                   //@reject
+        fa[ra]=rb;                                              //@accept
+        total+=e.w;                                             //@accept
+        cnt++;                                                  //@accept
     }
-    cout<<(cnt==n-1?total:-1)<<endl;            //@done
+    cout<<(cnt==n-1?total:-1)<<endl;                            //@done
     return 0;
 }
 `,
     python: String.raw`
 def find(x):
-    if fa[x] != x:
-        fa[x] = find(fa[x])
+    if fa[x]!=x:
+        fa[x]=find(fa[x])
     return fa[x]
 
-
-n, m = map(int, input().split())
-es = [tuple(map(int, input().split())) for _ in range(m)]
-es.sort(key=lambda e: e[2])                     #@init
-fa = list(range(n + 1))
-total = cnt = 0
-for a, b, w in es:
-    ra, rb = find(a), find(b)                   #@consider
-    if ra == rb:
-        continue                                #@reject
-    fa[ra] = rb                                 #@accept
-    total += w                                  #@accept
-    cnt += 1                                    #@accept
-print(total if cnt == n - 1 else -1)            #@done
+n,m=map(int,input().split())
+es=[tuple(map(int,input().split())) for _ in range(m)]
+es.sort(key=lambda e: e[2])                 #@init
+fa=list(range(n+1))
+total=cnt=0
+for a,b,w in es:
+    ra,rb=find(a),find(b)                   #@consider
+    if ra==rb:
+        continue                            #@reject
+    fa[ra]=rb                               #@accept
+    total+=w                                #@accept
+    cnt+=1                                  #@accept
+print(total if cnt==n-1 else -1)            #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int[] fa = new int[105];
+public class Main{
+    static int[] fa=new int[105];
 
-    static int find(int x) {
-        return fa[x] == x ? x : (fa[x] = find(fa[x]));
+    static int find(int x){
+        return fa[x]==x?x:(fa[x]=find(fa[x]));
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        int[][] es = new int[m][3];
-        for (int i = 0; i < m; i++) for (int j = 0; j < 3; j++) es[i][j] = sc.nextInt();
-        Arrays.sort(es, (x, y) -> x[2] - y[2]);     //@init
-        for (int i = 1; i <= n; i++) fa[i] = i;
-        int total = 0, cnt = 0;
-        for (int[] e : es) {
-            int ra = find(e[0]), rb = find(e[1]);   //@consider
-            if (ra == rb) continue;                 //@reject
-            fa[ra] = rb;                            //@accept
-            total += e[2];                          //@accept
-            cnt++;                                  //@accept
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        int[][] es=new int[m][3];
+        for (int i=0;i<m;i++) for (int j=0;j<3;j++) es[i][j]=sc.nextInt();
+        Arrays.sort(es,(x,y)->x[2]-y[2]);       //@init
+        for (int i=1;i<=n;i++) fa[i]=i;
+        int total=0,cnt=0;
+        for (int[] e:es){
+            int ra=find(e[0]),rb=find(e[1]);    //@consider
+            if (ra==rb) continue;               //@reject
+            fa[ra]=rb;                          //@accept
+            total+=e[2];                        //@accept
+            cnt++;                              //@accept
         }
-        System.out.println(cnt == n - 1 ? total : -1);  //@done
+        System.out.println(cnt==n-1?total:-1);  //@done
     }
 }
 `,

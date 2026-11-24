@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 export type BitOp = { kind: 'u'; i: number; k: number } | { kind: 'q'; l: number; r: number }
 
@@ -139,30 +139,27 @@ function BitView({ frame }: { frame: Frame<BitState> }) {
 }
 
 function parse(text: string): ParseResult<BitInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「数组 | 操作 ; 操作」，例如：3 1 4 1 5 9 2 6 | q 2 6 ; u 3 5 ; q 2 6' }
-  const arr = toNums(parts[0])
-  if (arr.length < 3 || arr.length > 8) return { ok: false, error: '数组里请放 3～8 个整数。' }
-  if (arr.some((x) => !Number.isInteger(x) || x < 0 || x > 99)) return { ok: false, error: '数组里的数是 0～99 的整数。' }
-  const groups = parts[1].split(/[;；]/).map((g) => g.trim()).filter(Boolean)
-  if (groups.length < 1 || groups.length > 3) return { ok: false, error: '请写 1～3 个操作，用分号隔开。' }
-  const ops: BitOp[] = []
-  for (const g of groups) {
-    const m = /^([qQ])\s+(\d+)\s+(\d+)$/.exec(g) ?? /^([uU])\s+(\d+)\s+(-?\d+)$/.exec(g)
-    if (!m) return { ok: false, error: `“${g}”不对：查询写成 q l r，加法写成 u 位置 增加的值。` }
-    const x = Number(m[2])
-    const y = Number(m[3])
-    if (m[1].toLowerCase() === 'q') {
-      if (x < 1 || y > arr.length || x > y) return { ok: false, error: `查询要满足 1 ≤ l ≤ r ≤ ${arr.length}。` }
-      ops.push({ kind: 'q', l: x, r: y })
-    } else {
-      if (x < 1 || x > arr.length) return { ok: false, error: `位置要在 1～${arr.length} 之间。` }
-      if (Math.abs(y) > 99) return { ok: false, error: '增加的值请取 -99～99。' }
-      ops.push({ kind: 'u', i: x, k: y })
+  return readInput(text, (r) => {
+    const n = r.int('n', 3, 8)
+    const arr = r.ints(n, '数', 0, 99)
+    const m = r.int('m', 1, 3)
+    const ops: BitOp[] = []
+    for (let t = 1; t <= m; t++) {
+      const z = r.int(`第 ${t} 个操作的类型 z`, 1, 2)
+      if (z === 1) {
+        const i = r.int(`第 ${t} 个操作的位置`, 1, n)
+        const k = r.int(`第 ${t} 个操作加上的数`, -99, 99)
+        ops.push({ kind: 'u', i, k })
+      } else {
+        const l = r.int(`第 ${t} 个操作的 l`, 1, n)
+        const rr = r.int(`第 ${t} 个操作的 r`, l, n)
+        ops.push({ kind: 'q', l, r: rr })
+      }
     }
-  }
-  if (!ops.some((o) => o.kind === 'q')) return { ok: false, error: '至少要有一个查询操作（q l r）。' }
-  return { ok: true, value: { arr, ops } }
+    r.end()
+    if (!ops.some((o) => o.kind === 'q')) fail('至少要有一个查询操作（z 为 2）。')
+    return { arr, ops }
+  })
 }
 
 export const bit: AlgoDef<BitInput, BitState> = {
@@ -170,6 +167,21 @@ export const bit: AlgoDef<BitInput, BitState> = {
   title: '树状数组',
   tagline: '用 lowbit 把前缀和“切块”存放，单点修改和前缀查询都只需要跳 log n 次',
   kind: '数据结构',
+  slug: 'range-sum',
+  name: '单点修改，区间求和',
+  type: '动态前缀和',
+  statement: {
+    desc: [
+      '给定一个长度为 n 的数列，依次执行 m 个操作：操作 1 i k 表示把第 i 个数加上 k；操作 2 l r 表示询问第 l 到第 r 个数的和。对每个询问输出结果。',
+    ],
+    input: [
+      '第一行一个整数 n（3 ≤ n ≤ 8），第二行 n 个整数，每个在 0～99 之间。',
+      '第三行一个整数 m（1 ≤ m ≤ 3），其后 m 行每行三个整数 z、x、y。z 为 1 时，x 是位置，y 是加上的数（-99～99）；z 为 2 时，x、y 是区间的两端（1 ≤ x ≤ y ≤ n）。至少要有一个查询。',
+    ],
+    output: [
+      '对每个查询输出一个整数，所有结果写在同一行，用空格隔开。',
+    ],
+  },
   intro: [
     '要同时支持“修改某个数”和“求前缀和”，前缀和数组改一个数要重算后面所有的和，太慢；原数组求和又要逐个相加，也慢。树状数组的办法是把前缀和“切成几块”存放：c[i] 只保存以 i 结尾、长度为 lowbit(i) 的那一小段的和。lowbit(i) = i & -i，是 i 的二进制里最低位的 1 所表示的数。',
     '求前缀和 sum(i) 时，从 i 开始，累加 c[i]，再让 i 减去 lowbit(i) 跳到下一块，直到 i 变成 0，这些块恰好拼成 [1, i]。修改 a[i] 时，要把所有“包含位置 i”的块都改一遍：从 i 开始让 c[i] 加上增量，再让 i 加上 lowbit(i) 跳到上一层，直到超过 n。两个循环最多执行 log n 次。区间 [l, r] 的和就是 sum(r) - sum(l-1)。',
@@ -186,15 +198,23 @@ export const bit: AlgoDef<BitInput, BitState> = {
     '初始值不为 0 时，要把初始数组也加进去，不能只处理后续的修改。',
   ],
   complexity: { time: 'O(log n)', space: 'O(n)', note: '单点修改与前缀和查询都是 O(log n)；建树是 O(n log n)。' },
-  inputHint: '格式：数组 | 操作 ; 操作。q l r 查询区间和，u 位置 增量 修改，例如 3 1 4 1 5 9 2 6 | q 2 6 ; u 3 5 ; q 2 6。',
   presets: [
-    { label: '先查后改再查', text: '3 1 4 1 5 9 2 6 | q 2 6 ; u 3 5 ; q 2 6' },
-    { label: '修改靠前的位置', text: '2 7 1 8 2 8 1 8 | u 1 10 ; q 1 8' },
-    { label: '长度不是 2 的幂', text: '5 2 8 6 3 | q 1 5 ; u 2 -2 ; q 2 4' },
+    { label: '先查后改再查', text: '8\n3 1 4 1 5 9 2 6\n3\n2 2 6\n1 3 5\n2 2 6' },
+    { label: '修改靠前的位置', text: '8\n2 7 1 8 2 8 1 8\n2\n1 1 10\n2 1 8' },
+    { label: '长度不是 2 的幂', text: '5\n5 2 8 6 3\n3\n2 1 5\n1 2 -2\n2 2 4' },
   ],
   defaultInput: { arr: [3, 1, 4, 1, 5, 9, 2, 6], ops: [{ kind: 'q', l: 2, r: 6 }, { kind: 'u', i: 3, k: 5 }, { kind: 'q', l: 2, r: 6 }] },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.ops.map((o) => (o.kind === 'q' ? `q ${o.l} ${o.r}` : `u ${o.i} ${o.k}`)).join(' ; ')}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.ops.length}\n${v.ops.map((o) => (o.kind === 'u' ? `1 ${o.i} ${o.k}` : `2 ${o.l} ${o.r}`)).join('\n')}`,
+  answer: (v) => {
+    const a = [...v.arr]
+    const out: number[] = []
+    for (const o of v.ops) {
+      if (o.kind === 'u') a[o.i - 1] += o.k
+      else out.push(a.slice(o.l - 1, o.r).reduce((x, y) => x + y, 0))
+    }
+    return out.join(' ')
+  },
   random: () => {
     const n = randInt(5, 8)
     const arr = Array.from({ length: n }, () => randInt(0, 20))
@@ -215,11 +235,11 @@ int lowbit(int x){
     return x&-x;
 }
 void add(int i,int k){
-    for (;i<=n;i+=lowbit(i)) c[i]+=k;           //@uStep
+    for (;i<=n;i+=lowbit(i)) c[i]+=k;       //@uStep
 }
 int sum(int i){
     int s=0;
-    for (;i>0;i-=lowbit(i)) s+=c[i];            //@qStep
+    for (;i>0;i-=lowbit(i)) s+=c[i];        //@qStep
     return s;
 }
 int main(){
@@ -227,16 +247,16 @@ int main(){
     scanf("%d",&n);
     for (int i=1;i<=n;i++){
         scanf("%d",&a);
-        add(i,a);                               //@init
+        add(i,a);                           //@init
     }
     scanf("%d",&m);
     while (m--){
         scanf("%d %d %d",&z,&x,&y);
         if (z==1) add(x,y);
-        else res[rc++]=sum(y)-sum(x-1);         //@qAns
+        else res[rc++]=sum(y)-sum(x-1);     //@qAns
     }
     for (int i=0;i<rc;i++) printf("%d ",res[i]);
-    printf("\n");                               //@done
+    printf("\n");                           //@done
     return 0;
 }
 `,
@@ -248,11 +268,11 @@ int lowbit(int x){
     return x&-x;
 }
 void add(int i,int k){
-    for (;i<=n;i+=lowbit(i)) c[i]+=k;           //@uStep
+    for (;i<=n;i+=lowbit(i)) c[i]+=k;         //@uStep
 }
 int sum(int i){
     int s=0;
-    for (;i>0;i-=lowbit(i)) s+=c[i];            //@qStep
+    for (;i>0;i-=lowbit(i)) s+=c[i];          //@qStep
     return s;
 }
 int main(){
@@ -261,86 +281,83 @@ int main(){
     cin>>n;
     for (int i=1;i<=n;i++){
         cin>>a;
-        add(i,a);                               //@init
+        add(i,a);                             //@init
     }
     cin>>m;
     while (m--){
         cin>>z>>x>>y;
         if (z==1) add(x,y);
-        else res.push_back(sum(y)-sum(x-1));    //@qAns
+        else res.push_back(sum(y)-sum(x-1));  //@qAns
     }
     for (int v:res) cout<<v<<" ";
-    cout<<endl;                                 //@done
+    cout<<endl;                               //@done
     return 0;
 }
 `,
     python: String.raw`
 def lowbit(x):
-    return x & -x
+    return x&-x
 
-
-def add(i, k):
-    while i <= n:
-        c[i] += k                               #@uStep
-        i += lowbit(i)
-
+def add(i,k):
+    while i<=n:
+        c[i]+=k                             #@uStep
+        i+=lowbit(i)
 
 def prefix(i):
-    s = 0
-    while i > 0:
-        s += c[i]                               #@qStep
-        i -= lowbit(i)
+    s=0
+    while i>0:
+        s+=c[i]                             #@qStep
+        i-=lowbit(i)
     return s
 
-
-n = int(input())
-c = [0] * (n + 1)
-for i, a in enumerate(map(int, input().split()), 1):
-    add(i, a)                                   #@init
-res = []
+n=int(input())
+c=[0]*(n+1)
+for i,a in enumerate(map(int,input().split()),1):
+    add(i,a)                                #@init
+res=[]
 for _ in range(int(input())):
-    z, x, y = map(int, input().split())
-    if z == 1:
-        add(x, y)
+    z,x,y=map(int,input().split())
+    if z==1:
+        add(x,y)
     else:
-        res.append(prefix(y) - prefix(x - 1))   #@qAns
-print(*res)                                     #@done
+        res.append(prefix(y)-prefix(x-1))   #@qAns
+print(*res)                                 #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
+public class Main{
     static int n;
-    static int[] c = new int[1005];
+    static int[] c=new int[1005];
 
-    static int lowbit(int x) {
-        return x & -x;
+    static int lowbit(int x){
+        return x&-x;
     }
 
-    static void add(int i, int k) {
-        for (; i <= n; i += lowbit(i)) c[i] += k;   //@uStep
+    static void add(int i,int k){
+        for (;i<=n;i+=lowbit(i)) c[i]+=k;                 //@uStep
     }
 
-    static int sum(int i) {
-        int s = 0;
-        for (; i > 0; i -= lowbit(i)) s += c[i];    //@qStep
+    static int sum(int i){
+        int s=0;
+        for (;i>0;i-=lowbit(i)) s+=c[i];                  //@qStep
         return s;
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        n = sc.nextInt();
-        for (int i = 1; i <= n; i++) {
-            add(i, sc.nextInt());                   //@init
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        n=sc.nextInt();
+        for (int i=1;i<=n;i++){
+            add(i,sc.nextInt());                          //@init
         }
-        int m = sc.nextInt();
-        StringBuilder sb = new StringBuilder();
-        while (m-- > 0) {
-            int z = sc.nextInt(), x = sc.nextInt(), y = sc.nextInt();
-            if (z == 1) add(x, y);
-            else sb.append(sum(y) - sum(x - 1)).append(' ');    //@qAns
+        int m=sc.nextInt();
+        StringBuilder sb=new StringBuilder();
+        while (m-- > 0){
+            int z=sc.nextInt(),x=sc.nextInt(),y=sc.nextInt();
+            if (z==1) add(x,y);
+            else sb.append(sum(y)-sum(x-1)).append(' ');  //@qAns
         }
-        System.out.println(sb);                     //@done
+        System.out.println(sb);                           //@done
     }
 }
 `,

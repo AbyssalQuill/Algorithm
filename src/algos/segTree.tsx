@@ -4,7 +4,7 @@ import { TreeView, type TNode } from '../components/TreeView'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 export type SegOp = { kind: 'q'; l: number; r: number } | { kind: 'u'; i: number; v: number }
 
@@ -196,37 +196,49 @@ function SegView({ frame }: { frame: Frame<SegState> }) {
 }
 
 function parse(text: string): ParseResult<SegInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「数组 | 操作 ; 操作」，例如：3 1 4 1 5 9 2 6 | q 2 5 ; u 3 10 ; q 2 5' }
-  const arr = toNums(parts[0])
-  if (arr.length < 3 || arr.length > 8) return { ok: false, error: '数组里请放 3～8 个整数。' }
-  if (arr.some((x) => !Number.isInteger(x) || x < 0 || x > 99)) return { ok: false, error: '数组里的数是 0～99 的整数。' }
-  const groups = parts[1].split(/[;；]/).map((g) => g.trim()).filter(Boolean)
-  if (groups.length < 1 || groups.length > 3) return { ok: false, error: '请写 1～3 个操作，用分号隔开。' }
-  const ops: SegOp[] = []
-  for (const g of groups) {
-    const m = /^([qQuU])\s+(-?\d+)\s+(-?\d+)$/.exec(g)
-    if (!m) return { ok: false, error: `“${g}”不对：查询写成 q l r，修改写成 u 位置 新值。` }
-    const x = Number(m[2])
-    const y = Number(m[3])
-    if (m[1].toLowerCase() === 'q') {
-      if (x < 1 || y > arr.length || x > y) return { ok: false, error: `查询要满足 1 ≤ l ≤ r ≤ ${arr.length}。` }
-      ops.push({ kind: 'q', l: x, r: y })
-    } else {
-      if (x < 1 || x > arr.length) return { ok: false, error: `修改的位置要在 1～${arr.length} 之间。` }
-      if (y < 0 || y > 99) return { ok: false, error: '新的值请取 0～99。' }
-      ops.push({ kind: 'u', i: x, v: y })
+  return readInput(text, (r) => {
+    const n = r.int('n', 3, 8)
+    const arr = r.ints(n, '数', 0, 99)
+    const m = r.int('m', 1, 3)
+    const ops: SegOp[] = []
+    for (let t = 1; t <= m; t++) {
+      const z = r.int(`第 ${t} 个操作的类型 z`, 1, 2)
+      if (z === 1) {
+        const l = r.int(`第 ${t} 个操作的 l`, 1, n)
+        const rr = r.int(`第 ${t} 个操作的 r`, l, n)
+        ops.push({ kind: 'q', l, r: rr })
+      } else {
+        const i = r.int(`第 ${t} 个操作的位置`, 1, n)
+        const v = r.int(`第 ${t} 个操作的新值`, 0, 99)
+        ops.push({ kind: 'u', i, v })
+      }
     }
-  }
-  if (!ops.some((o) => o.kind === 'q')) return { ok: false, error: '至少要有一个查询操作（q l r）。' }
-  return { ok: true, value: { arr, ops } }
+    r.end()
+    if (!ops.some((o) => o.kind === 'q')) fail('至少要有一个查询操作（z 为 1）。')
+    return { arr, ops }
+  })
 }
 
 export const segTree: AlgoDef<SegInput, SegState> = {
   id: 'seg-tree',
-  title: '线段树：区间求和与单点修改',
+  title: '线段树',
   tagline: '把区间对半拆开，每个结点管一段，查询和修改都只需要走 log n 个结点',
   kind: '数据结构',
+  slug: 'range-sum',
+  name: '区间求和，单点修改',
+  type: '区间查询',
+  statement: {
+    desc: [
+      '给定一个长度为 n 的数列，依次执行 m 个操作：操作 1 l r 询问第 l 到第 r 个数的和；操作 2 i v 把第 i 个数改成 v。对每个询问输出结果。',
+    ],
+    input: [
+      '第一行一个整数 n（3 ≤ n ≤ 8），第二行 n 个整数，每个在 0～99 之间。',
+      '第三行一个整数 m（1 ≤ m ≤ 3），其后 m 行每行三个整数 z、x、y。z 为 1 时，x、y 是查询区间的两端（1 ≤ x ≤ y ≤ n）；z 为 2 时，x 是位置，y 是新的值（0～99）。至少要有一个查询。',
+    ],
+    output: [
+      '对每个查询输出一个整数，所有结果写在同一行，用空格隔开。',
+    ],
+  },
   intro: [
     '如果数组会不断被修改，又要不断询问“某一段的和是多少”，前缀和就不够用了：每改一个数，后面所有的前缀和都得重算。线段树用一棵二叉树同时解决这两件事。根结点管理整个区间，把区间从中间劈成两半，分给左右孩子，一直劈到每个叶子只管一个数；每个结点里存着它所管区间的和。',
     '查询区间和的时候，从根往下走：结点的区间完全落在要查的范围里，就直接取它保存的和，不再往下；完全不相交就跳过；只重叠一部分，才拆成左右两半分别去问。这样需要访问的结点只有 O(log n) 个。修改一个数时，先走到对应的叶子改掉，再沿原路返回，把沿途结点的和重新算一遍，同样是 O(log n)。',
@@ -243,15 +255,23 @@ export const segTree: AlgoDef<SegInput, SegState> = {
     '修改之后忘记“上推”，沿途的结点还保存着旧的和，后面的查询就会得到错误的结果。',
   ],
   complexity: { time: 'O(log n)', space: 'O(n)', note: '建树 O(n)，每次查询和修改 O(log n)。' },
-  inputHint: '格式：数组 | 操作 ; 操作。q l r 表示查询区间和，u 位置 新值 表示修改，例如 3 1 4 1 5 9 2 6 | q 2 5 ; u 3 10 ; q 2 5（数组 3～8 个数）。',
   presets: [
-    { label: '先查后改再查', text: '3 1 4 1 5 9 2 6 | q 2 5 ; u 3 10 ; q 2 5' },
-    { label: '查整个区间', text: '3 1 4 1 5 9 2 6 | q 1 8' },
-    { label: '长度不是 2 的幂', text: '5 2 8 6 3 | q 2 4 ; u 5 0' },
+    { label: '先查后改再查', text: '8\n3 1 4 1 5 9 2 6\n3\n1 2 5\n2 3 10\n1 2 5' },
+    { label: '查整个区间', text: '8\n3 1 4 1 5 9 2 6\n1\n1 1 8' },
+    { label: '长度不是 2 的幂', text: '5\n5 2 8 6 3\n2\n1 2 4\n2 5 0' },
   ],
   defaultInput: { arr: [3, 1, 4, 1, 5, 9, 2, 6], ops: [{ kind: 'q', l: 2, r: 5 }, { kind: 'u', i: 3, v: 10 }, { kind: 'q', l: 2, r: 5 }] },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.ops.map((o) => (o.kind === 'q' ? `q ${o.l} ${o.r}` : `u ${o.i} ${o.v}`)).join(' ; ')}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.ops.length}\n${v.ops.map((o) => (o.kind === 'q' ? `1 ${o.l} ${o.r}` : `2 ${o.i} ${o.v}`)).join('\n')}`,
+  answer: (v) => {
+    const a = [...v.arr]
+    const out: number[] = []
+    for (const o of v.ops) {
+      if (o.kind === 'u') a[o.i - 1] = o.v
+      else out.push(a.slice(o.l - 1, o.r).reduce((x, y) => x + y, 0))
+    }
+    return out.join(' ')
+  },
   random: () => {
     const n = randInt(5, 8)
     const arr = Array.from({ length: n }, () => randInt(0, 20))
@@ -268,26 +288,32 @@ export const segTree: AlgoDef<SegInput, SegState> = {
   sources: {
     c: String.raw`
 #include <stdio.h>
-int a[1005],t[4005];                            //@init
+int a[1005],t[4005];                           //@init
 void build(int o,int l,int r){
-    if (l==r){ t[o]=a[l]; return; }             //@build
+    if (l==r){                                 //@build
+        t[o]=a[l];                             //@build
+        return;                                //@build
+    }                                          //@build
     int m=(l+r)/2;
     build(2*o,l,m);
     build(2*o+1,m+1,r);
-    t[o]=t[2*o]+t[2*o+1];                       //@build
+    t[o]=t[2*o]+t[2*o+1];                      //@build
 }
 int query(int o,int l,int r,int ql,int qr){
-    if (qr<l||r<ql) return 0;                   //@qOut
-    if (ql<=l&&r<=qr) return t[o];              //@qIn
-    int m=(l+r)/2;                              //@qSplit
+    if (qr<l||r<ql) return 0;                  //@qOut
+    if (ql<=l&&r<=qr) return t[o];             //@qIn
+    int m=(l+r)/2;                             //@qSplit
     return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr);
 }
 void update(int o,int l,int r,int i,int v){
-    if (l==r){ t[o]=v; return; }                //@uLeaf
-    int m=(l+r)/2;                              //@uDown
+    if (l==r){                                 //@uLeaf
+        t[o]=v;                                //@uLeaf
+        return;                                //@uLeaf
+    }                                          //@uLeaf
+    int m=(l+r)/2;                             //@uDown
     if (i<=m) update(2*o,l,m,i,v);
     else update(2*o+1,m+1,r,i,v);
-    t[o]=t[2*o]+t[2*o+1];                       //@uUp
+    t[o]=t[2*o]+t[2*o+1];                      //@uUp
 }
 int main(){
     int n,m,res[1005],rc=0;
@@ -299,36 +325,42 @@ int main(){
         int z,x,y;
         scanf("%d %d %d",&z,&x,&y);
         if (z==1) res[rc++]=query(1,1,n,x,y);  //@qStart
-        else update(1,1,n,x,y);                 //@uStart
+        else update(1,1,n,x,y);                //@uStart
     }
     for (int i=0;i<rc;i++) printf("%d ",res[i]);
-    printf("\n");                               //@done
+    printf("\n");                              //@done
     return 0;
 }
 `,
     cpp: String.raw`
 #include <bits/stdc++.h>
 using namespace std;
-int a[1005],t[4005];                            //@init
+int a[1005],t[4005];                                //@init
 void build(int o,int l,int r){
-    if (l==r){ t[o]=a[l]; return; }             //@build
+    if (l==r){                                      //@build
+        t[o]=a[l];                                  //@build
+        return;                                     //@build
+    }                                               //@build
     int m=(l+r)/2;
     build(2*o,l,m);
     build(2*o+1,m+1,r);
-    t[o]=t[2*o]+t[2*o+1];                       //@build
+    t[o]=t[2*o]+t[2*o+1];                           //@build
 }
 int query(int o,int l,int r,int ql,int qr){
-    if (qr<l||r<ql) return 0;                   //@qOut
-    if (ql<=l&&r<=qr) return t[o];              //@qIn
-    int m=(l+r)/2;                              //@qSplit
+    if (qr<l||r<ql) return 0;                       //@qOut
+    if (ql<=l&&r<=qr) return t[o];                  //@qIn
+    int m=(l+r)/2;                                  //@qSplit
     return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr);
 }
 void update(int o,int l,int r,int i,int v){
-    if (l==r){ t[o]=v; return; }                //@uLeaf
-    int m=(l+r)/2;                              //@uDown
+    if (l==r){                                      //@uLeaf
+        t[o]=v;                                     //@uLeaf
+        return;                                     //@uLeaf
+    }                                               //@uLeaf
+    int m=(l+r)/2;                                  //@uDown
     if (i<=m) update(2*o,l,m,i,v);
     else update(2*o+1,m+1,r,i,v);
-    t[o]=t[2*o]+t[2*o+1];                       //@uUp
+    t[o]=t[2*o]+t[2*o+1];                           //@uUp
 }
 int main(){
     int n,m;
@@ -341,105 +373,107 @@ int main(){
         int z,x,y;
         cin>>z>>x>>y;
         if (z==1) res.push_back(query(1,1,n,x,y));  //@qStart
-        else update(1,1,n,x,y);                 //@uStart
+        else update(1,1,n,x,y);                     //@uStart
     }
     for (int x:res) cout<<x<<" ";
-    cout<<endl;                                 //@done
+    cout<<endl;                                     //@done
     return 0;
 }
 `,
     python: String.raw`
 import sys
 sys.setrecursionlimit(10000)
-a = [0]
-t = [0] * 4005                                  #@init
+a=[0]
+t=[0]*4005                                  #@init
 
-
-def build(o, l, r):
-    if l == r:
-        t[o] = a[l]                             #@build
+def build(o,l,r):
+    if l==r:
+        t[o]=a[l]                           #@build
         return
-    m = (l + r) // 2
-    build(2 * o, l, m)
-    build(2 * o + 1, m + 1, r)
-    t[o] = t[2 * o] + t[2 * o + 1]              #@build
+    m=(l+r)//2
+    build(2*o,l,m)
+    build(2*o+1,m+1,r)
+    t[o]=t[2*o]+t[2*o+1]                    #@build
 
+def query(o,l,r,ql,qr):
+    if qr<l or r<ql:
+        return 0                            #@qOut
+    if ql<=l and r<=qr:
+        return t[o]                         #@qIn
+    m=(l+r)//2                              #@qSplit
+    return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr)
 
-def query(o, l, r, ql, qr):
-    if qr < l or r < ql:
-        return 0                                #@qOut
-    if ql <= l and r <= qr:
-        return t[o]                             #@qIn
-    m = (l + r) // 2                            #@qSplit
-    return query(2 * o, l, m, ql, qr) + query(2 * o + 1, m + 1, r, ql, qr)
-
-
-def update(o, l, r, i, v):
-    if l == r:
-        t[o] = v                                #@uLeaf
+def update(o,l,r,i,v):
+    if l==r:
+        t[o]=v                              #@uLeaf
         return
-    m = (l + r) // 2                            #@uDown
-    if i <= m:
-        update(2 * o, l, m, i, v)
+    m=(l+r)//2                              #@uDown
+    if i<=m:
+        update(2*o,l,m,i,v)
     else:
-        update(2 * o + 1, m + 1, r, i, v)
-    t[o] = t[2 * o] + t[2 * o + 1]              #@uUp
+        update(2*o+1,m+1,r,i,v)
+    t[o]=t[2*o]+t[2*o+1]                    #@uUp
 
-
-n = int(input())
-a += list(map(int, input().split()))
-build(1, 1, n)
-res = []
+n=int(input())
+a+=list(map(int,input().split()))
+build(1,1,n)
+res=[]
 for _ in range(int(input())):
-    z, x, y = map(int, input().split())
-    if z == 1:
-        res.append(query(1, 1, n, x, y))        #@qStart
+    z,x,y=map(int,input().split())
+    if z==1:
+        res.append(query(1,1,n,x,y))        #@qStart
     else:
-        update(1, 1, n, x, y)                   #@uStart
-print(*res)                                     #@done
+        update(1,1,n,x,y)                   #@uStart
+print(*res)                                 #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int[] a = new int[1005], t = new int[4005];  //@init
+public class Main{
+    static int[] a=new int[1005],t=new int[4005];               //@init
 
-    static void build(int o, int l, int r) {
-        if (l == r) { t[o] = a[l]; return; }        //@build
-        int m = (l + r) / 2;
-        build(2 * o, l, m);
-        build(2 * o + 1, m + 1, r);
-        t[o] = t[2 * o] + t[2 * o + 1];             //@build
+    static void build(int o,int l,int r){
+        if (l==r){                                              //@build
+            t[o]=a[l];                                          //@build
+            return;                                             //@build
+        }                                                       //@build
+        int m=(l+r)/2;
+        build(2*o,l,m);
+        build(2*o+1,m+1,r);
+        t[o]=t[2*o]+t[2*o+1];                                   //@build
     }
 
-    static int query(int o, int l, int r, int ql, int qr) {
-        if (qr < l || r < ql) return 0;             //@qOut
-        if (ql <= l && r <= qr) return t[o];        //@qIn
-        int m = (l + r) / 2;                        //@qSplit
-        return query(2 * o, l, m, ql, qr) + query(2 * o + 1, m + 1, r, ql, qr);
+    static int query(int o,int l,int r,int ql,int qr){
+        if (qr<l||r<ql) return 0;                               //@qOut
+        if (ql<=l&&r<=qr) return t[o];                          //@qIn
+        int m=(l+r)/2;                                          //@qSplit
+        return query(2*o,l,m,ql,qr)+query(2*o+1,m+1,r,ql,qr);
     }
 
-    static void update(int o, int l, int r, int i, int v) {
-        if (l == r) { t[o] = v; return; }           //@uLeaf
-        int m = (l + r) / 2;                        //@uDown
-        if (i <= m) update(2 * o, l, m, i, v);
-        else update(2 * o + 1, m + 1, r, i, v);
-        t[o] = t[2 * o] + t[2 * o + 1];             //@uUp
+    static void update(int o,int l,int r,int i,int v){
+        if (l==r){                                              //@uLeaf
+            t[o]=v;                                             //@uLeaf
+            return;                                             //@uLeaf
+        }                                                       //@uLeaf
+        int m=(l+r)/2;                                          //@uDown
+        if (i<=m) update(2*o,l,m,i,v);
+        else update(2*o+1,m+1,r,i,v);
+        t[o]=t[2*o]+t[2*o+1];                                   //@uUp
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        for (int i = 1; i <= n; i++) a[i] = sc.nextInt();
-        build(1, 1, n);
-        int m = sc.nextInt();
-        StringBuilder sb = new StringBuilder();
-        while (m-- > 0) {
-            int z = sc.nextInt(), x = sc.nextInt(), y = sc.nextInt();
-            if (z == 1) sb.append(query(1, 1, n, x, y)).append(' ');   //@qStart
-            else update(1, 1, n, x, y);             //@uStart
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        for (int i=1;i<=n;i++) a[i]=sc.nextInt();
+        build(1,1,n);
+        int m=sc.nextInt();
+        StringBuilder sb=new StringBuilder();
+        while (m-- > 0){
+            int z=sc.nextInt(),x=sc.nextInt(),y=sc.nextInt();
+            if (z==1) sb.append(query(1,1,n,x,y)).append(' ');  //@qStart
+            else update(1,1,n,x,y);                             //@uStart
         }
-        System.out.println(sb);                     //@done
+        System.out.println(sb);                                 //@done
     }
 }
 `,

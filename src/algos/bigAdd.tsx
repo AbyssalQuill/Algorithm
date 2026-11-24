@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface BigInput {
   a: string
@@ -114,16 +114,33 @@ function BigView({ frame }: { frame: Frame<BigState> }) {
 }
 
 function parse(text: string): ParseResult<BigInput> {
-  const parts = text.trim().split(/[\s,，+＋]+/).filter(Boolean)
-  if (parts.length !== 2 || parts.some((p) => !/^[1-9]\d{0,7}$/.test(p))) return { ok: false, error: '请输入两个正整数（1～8 位，不能以 0 开头），例如：958 67' }
-  return { ok: true, value: { a: parts[0], b: parts[1] } }
+  return readInput(text, (r) => {
+    const a = r.word('a', /^[1-9]\d{0,7}$/, '要是 1～8 位的正整数，不能以 0 开头')
+    const b = r.word('b', /^[1-9]\d{0,7}$/, '要是 1～8 位的正整数，不能以 0 开头')
+    r.end()
+    return { a, b }
+  })
 }
 
 export const bigAdd: AlgoDef<BigInput, BigState> = {
-  id: 'big-add',
-  title: '高精度加法',
-  tagline: '把大数当作字符串，像小学竖式一样一位一位地加，并处理进位',
+  id: 'bigint',
+  title: '高精度',
+  tagline: '把大数当作字符串，像小学竖式一样一位一位地计算，并处理进位',
   kind: '算法',
+  slug: 'add',
+  name: '大整数加法',
+  type: '竖式',
+  statement: {
+    desc: [
+      '给定两个正整数 a 和 b，它们可能大到 long long 也装不下，请输出 a + b 的结果。',
+    ],
+    input: [
+      '一行两个正整数 a 和 b，用空格隔开，不含前导 0。演示里每个数最多 8 位；真正的题目里它们常常有几百位。',
+    ],
+    output: [
+      '一行一个整数，是 a + b 的值。',
+    ],
+  },
   intro: [
     'int 最大约 21 亿，long long 最大约 9.2×10¹⁸。如果题目要求计算两个几十位、几百位的整数相加，这些类型都装不下。解决的办法是回到小学：用竖式一位一位地加，每一位的结果满十就向前一位进一。整个数用字符串或者数组保存，位数多长都可以，这就是“高精度”。',
     '实现时有两个小技巧。第一，把每个数的各位倒过来存放，让个位在下标 0，这样“从个位开始、向高位进位”的方向，正好是下标增大的方向。第二，较短的数在高位没有数字，按 0 处理，最后如果还有进位，结果就比两个加数都多出一位。',
@@ -140,7 +157,6 @@ export const bigAdd: AlgoDef<BigInput, BigState> = {
     '输出时要把倒序存放的结果再反转回来；还要注意结果开头不能有多余的 0。',
   ],
   complexity: { time: 'O(n)', space: 'O(n)', note: 'n 是较长的那个数的位数，每一位只处理一次。' },
-  inputHint: '输入两个正整数（1～8 位），用空格隔开，例如 958 67。',
   presets: [
     { label: '连续进位', text: '999 1' },
     { label: '位数不同', text: '958 67' },
@@ -149,6 +165,7 @@ export const bigAdd: AlgoDef<BigInput, BigState> = {
   defaultInput: { a: '958', b: '67' },
   parse,
   format: (v) => `${v.a} ${v.b}`,
+  answer: (v) => bigAddRef(v.a, v.b),
   random: () => ({ a: String(randInt(10, 99999)), b: String(randInt(1, 9999)) }),
   run: runBigAdd,
   View: BigView,
@@ -161,16 +178,16 @@ int main(){
     int a[105]={0},b[105]={0},c[105]={0};
     scanf("%s %s",s1,s2);
     int l1=strlen(s1),l2=strlen(s2);
-    for (int i=0;i<l1;i++) a[i]=s1[l1-1-i]-'0';     //@init
+    for (int i=0;i<l1;i++) a[i]=s1[l1-1-i]-'0';    //@init
     for (int i=0;i<l2;i++) b[i]=s2[l2-1-i]-'0';
     int len=l1>l2?l1:l2,carry=0;
     for (int i=0;i<len;i++){
-        int s=a[i]+b[i]+carry;                  //@sum
-        c[i]=s%10;                              //@digit
-        carry=s/10;                             //@carry
+        int s=a[i]+b[i]+carry;                     //@sum
+        c[i]=s%10;                                 //@digit
+        carry=s/10;                                //@carry
     }
-    if (carry) c[len++]=carry;                  //@last
-    for (int i=len-1;i>=0;i--) printf("%d",c[i]);   //@done
+    if (carry) c[len++]=carry;                     //@last
+    for (int i=len-1;i>=0;i--) printf("%d",c[i]);  //@done
     printf("\n");
     return 0;
 }
@@ -181,58 +198,58 @@ using namespace std;
 int main(){
     string s1,s2;
     cin>>s1>>s2;
-    reverse(s1.begin(),s1.end());               //@init
+    reverse(s1.begin(),s1.end());                //@init
     reverse(s2.begin(),s2.end());
     int len=max(s1.size(),s2.size()),carry=0;
     vector<int> c;
     for (int i=0;i<len;i++){
         int x=i<(int)s1.size()?s1[i]-'0':0;
         int y=i<(int)s2.size()?s2[i]-'0':0;
-        int s=x+y+carry;                        //@sum
-        c.push_back(s%10);                      //@digit
-        carry=s/10;                             //@carry
+        int s=x+y+carry;                         //@sum
+        c.push_back(s%10);                       //@digit
+        carry=s/10;                              //@carry
     }
-    if (carry) c.push_back(carry);              //@last
-    for (int i=c.size()-1;i>=0;i--) cout<<c[i]; //@done
+    if (carry) c.push_back(carry);               //@last
+    for (int i=c.size()-1;i>=0;i--) cout<<c[i];  //@done
     cout<<endl;
     return 0;
 }
 `,
     python: String.raw`
-s1, s2 = input().split()
-a = [int(ch) for ch in reversed(s1)]            #@init
-b = [int(ch) for ch in reversed(s2)]
-c = []
-carry = 0
-for i in range(max(len(a), len(b))):
-    x = a[i] if i < len(a) else 0
-    y = b[i] if i < len(b) else 0
-    s = x + y + carry                           #@sum
-    c.append(s % 10)                            #@digit
-    carry = s // 10                             #@carry
+s1,s2=input().split()
+a=[int(ch) for ch in reversed(s1)]          #@init
+b=[int(ch) for ch in reversed(s2)]
+c=[]
+carry=0
+for i in range(max(len(a),len(b))):
+    x=a[i] if i<len(a) else 0
+    y=b[i] if i<len(b) else 0
+    s=x+y+carry                             #@sum
+    c.append(s%10)                          #@digit
+    carry=s//10                             #@carry
 if carry:
-    c.append(carry)                             #@last
-print(''.join(map(str, reversed(c))))           #@done
+    c.append(carry)                         #@last
+print(''.join(map(str,reversed(c))))        #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String s1 = new StringBuilder(sc.next()).reverse().toString();   //@init
-        String s2 = new StringBuilder(sc.next()).reverse().toString();
-        int len = Math.max(s1.length(), s2.length()), carry = 0;
-        StringBuilder c = new StringBuilder();
-        for (int i = 0; i < len; i++) {
-            int x = i < s1.length() ? s1.charAt(i) - '0' : 0;
-            int y = i < s2.length() ? s2.charAt(i) - '0' : 0;
-            int s = x + y + carry;                  //@sum
-            c.append(s % 10);                       //@digit
-            carry = s / 10;                         //@carry
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        String s1=new StringBuilder(sc.next()).reverse().toString();  //@init
+        String s2=new StringBuilder(sc.next()).reverse().toString();
+        int len=Math.max(s1.length(),s2.length()),carry=0;
+        StringBuilder c=new StringBuilder();
+        for (int i=0;i<len;i++){
+            int x=i<s1.length()?s1.charAt(i)-'0':0;
+            int y=i<s2.length()?s2.charAt(i)-'0':0;
+            int s=x+y+carry;                                    //@sum
+            c.append(s%10);                                     //@digit
+            carry=s/10;                                         //@carry
         }
-        if (carry > 0) c.append(carry);             //@last
-        System.out.println(c.reverse());            //@done
+        if (carry>0) c.append(carry);                           //@last
+        System.out.println(c.reverse());                        //@done
     }
 }
 `,

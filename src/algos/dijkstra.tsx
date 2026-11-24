@@ -4,7 +4,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { formatEdges, parseEdges, randInt, randomGraph, splitBar, toNums, type ParsedEdge } from './shared'
+import { formatGraph, type ParsedEdge, randInt, randomGraph, readGraph, readInput } from './shared'
 
 export interface DijInput {
   n: number
@@ -111,20 +111,35 @@ function DijView({ frame }: { frame: Frame<DijState> }) {
 }
 
 function parse(text: string): ParseResult<DijInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「边 | 起点」，边写成 a-b:权值，例如：1-2:4 1-3:2 2-3:1 2-4:5 | 1' }
-  const r = parseEdges(parts[0], { weighted: true, directed: false, maxN: 7, maxM: 11 })
-  if (!r.ok) return r
-  const s = toNums(parts[1])
-  if (s.length !== 1 || !Number.isInteger(s[0]) || s[0] < 1 || s[0] > r.value.n) return { ok: false, error: `起点要是 1～${r.value.n} 之间的结点编号。` }
-  return { ok: true, value: { n: r.value.n, edges: r.value.edges, start: s[0] } }
+  return readInput(text, (r) => {
+    const { n, edges } = readGraph(r, { weighted: true, directed: false, maxN: 7, maxM: 11 })
+    const start = r.int('起点 s', 1, n)
+    r.end()
+    return { n, edges, start }
+  })
 }
 
 export const dijkstra: AlgoDef<DijInput, DijState> = {
   id: 'dijkstra',
-  title: 'Dijkstra 最短路',
+  title: 'Dijkstra',
   tagline: '每次确定离起点最近的那个结点，再用它去更新相邻结点的距离',
   kind: '算法',
+  slug: 'shortest',
+  name: '单源最短路',
+  type: '非负边权',
+  statement: {
+    desc: [
+      '给定一张带权无向图，所有边的权值都是正整数。求结点 s 到每个结点的最短路径长度，到不了的结点输出 -1。',
+    ],
+    input: [
+      '第一行两个整数 n 和 m（2 ≤ n ≤ 7，1 ≤ m ≤ 11），表示结点数和边数。',
+      '接下来 m 行，每行三个整数 a、b、w，表示 a 和 b 之间有一条长为 w 的边（1 ≤ w ≤ 99，没有重边和自环）。',
+      '最后一行一个整数 s，是起点。',
+    ],
+    output: [
+      '一行 n 个整数，第 i 个是 s 到结点 i 的最短距离，到不了输出 -1，用空格隔开。',
+    ],
+  },
   intro: [
     '图里每条边都有一个正的权值（比如路的长度），要求从起点到其他所有结点的最短路线。Dijkstra 算法的思路是：维护一个 dist 数组，记录“目前已知的”到每个结点的最短距离，起点是 0，其余是无穷大。然后重复这样一件事：在还没确定的结点里，挑出 dist 最小的那个，它的距离就不会再变小了，把它“确定”下来；再用它去更新所有相邻结点的距离。',
     '更新的操作叫“松弛”：如果经过当前结点走到邻居，比邻居原来记录的距离更短，就更新为更短的值。每次确定一个结点，重复 n 次，所有结点的最短距离就都确定了。这里每一步都是在“局部最优”之间做选择，所以它属于贪心算法，成立的前提是所有边权都不是负数。',
@@ -141,15 +156,31 @@ export const dijkstra: AlgoDef<DijInput, DijState> = {
     '如果有些结点从起点走不到，它们的 dist 一直是 INF，输出时要单独处理（常见的约定是输出 -1 或者 INF）。',
   ],
   complexity: { time: 'O(n²)', space: 'O(n + m)', note: '这是用数组扫描找最小值的版本；用优先队列优化后是 O((n + m) log n)。' },
-  inputHint: '格式：边 | 起点，边写成 a-b:权值，例如 1-2:4 1-3:2 2-3:1 2-4:5 3-4:8 | 1（结点编号 1～7，最多 11 条边，权值 1～99）。',
   presets: [
-    { label: '绕路更近', text: '1-2:4 1-3:2 2-3:1 2-4:5 3-4:8 | 1' },
-    { label: '有走不到的点', text: '1-2:3 2-3:4 4-5:2 | 1' },
-    { label: '七个结点', text: '1-2:7 1-3:9 1-6:14 2-3:10 2-4:15 3-4:11 3-6:2 4-5:6 5-6:9 | 1' },
+    { label: '绕路更近', text: '4 5\n1 2 4\n1 3 2\n2 3 1\n2 4 5\n3 4 8\n1' },
+    { label: '有走不到的点', text: '5 3\n1 2 3\n2 3 4\n4 5 2\n1' },
+    { label: '六个结点', text: '6 9\n1 2 7\n1 3 9\n1 6 14\n2 3 10\n2 4 15\n3 4 11\n3 6 2\n4 5 6\n5 6 9\n1' },
   ],
   defaultInput: { n: 4, edges: [{ a: 1, b: 2, w: 4 }, { a: 1, b: 3, w: 2 }, { a: 2, b: 3, w: 1 }, { a: 2, b: 4, w: 5 }, { a: 3, b: 4, w: 8 }], start: 1 },
   parse,
-  format: (v) => `${formatEdges(v.edges, { weighted: true, directed: false })} | ${v.start}`,
+  format: (v) => `${formatGraph(v.n, v.edges, true)}\n${v.start}`,
+  answer: (v) => {
+    const INF = 1e9
+    const dist = Array<number>(v.n + 1).fill(INF)
+    const done = Array<boolean>(v.n + 1).fill(false)
+    dist[v.start] = 0
+    for (let it = 0; it < v.n; it++) {
+      let u = -1
+      for (let i = 1; i <= v.n; i++) if (!done[i] && dist[i] < INF && (u === -1 || dist[i] < dist[u])) u = i
+      if (u === -1) break
+      done[u] = true
+      for (const e of v.edges) {
+        if (e.a === u) dist[e.b] = Math.min(dist[e.b], dist[u] + e.w)
+        if (e.b === u) dist[e.a] = Math.min(dist[e.a], dist[u] + e.w)
+      }
+    }
+    return dist.slice(1).map((d) => (d === INF ? -1 : d)).join(' ')
+  },
   random: () => {
     const n = randInt(5, 7)
     return { n, edges: randomGraph(n, randInt(1, 4), true), start: randInt(1, n) }
@@ -171,22 +202,22 @@ int main(){
     }
     scanf("%d",&s);
     for (int i=1;i<=n;i++) dist[i]=INF;
-    dist[s]=0;                                  //@init
+    dist[s]=0;                              //@init
     for (int it=0;it<n;it++){
         int u=-1;
         for (int i=1;i<=n;i++)
             if (!done[i]&&dist[i]<INF&&(u==-1||dist[i]<dist[u])) u=i;
-        if (u==-1) break;                       //@stop
-        done[u]=1;                              //@pick
+        if (u==-1) break;                   //@stop
+        done[u]=1;                          //@pick
         for (int i=0;i<deg[u];i++){
             int v=adj[u][i],c=dist[u]+wt[u][i];
-            if (c<dist[v]){                     //@relax
-                dist[v]=c;                      //@update
+            if (c<dist[v]){                 //@relax
+                dist[v]=c;                  //@update
             }
         }
     }
     for (int i=1;i<=n;i++) printf("%d ",dist[i]==INF?-1:dist[i]);
-    printf("\n");                               //@done
+    printf("\n");                           //@done
     return 0;
 }
 `,
@@ -207,84 +238,84 @@ int main(){
     }
     cin>>s;
     fill(dist_,dist_+n+1,INF);
-    dist_[s]=0;                                 //@init
+    dist_[s]=0;                             //@init
     for (int it=0;it<n;it++){
         int u=-1;
         for (int i=1;i<=n;i++)
             if (!done[i]&&dist_[i]<INF&&(u==-1||dist_[i]<dist_[u])) u=i;
-        if (u==-1) break;                       //@stop
-        done[u]=true;                           //@pick
+        if (u==-1) break;                   //@stop
+        done[u]=true;                       //@pick
         for (auto [v,c]:adj[u]){
-            if (dist_[u]+c<dist_[v]){           //@relax
-                dist_[v]=dist_[u]+c;            //@update
+            if (dist_[u]+c<dist_[v]){       //@relax
+                dist_[v]=dist_[u]+c;        //@update
             }
         }
     }
     for (int i=1;i<=n;i++) cout<<(dist_[i]==INF?-1:dist_[i])<<" ";
-    cout<<endl;                                 //@done
+    cout<<endl;                             //@done
     return 0;
 }
 `,
     python: String.raw`
-INF = 10 ** 9
-n, m = map(int, input().split())
-adj = [[] for _ in range(n + 1)]
+INF=10**9
+n,m=map(int,input().split())
+adj=[[] for _ in range(n+1)]
 for _ in range(m):
-    a, b, w = map(int, input().split())
-    adj[a].append((b, w))
-    adj[b].append((a, w))
-s = int(input())
-dist = [INF] * (n + 1)
-dist[s] = 0                                     #@init
-done = [False] * (n + 1)
+    a,b,w=map(int,input().split())
+    adj[a].append((b,w))
+    adj[b].append((a,w))
+s=int(input())
+dist=[INF]*(n+1)
+dist[s]=0                                        #@init
+done=[False]*(n+1)
 for _ in range(n):
-    u = -1
-    for i in range(1, n + 1):
-        if not done[i] and dist[i] < INF and (u == -1 or dist[i] < dist[u]):
-            u = i
-    if u == -1:
-        break                                   #@stop
-    done[u] = True                              #@pick
-    for v, c in adj[u]:
-        if dist[u] + c < dist[v]:               #@relax
-            dist[v] = dist[u] + c               #@update
-print(*[-1 if d == INF else d for d in dist[1:]])   #@done
+    u=-1
+    for i in range(1,n+1):
+        if not done[i] and dist[i]<INF and (u==-1 or dist[i]<dist[u]):
+            u=i
+    if u==-1:
+        break                                    #@stop
+    done[u]=True                                 #@pick
+    for v,c in adj[u]:
+        if dist[u]+c<dist[v]:                    #@relax
+            dist[v]=dist[u]+c                    #@update
+print(*[-1 if d==INF else d for d in dist[1:]])  #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        final int INF = 1000000000;
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        List<List<int[]>> adj = new ArrayList<>();
-        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());
-        for (int i = 0; i < m; i++) {
-            int a = sc.nextInt(), b = sc.nextInt(), w = sc.nextInt();
-            adj.get(a).add(new int[]{b, w});
-            adj.get(b).add(new int[]{a, w});
+public class Main{
+    public static void main(String[] args){
+        final int INF=1000000000;
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        List<List<int[]>> adj=new ArrayList<>();
+        for (int i=0;i<=n;i++) adj.add(new ArrayList<>());
+        for (int i=0;i<m;i++){
+            int a=sc.nextInt(),b=sc.nextInt(),w=sc.nextInt();
+            adj.get(a).add(new int[]{b,w});
+            adj.get(b).add(new int[]{a,w});
         }
-        int s = sc.nextInt();
-        int[] dist = new int[n + 1];
-        boolean[] done = new boolean[n + 1];
-        Arrays.fill(dist, INF);
-        dist[s] = 0;                                //@init
-        for (int it = 0; it < n; it++) {
-            int u = -1;
-            for (int i = 1; i <= n; i++)
-                if (!done[i] && dist[i] < INF && (u == -1 || dist[i] < dist[u])) u = i;
-            if (u == -1) break;                     //@stop
-            done[u] = true;                         //@pick
-            for (int[] e : adj.get(u)) {
-                if (dist[u] + e[1] < dist[e[0]]) {  //@relax
-                    dist[e[0]] = dist[u] + e[1];    //@update
+        int s=sc.nextInt();
+        int[] dist=new int[n+1];
+        boolean[] done=new boolean[n+1];
+        Arrays.fill(dist,INF);
+        dist[s]=0;                             //@init
+        for (int it=0;it<n;it++){
+            int u=-1;
+            for (int i=1;i<=n;i++)
+                if (!done[i]&&dist[i]<INF&&(u==-1||dist[i]<dist[u])) u=i;
+            if (u==-1) break;                  //@stop
+            done[u]=true;                      //@pick
+            for (int[] e:adj.get(u)){
+                if (dist[u]+e[1]<dist[e[0]]){  //@relax
+                    dist[e[0]]=dist[u]+e[1];   //@update
                 }
             }
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= n; i++) sb.append(dist[i] == INF ? -1 : dist[i]).append(' ');
-        System.out.println(sb);                     //@done
+        StringBuilder sb=new StringBuilder();
+        for (int i=1;i<=n;i++) sb.append(dist[i]==INF?-1:dist[i]).append(' ');
+        System.out.println(sb);                //@done
     }
 }
 `,

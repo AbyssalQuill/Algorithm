@@ -3,7 +3,7 @@ import { TreeView, type TNode } from '../components/TreeView'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { fail, randInt, readInput } from './shared'
 
 export interface BstInput {
   vals: number[]
@@ -174,22 +174,38 @@ function BstView({ frame }: { frame: Frame<BstState> }) {
 }
 
 function parse(text: string): ParseResult<BstInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「依次插入的数 | 要查找的数」，例如：50 30 70 20 40 | 40' }
-  const vals = toNums(parts[0])
-  const t = toNums(parts[1])
-  if (vals.length < 1 || vals.length > 9) return { ok: false, error: '请放 1～9 个要插入的数。' }
-  if (t.length !== 1) return { ok: false, error: '“|”右边只放一个要查找的数。' }
-  if ([...vals, t[0]].some((v) => !Number.isInteger(v) || v < 1 || v > 99)) return { ok: false, error: '所有的数都是 1～99 的整数。' }
-  if (new Set(vals).size !== vals.length) return { ok: false, error: '演示里插入的数请互不相同（相同的数会被忽略）。' }
-  return { ok: true, value: { vals, target: t[0] } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 9)
+    const vals = r.ints(n, '数', 1, 99)
+    const target = r.int('t', 1, 99)
+    r.end()
+    if (new Set(vals).size !== vals.length) fail('演示里插入的数请互不相同。')
+    return { vals, target }
+  })
 }
 
 export const bst: AlgoDef<BstInput, BstState> = {
   id: 'bst',
-  title: '二叉搜索树：插入与查找',
+  title: '二叉搜索树',
   tagline: '每个结点的左边都比它小、右边都比它大，查找时每一步都能排除一半',
   kind: '数据结构',
+  slug: 'insert-find',
+  name: '插入与查找',
+  type: '建树',
+  statement: {
+    desc: [
+      '把 n 个互不相同的整数依次插入一棵最初为空的二叉搜索树：每个数从根出发，比当前结点小就往左走，比它大就往右走，走到空位就放在那里。建好以后，先输出这棵树的前序遍历（根、左、右），再判断给定的数 t 是否在树里。',
+    ],
+    input: [
+      '第一行一个整数 n（1 ≤ n ≤ 9）。',
+      '第二行 n 个互不相同的整数，每个在 1～99 之间，按这个顺序依次插入。',
+      '第三行一个整数 t（1～99），是要查找的数。',
+    ],
+    output: [
+      '第一行是前序遍历的结果，用空格隔开。',
+      '第二行：t 在树里输出 YES，否则输出 NO。',
+    ],
+  },
   intro: [
     '二叉搜索树是一棵二叉树，并且满足一条规则：任意结点的左子树里所有的数都比它小，右子树里所有的数都比它大。这条规则让查找变得很像二分查找：把目标和当前结点比较，比它小就只可能在左边，比它大就只可能在右边，一步就排除了一整棵子树。',
     '插入同样依靠这条规则。新来的数从根开始，沿着“小了往左、大了往右”的路线一直走到空位，就挂在那里。所以树的形状取决于数据插入的顺序：顺序比较均匀时，树很矮，查找很快；如果数据本来就有序，树会退化成一条链，查找也就退化成了逐个比较。',
@@ -206,15 +222,39 @@ export const bst: AlgoDef<BstInput, BstState> = {
     '递归插入时，忘记把递归的返回值赋回给 root->l 或 root->r，新结点就没有挂到树上。',
   ],
   complexity: { time: 'O(log n)', space: 'O(n)', note: '这是树比较矮（接近平衡）时每次操作的时间；最坏情况树退化成链，每次操作是 O(n)。空间是存放全部结点所需的。' },
-  inputHint: '格式：依次插入的数 | 要查找的数，例如 50 30 70 20 40 60 80 | 60（最多 9 个互不相同的数）。',
   presets: [
-    { label: '比较均匀', text: '50 30 70 20 40 60 80 | 60' },
-    { label: '退化成链', text: '10 20 30 40 50 | 50' },
-    { label: '查找不到', text: '25 15 40 10 20 35 | 33' },
+    { label: '比较均匀', text: '7\n50 30 70 20 40 60 80\n60' },
+    { label: '退化成链', text: '5\n10 20 30 40 50\n50' },
+    { label: '查找不到', text: '6\n25 15 40 10 20 35\n33' },
   ],
   defaultInput: { vals: [50, 30, 70, 20, 40, 60, 80], target: 60 },
   parse,
-  format: (v) => `${v.vals.join(' ')} | ${v.target}`,
+  format: (v) => `${v.vals.length}\n${v.vals.join(' ')}\n${v.target}`,
+  answer: (v) => {
+    interface N {
+      val: number
+      l?: N
+      r?: N
+    }
+    let root: N | undefined
+    for (const x of v.vals) {
+      if (!root) {
+        root = { val: x }
+        continue
+      }
+      let p = root
+      for (;;) {
+        const side = x < p.val ? 'l' : 'r'
+        if (!p[side]) {
+          p[side] = { val: x }
+          break
+        }
+        p = p[side]!
+      }
+    }
+    const pre = (n?: N): number[] => (n ? [n.val, ...pre(n.l), ...pre(n.r)] : [])
+    return `${pre(root).join(' ')}\n${v.vals.includes(v.target) ? 'YES' : 'NO'}`
+  },
   random: () => {
     const set = new Set<number>()
     const n = randInt(6, 9)
@@ -233,22 +273,22 @@ typedef struct Node{
     struct Node *l,*r;
 } Node;
 Node* insert(Node* root,int x){
-    if (!root){                                 //@place
-        Node* p=(Node*)malloc(sizeof(Node));    //@place
-        p->val=x;                               //@place
-        p->l=p->r=NULL;                         //@place
-        return p;                               //@place
+    if (!root){                                       //@place
+        Node* p=(Node*)malloc(sizeof(Node));          //@place
+        p->val=x;                                     //@place
+        p->l=p->r=NULL;                               //@place
+        return p;                                     //@place
     }
-    if (x<root->val) root->l=insert(root->l,x);         //@goLeft
-    else if (x>root->val) root->r=insert(root->r,x);    //@goRight
+    if (x<root->val) root->l=insert(root->l,x);       //@goLeft
+    else if (x>root->val) root->r=insert(root->r,x);  //@goRight
     return root;
 }
 int search(Node* root,int x){
     while (root){
-        if (x==root->val) return 1;             //@hit
-        root=x<root->val?root->l:root->r;       //@sgo
+        if (x==root->val) return 1;                   //@hit
+        root=x<root->val?root->l:root->r;             //@sgo
     }
-    return 0;                                   //@miss
+    return 0;                                         //@miss
 }
 void preorder(Node* root){
     if (!root) return;
@@ -258,16 +298,16 @@ void preorder(Node* root){
 }
 int main(){
     int n,t,x;
-    Node* root=NULL;                            //@init
+    Node* root=NULL;                                  //@init
     scanf("%d",&n);
     for (int i=0;i<n;i++){
         scanf("%d",&x);
-        root=insert(root,x);                    //@ins
+        root=insert(root,x);                          //@ins
     }
     scanf("%d",&t);
-    int found=search(root,t);                   //@sStart
+    int found=search(root,t);                         //@sStart
     preorder(root);
-    printf("\n%s\n",found?"YES":"NO");          //@done
+    printf("\n%s\n",found?"YES":"NO");                //@done
     return 0;
 }
 `,
@@ -280,17 +320,17 @@ struct Node{
     Node(int v):val(v),l(nullptr),r(nullptr){}
 };
 Node* insert(Node* root,int x){
-    if (!root) return new Node(x);              //@place
-    if (x<root->val) root->l=insert(root->l,x);         //@goLeft
-    else if (x>root->val) root->r=insert(root->r,x);    //@goRight
+    if (!root) return new Node(x);                    //@place
+    if (x<root->val) root->l=insert(root->l,x);       //@goLeft
+    else if (x>root->val) root->r=insert(root->r,x);  //@goRight
     return root;
 }
 bool search(Node* root,int x){
     while (root){
-        if (x==root->val) return true;          //@hit
-        root=x<root->val?root->l:root->r;       //@sgo
+        if (x==root->val) return true;                //@hit
+        root=x<root->val?root->l:root->r;             //@sgo
     }
-    return false;                               //@miss
+    return false;                                     //@miss
 }
 void preorder(Node* root){
     if (!root) return;
@@ -300,110 +340,108 @@ void preorder(Node* root){
 }
 int main(){
     int n,t,x;
-    Node* root=nullptr;                         //@init
+    Node* root=nullptr;                               //@init
     cin>>n;
     for (int i=0;i<n;i++){
         cin>>x;
-        root=insert(root,x);                    //@ins
+        root=insert(root,x);                          //@ins
     }
     cin>>t;
-    bool found=search(root,t);                  //@sStart
+    bool found=search(root,t);                        //@sStart
     preorder(root);
-    cout<<endl<<(found?"YES":"NO")<<endl;       //@done
+    cout<<endl<<(found?"YES":"NO")<<endl;             //@done
     return 0;
 }
 `,
     python: String.raw`
 class Node:
-    def __init__(self, v):
-        self.val = v
-        self.l = None
-        self.r = None
+    def __init__(self,v):
+        self.val=v
+        self.l=None
+        self.r=None
 
-
-def insert(root, x):
+def insert(root,x):
     if root is None:
-        return Node(x)                          #@place
-    if x < root.val:
-        root.l = insert(root.l, x)              #@goLeft
-    elif x > root.val:
-        root.r = insert(root.r, x)              #@goRight
+        return Node(x)                         #@place
+    if x<root.val:
+        root.l=insert(root.l,x)                #@goLeft
+    elif x>root.val:
+        root.r=insert(root.r,x)                #@goRight
     return root
 
-
-def search(root, x):
+def search(root,x):
     while root is not None:
-        if x == root.val:
-            return True                         #@hit
-        root = root.l if x < root.val else root.r   #@sgo
-    return False                                #@miss
+        if x==root.val:
+            return True                        #@hit
+        root=root.l if x<root.val else root.r  #@sgo
+    return False                               #@miss
 
-
-def preorder(root, out):
+def preorder(root,out):
     if root is None:
         return
     out.append(root.val)
-    preorder(root.l, out)
-    preorder(root.r, out)
+    preorder(root.l,out)
+    preorder(root.r,out)
 
-
-n = int(input())
-nums = list(map(int, input().split()))
-t = int(input())
-root = None                                     #@init
+n=int(input())
+nums=list(map(int,input().split()))
+t=int(input())
+root=None                                      #@init
 for x in nums:
-    root = insert(root, x)                      #@ins
-found = search(root, t)                         #@sStart
-out = []
-preorder(root, out)
+    root=insert(root,x)                        #@ins
+found=search(root,t)                           #@sStart
+out=[]
+preorder(root,out)
 print(*out)
-print("YES" if found else "NO")                  #@done
+print("YES" if found else "NO")                #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static class Node {
+public class Main{
+    static class Node{
         int val;
-        Node l, r;
-        Node(int v) { val = v; }
+        Node l,r;
+        Node(int v){
+            val=v;
+        }
     }
 
-    static Node insert(Node root, int x) {
-        if (root == null) return new Node(x);               //@place
-        if (x < root.val) root.l = insert(root.l, x);       //@goLeft
-        else if (x > root.val) root.r = insert(root.r, x);  //@goRight
+    static Node insert(Node root,int x){
+        if (root==null) return new Node(x);            //@place
+        if (x<root.val) root.l=insert(root.l,x);       //@goLeft
+        else if (x>root.val) root.r=insert(root.r,x);  //@goRight
         return root;
     }
 
-    static boolean search(Node root, int x) {
-        while (root != null) {
-            if (x == root.val) return true;                 //@hit
-            root = x < root.val ? root.l : root.r;          //@sgo
+    static boolean search(Node root,int x){
+        while (root!=null){
+            if (x==root.val) return true;              //@hit
+            root=x<root.val?root.l:root.r;             //@sgo
         }
-        return false;                                       //@miss
+        return false;                                  //@miss
     }
 
-    static void preorder(Node root, StringBuilder sb) {
-        if (root == null) return;
+    static void preorder(Node root,StringBuilder sb){
+        if (root==null) return;
         sb.append(root.val).append(' ');
-        preorder(root.l, sb);
-        preorder(root.r, sb);
+        preorder(root.l,sb);
+        preorder(root.r,sb);
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        Node root = null;                                   //@init
-        for (int i = 0; i < n; i++) {
-            root = insert(root, sc.nextInt());              //@ins
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        Node root=null;                                //@init
+        for (int i=0;i<n;i++){
+            root=insert(root,sc.nextInt());            //@ins
         }
-        int t = sc.nextInt();
-        boolean found = search(root, t);                    //@sStart
-        StringBuilder sb = new StringBuilder();
-        preorder(root, sb);
+        int t=sc.nextInt();
+        boolean found=search(root,t);                  //@sStart
+        StringBuilder sb=new StringBuilder();
+        preorder(root,sb);
         System.out.println(sb);
-        System.out.println(found ? "YES" : "NO");           //@done
+        System.out.println(found?"YES":"NO");          //@done
     }
 }
 `,

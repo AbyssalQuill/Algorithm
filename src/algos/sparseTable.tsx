@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export interface StInput {
   arr: number[]
@@ -104,28 +104,41 @@ function StView({ frame }: { frame: Frame<StState> }) {
 }
 
 function parse(text: string): ParseResult<StInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「数组 | 查询 ; 查询」，每个查询写成 l r，例如：3 1 4 1 5 9 2 6 | 2 7 ; 1 4' }
-  const arr = toNums(parts[0])
-  if (arr.length < 4 || arr.length > 8) return { ok: false, error: '数组里请放 4～8 个整数。' }
-  if (arr.some((x) => !Number.isInteger(x) || x < 0 || x > 99)) return { ok: false, error: '数组里的数是 0～99 的整数。' }
-  const groups = parts[1].split(/[;；]/).map((g) => g.trim()).filter(Boolean)
-  if (groups.length < 1 || groups.length > 3) return { ok: false, error: '请写 1～3 个查询，用分号隔开。' }
-  const qs: [number, number][] = []
-  for (const g of groups) {
-    const v = toNums(g)
-    if (v.length !== 2 || v.some((x) => !Number.isInteger(x))) return { ok: false, error: `“${g}”不是“l r”这样的两个整数。` }
-    if (v[0] < 1 || v[1] > arr.length || v[0] > v[1]) return { ok: false, error: `查询要满足 1 ≤ l ≤ r ≤ ${arr.length}。` }
-    qs.push([v[0], v[1]])
-  }
-  return { ok: true, value: { arr, qs } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 4, 8)
+    const arr = r.ints(n, '数', 0, 99)
+    const m = r.int('m', 1, 3)
+    const qs: [number, number][] = []
+    for (let t = 1; t <= m; t++) {
+      const l = r.int(`第 ${t} 次询问的 l`, 1, n)
+      const rr = r.int(`第 ${t} 次询问的 r`, l, n)
+      qs.push([l, rr])
+    }
+    r.end()
+    return { arr, qs }
+  })
 }
 
 export const sparseTable: AlgoDef<StInput, StState> = {
   id: 'sparse-table',
-  title: 'ST 表：区间最小值',
+  title: 'ST 表',
   tagline: '花 O(n log n) 的时间预处理，之后每次区间最值查询只需要比较两个数',
   kind: '数据结构',
+  slug: 'range-min',
+  name: '区间最小值',
+  type: '静态区间查询',
+  statement: {
+    desc: [
+      '给定一个长度为 n 的数列，有 m 次询问，每次询问第 l 到第 r 个数里的最小值。数列在询问之间不会被修改。',
+    ],
+    input: [
+      '第一行一个整数 n（4 ≤ n ≤ 8），第二行 n 个整数，每个在 0～99 之间。',
+      '第三行一个整数 m（1 ≤ m ≤ 3），其后 m 行每行两个整数 l、r（1 ≤ l ≤ r ≤ n）。',
+    ],
+    output: [
+      '一行 m 个整数，依次是每次询问的最小值，用空格隔开。',
+    ],
+  },
   intro: [
     '数组不会修改，却要回答很多次“从 l 到 r 的最小值是多少”。每次扫描要 O(n)，查询一多就太慢。ST 表（稀疏表）的办法是提前把所有“长度为 2 的幂”的区间的最小值都算出来：st[k][i] 表示从 i 开始、长度为 2ᵏ 的区间的最小值。算它很简单：把这个区间平分成两半，各自的最小值前面已经算好了，取较小的就行。',
     '查询时，设区间长度为 len，取 k = ⌊log₂ len⌋，那么两个长度为 2ᵏ 的区间——一个从 l 开始，一个以 r 结束——正好可以盖住整个 [l, r]，只是中间可能重叠。最小值这类运算允许重叠（重复比较不影响结果），所以答案就是这两个预处理好的值里较小的那个，一次比较搞定。',
@@ -142,15 +155,15 @@ export const sparseTable: AlgoDef<StInput, StState> = {
     '用 log2 函数求 k 在浮点数上可能出现误差，更稳妥的是提前用整数递推算好 lg 数组。',
   ],
   complexity: { time: 'O(n log n) 预处理，O(1) 查询', space: 'O(n log n)', note: '预处理一次 O(n log n)，之后每次查询只需要比较两个数，是常数时间。' },
-  inputHint: '格式：数组 | 查询 ; 查询，每个查询是 l r，例如 3 1 4 1 5 9 2 6 | 2 7 ; 1 4（数组 4～8 个数）。',
   presets: [
-    { label: '两次查询', text: '3 1 4 1 5 9 2 6 | 2 7 ; 1 4' },
-    { label: '长度刚好是 2 的幂', text: '5 2 8 6 | 1 4 ; 2 3' },
-    { label: '整个数组', text: '9 7 5 3 1 2 4 6 | 1 8' },
+    { label: '两次查询', text: '8\n3 1 4 1 5 9 2 6\n2\n2 7\n1 4' },
+    { label: '长度刚好是 2 的幂', text: '4\n5 2 8 6\n2\n1 4\n2 3' },
+    { label: '整个数组', text: '8\n9 7 5 3 1 2 4 6\n1\n1 8' },
   ],
   defaultInput: { arr: [3, 1, 4, 1, 5, 9, 2, 6], qs: [[2, 7], [1, 4]] },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.qs.map((q) => q.join(' ')).join(' ; ')}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.qs.length}\n${v.qs.map((q) => q.join(' ')).join('\n')}`,
+  answer: (v) => v.qs.map(([l, r]) => Math.min(...v.arr.slice(l - 1, r))).join(' '),
   random: () => {
     const n = randInt(5, 8)
     const arr = Array.from({ length: n }, () => randInt(0, 30))
@@ -167,26 +180,28 @@ export const sparseTable: AlgoDef<StInput, StState> = {
     c: String.raw`
 #include <stdio.h>
 int n,a[105],st[8][105],lg[105];
-int min(int x,int y){ return x<y?x:y; }
+int min(int x,int y){
+    return x<y?x:y;
+}
 int main(){
     int m,l,r;
     scanf("%d",&n);
     for (int i=1;i<=n;i++){
         scanf("%d",&a[i]);
-        st[0][i]=a[i];                          //@init
+        st[0][i]=a[i];                                       //@init
     }
     lg[1]=0;
     for (int i=2;i<=n;i++) lg[i]=lg[i/2]+1;
     for (int k=1;(1<<k)<=n;k++)
         for (int i=1;i+(1<<k)-1<=n;i++)
-            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);   //@fill
+            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  //@fill
     scanf("%d",&m);
     while (m--){
         scanf("%d %d",&l,&r);
-        int k=lg[r-l+1];                        //@qLevel
-        printf("%d ",min(st[k][l],st[k][r-(1<<k)+1]));   //@qAns
+        int k=lg[r-l+1];                                     //@qLevel
+        printf("%d ",min(st[k][l],st[k][r-(1<<k)+1]));       //@qAns
     }
-    printf("\n");                               //@done
+    printf("\n");                                            //@done
     return 0;
 }
 `,
@@ -199,69 +214,69 @@ int main(){
     cin>>n;
     for (int i=1;i<=n;i++){
         cin>>a[i];
-        st[0][i]=a[i];                          //@init
+        st[0][i]=a[i];                                       //@init
     }
     lg[1]=0;
     for (int i=2;i<=n;i++) lg[i]=lg[i/2]+1;
     for (int k=1;(1<<k)<=n;k++)
         for (int i=1;i+(1<<k)-1<=n;i++)
-            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);   //@fill
+            st[k][i]=min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  //@fill
     cin>>m;
     while (m--){
         cin>>l>>r;
-        int k=lg[r-l+1];                        //@qLevel
-        cout<<min(st[k][l],st[k][r-(1<<k)+1])<<" ";   //@qAns
+        int k=lg[r-l+1];                                     //@qLevel
+        cout<<min(st[k][l],st[k][r-(1<<k)+1])<<" ";          //@qAns
     }
-    cout<<endl;                                 //@done
+    cout<<endl;                                              //@done
     return 0;
 }
 `,
     python: String.raw`
-n = int(input())
-a = [0] + list(map(int, input().split()))
-st = [a[:]]                                     #@init
-lg = [0] * (n + 2)
-for i in range(2, n + 1):
-    lg[i] = lg[i // 2] + 1
-k = 1
-while (1 << k) <= n:
-    prev = st[k - 1]
-    row = [0] * (n + 1)
-    for i in range(1, n - (1 << k) + 2):
-        row[i] = min(prev[i], prev[i + (1 << (k - 1))])   #@fill
+n=int(input())
+a=[0]+list(map(int,input().split()))
+st=[a[:]]                                        #@init
+lg=[0]*(n+2)
+for i in range(2,n+1):
+    lg[i]=lg[i//2]+1
+k=1
+while (1<<k)<=n:
+    prev=st[k-1]
+    row=[0]*(n+1)
+    for i in range(1,n-(1<<k)+2):
+        row[i]=min(prev[i],prev[i+(1<<(k-1))])   #@fill
     st.append(row)
-    k += 1
-res = []
+    k+=1
+res=[]
 for _ in range(int(input())):
-    l, r = map(int, input().split())
-    k = lg[r - l + 1]                           #@qLevel
-    res.append(min(st[k][l], st[k][r - (1 << k) + 1]))    #@qAns
-print(*res)                                     #@done
+    l,r=map(int,input().split())
+    k=lg[r-l+1]                                  #@qLevel
+    res.append(min(st[k][l],st[k][r-(1<<k)+1]))  #@qAns
+print(*res)                                      #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[][] st = new int[8][n + 2];
-        int[] lg = new int[n + 2];
-        for (int i = 1; i <= n; i++) {
-            st[0][i] = sc.nextInt();                //@init
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[][] st=new int[8][n+2];
+        int[] lg=new int[n+2];
+        for (int i=1;i<=n;i++){
+            st[0][i]=sc.nextInt();                              //@init
         }
-        for (int i = 2; i <= n; i++) lg[i] = lg[i / 2] + 1;
-        for (int k = 1; (1 << k) <= n; k++)
-            for (int i = 1; i + (1 << k) - 1 <= n; i++)
-                st[k][i] = Math.min(st[k - 1][i], st[k - 1][i + (1 << (k - 1))]);   //@fill
-        int m = sc.nextInt();
-        StringBuilder sb = new StringBuilder();
-        while (m-- > 0) {
-            int l = sc.nextInt(), r = sc.nextInt();
-            int k = lg[r - l + 1];                  //@qLevel
-            sb.append(Math.min(st[k][l], st[k][r - (1 << k) + 1])).append(' ');   //@qAns
+        for (int i=2;i<=n;i++) lg[i]=lg[i/2]+1;
+        for (int k=1;(1<<k)<=n;k++)
+            for (int i=1;i+(1<<k)-1<=n;i++)
+                st[k][i]=Math.min(st[k-1][i],st[k-1][i+(1<<(k-1))]);  //@fill
+        int m=sc.nextInt();
+        StringBuilder sb=new StringBuilder();
+        while (m-- > 0){
+            int l=sc.nextInt(),r=sc.nextInt();
+            int k=lg[r-l+1];                                    //@qLevel
+            sb.append(Math.min(st[k][l],st[k][r-(1<<k)+1])).append(' ');  //@qAns
         }
-        System.out.println(sb);                     //@done
+        System.out.println(sb);                                 //@done
     }
 }
 `,

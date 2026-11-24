@@ -3,7 +3,7 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { formatEdges, parseEdges, randInt, type ParsedEdge } from './shared'
+import { formatGraph, type ParsedEdge, randInt, readGraph, readInput } from './shared'
 
 export interface TopoInput {
   n: number
@@ -89,8 +89,11 @@ function TopoView({ frame }: { frame: Frame<TopoState> }) {
 }
 
 function parse(text: string): ParseResult<TopoInput> {
-  const r = parseEdges(text, { weighted: false, directed: true, maxN: 7, maxM: 11, minM: 1 })
-  return r.ok ? { ok: true, value: r.value } : r
+  return readInput(text, (r) => {
+    const g = readGraph(r, { weighted: false, directed: true, maxN: 7, maxM: 11 })
+    r.end()
+    return g
+  })
 }
 
 export const topoSort: AlgoDef<TopoInput, TopoState> = {
@@ -98,6 +101,21 @@ export const topoSort: AlgoDef<TopoInput, TopoState> = {
   title: '拓扑排序',
   tagline: '不断取出入度为 0 的结点，把依赖关系排成一条合理的先后顺序',
   kind: '算法',
+  slug: 'courses',
+  name: '课程安排',
+  type: '依赖关系',
+  statement: {
+    desc: [
+      '有 n 门课，其中一些课必须先学完另一些课才能学。给出 m 条先修关系 a b，表示必须先学 a，才能学 b。请排出一个合法的学习顺序。排序时按下面的规则：先把所有没有先修课的课按编号从小到大放进队列；每次从队首取出一门课来学，学完之后，如果某门课的先修课都已经学完，就把它放到队尾。如果这些关系互相矛盾，无法排出顺序，输出 CYCLE。',
+    ],
+    input: [
+      '第一行两个整数 n 和 m（2 ≤ n ≤ 7，1 ≤ m ≤ 11），课程编号是 1～n。',
+      '接下来 m 行，每行两个整数 a、b，表示 a 是 b 的先修课（没有重复的关系，也没有 a 等于 b 的情况）。',
+    ],
+    output: [
+      '一行 n 个整数，是学习的顺序，用空格隔开；无法排出顺序时输出 CYCLE。',
+    ],
+  },
   intro: [
     '很多事情有先后依赖：要学完高数才能学物理，要先穿袜子再穿鞋。把这些依赖画成有向图，“A 必须在 B 前面”就是一条从 A 到 B 的边。拓扑排序就是给所有结点安排一个先后顺序，使得每条边的起点都排在终点的前面。',
     '做法很自然：没有任何前提的结点（入度为 0）可以最先做。把它取出来排进结果，它发出的所有边就都满足了，可以拆掉，它的后继结点的入度各减一。又出现入度为 0 的结点就继续取。这样一直做到队列空为止。如果最后有结点没有排上，说明它们互相等待，图里有环，不存在这样的顺序。',
@@ -114,15 +132,31 @@ export const topoSort: AlgoDef<TopoInput, TopoState> = {
     '题目要求“字典序最小的拓扑序”时，要把普通队列换成优先队列。',
   ],
   complexity: { time: 'O(n + m)', space: 'O(n + m)', note: '每个结点入队一次，每条边处理一次。' },
-  inputHint: '输入有向边：a>b，用空格隔开，例如 1>2 1>3 2>4 3>4（结点 1～7，最多 11 条边）。',
   presets: [
-    { label: '先修课', text: '1>2 1>3 2>4 3>4 4>5' },
-    { label: '有环', text: '1>2 2>3 3>1 3>4' },
-    { label: '有多个起点', text: '1>3 2>3 3>4 2>5 5>4' },
+    { label: '先修课', text: '5 5\n1 2\n1 3\n2 4\n3 4\n4 5' },
+    { label: '有环', text: '4 4\n1 2\n2 3\n3 1\n3 4' },
+    { label: '有多个起点', text: '5 5\n1 3\n2 3\n3 4\n2 5\n5 4' },
   ],
   defaultInput: { n: 5, edges: [{ a: 1, b: 2, w: 1 }, { a: 1, b: 3, w: 1 }, { a: 2, b: 4, w: 1 }, { a: 3, b: 4, w: 1 }, { a: 4, b: 5, w: 1 }] },
   parse,
-  format: (v) => formatEdges(v.edges, { weighted: false, directed: true }),
+  format: (v) => formatGraph(v.n, v.edges, false),
+  answer: (v) => {
+    const adj: number[][] = Array.from({ length: v.n + 1 }, () => [])
+    const indeg = Array<number>(v.n + 1).fill(0)
+    for (const e of v.edges) {
+      adj[e.a].push(e.b)
+      indeg[e.b]++
+    }
+    const q: number[] = []
+    for (let i = 1; i <= v.n; i++) if (indeg[i] === 0) q.push(i)
+    const order: number[] = []
+    while (q.length) {
+      const u = q.shift()!
+      order.push(u)
+      for (const w of adj[u]) if (--indeg[w] === 0) q.push(w)
+    }
+    return order.length < v.n ? 'CYCLE' : order.join(' ')
+  },
   random: () => {
     const n = randInt(5, 7)
     const perm = Array.from({ length: n }, (_, i) => i + 1).sort(() => Math.random() - 0.5)
@@ -156,19 +190,19 @@ int main(){
         indeg[b]++;
     }
     for (int i=1;i<=n;i++)
-        if (indeg[i]==0) q[tail++]=i;           //@init
+        if (indeg[i]==0) q[tail++]=i;                    //@init
     while (head<tail){
-        int u=q[head++];                        //@take
-        order[cnt++]=u;                         //@take
+        int u=q[head++];                                 //@take
+        order[cnt++]=u;                                  //@take
         for (int i=0;i<deg[u];i++){
             int v=adj[u][i];
-            indeg[v]--;                         //@dec
-            if (indeg[v]==0) q[tail++]=v;       //@push
+            indeg[v]--;                                  //@dec
+            if (indeg[v]==0) q[tail++]=v;                //@push
         }
     }
-    if (cnt<n) puts("CYCLE");                   //@done
+    if (cnt<n) puts("CYCLE");                            //@done
     else{
-        for (int i=0;i<cnt;i++) printf("%d ",order[i]);   //@done
+        for (int i=0;i<cnt;i++) printf("%d ",order[i]);  //@done
         printf("\n");
     }
     return 0;
@@ -190,19 +224,19 @@ int main(){
     queue<int> q;
     vector<int> order;
     for (int i=1;i<=n;i++)
-        if (indeg[i]==0) q.push(i);             //@init
+        if (indeg[i]==0) q.push(i);                //@init
     while (!q.empty()){
-        int u=q.front();                        //@take
-        q.pop();                                //@take
-        order.push_back(u);                     //@take
+        int u=q.front();                           //@take
+        q.pop();                                   //@take
+        order.push_back(u);                        //@take
         for (int v:adj[u]){
-            indeg[v]--;                         //@dec
-            if (indeg[v]==0) q.push(v);         //@push
+            indeg[v]--;                            //@dec
+            if (indeg[v]==0) q.push(v);            //@push
         }
     }
-    if ((int)order.size()<n) cout<<"CYCLE"<<endl;      //@done
+    if ((int)order.size()<n) cout<<"CYCLE"<<endl;  //@done
     else{
-        for (int x:order) cout<<x<<" ";         //@done
+        for (int x:order) cout<<x<<" ";            //@done
         cout<<endl;
     }
     return 0;
@@ -211,58 +245,58 @@ int main(){
     python: String.raw`
 from collections import deque
 
-n, m = map(int, input().split())
-adj = [[] for _ in range(n + 1)]
-indeg = [0] * (n + 1)
+n,m=map(int,input().split())
+adj=[[] for _ in range(n+1)]
+indeg=[0]*(n+1)
 for _ in range(m):
-    a, b = map(int, input().split())
+    a,b=map(int,input().split())
     adj[a].append(b)
-    indeg[b] += 1
-q = deque(i for i in range(1, n + 1) if indeg[i] == 0)   #@init
-order = []
+    indeg[b]+=1
+q=deque(i for i in range(1,n+1) if indeg[i]==0)  #@init
+order=[]
 while q:
-    u = q.popleft()                             #@take
-    order.append(u)                             #@take
+    u=q.popleft()                                #@take
+    order.append(u)                              #@take
     for v in adj[u]:
-        indeg[v] -= 1                           #@dec
-        if indeg[v] == 0:
-            q.append(v)                         #@push
-if len(order) < n:
-    print("CYCLE")                              #@done
+        indeg[v]-=1                              #@dec
+        if indeg[v]==0:
+            q.append(v)                          #@push
+if len(order)<n:
+    print("CYCLE")                               #@done
 else:
-    print(*order)                               #@done
+    print(*order)                                #@done
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        List<List<Integer>> adj = new ArrayList<>();
-        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());
-        int[] indeg = new int[n + 1];
-        for (int i = 0; i < m; i++) {
-            int a = sc.nextInt(), b = sc.nextInt();
+public class Main{
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        List<List<Integer>> adj=new ArrayList<>();
+        for (int i=0;i<=n;i++) adj.add(new ArrayList<>());
+        int[] indeg=new int[n+1];
+        for (int i=0;i<m;i++){
+            int a=sc.nextInt(),b=sc.nextInt();
             adj.get(a).add(b);
             indeg[b]++;
         }
-        Queue<Integer> q = new ArrayDeque<>();
-        List<Integer> order = new ArrayList<>();
-        for (int i = 1; i <= n; i++)
-            if (indeg[i] == 0) q.add(i);            //@init
-        while (!q.isEmpty()) {
-            int u = q.poll();                       //@take
-            order.add(u);                           //@take
-            for (int v : adj.get(u)) {
-                indeg[v]--;                         //@dec
-                if (indeg[v] == 0) q.add(v);        //@push
+        Queue<Integer> q=new ArrayDeque<>();
+        List<Integer> order=new ArrayList<>();
+        for (int i=1;i<=n;i++)
+            if (indeg[i]==0) q.add(i);                    //@init
+        while (!q.isEmpty()){
+            int u=q.poll();                               //@take
+            order.add(u);                                 //@take
+            for (int v:adj.get(u)){
+                indeg[v]--;                               //@dec
+                if (indeg[v]==0) q.add(v);                //@push
             }
         }
-        if (order.size() < n) System.out.println("CYCLE");   //@done
-        else {
-            StringBuilder sb = new StringBuilder();
-            for (int x : order) sb.append(x).append(' ');    //@done
+        if (order.size()<n) System.out.println("CYCLE");  //@done
+        else{
+            StringBuilder sb=new StringBuilder();
+            for (int x:order) sb.append(x).append(' ');   //@done
             System.out.println(sb);
         }
     }

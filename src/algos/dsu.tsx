@@ -4,7 +4,7 @@ import { TreeView, type TNode } from '../components/TreeView'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
-import { randInt, splitBar, toNums } from './shared'
+import { randInt, readInput } from './shared'
 
 export type DsuOp = { kind: 'u'; a: number; b: number } | { kind: 'q'; a: number; b: number }
 
@@ -110,7 +110,7 @@ export function runDsu({ n, ops }: DsuInput): Frame<DsuState>[] {
   return rec.frames
 }
 
-function DsuView({ frame }: { frame: Frame<DsuState> }) {
+export function DsuView({ frame }: { frame: Frame<DsuState> }) {
   const s = frame.state
   const onPath = new Set(s.path)
   const kidsOf = (i: number) => Array.from({ length: s.n }, (_, k) => k + 1).filter((j) => j !== i && s.fa[j] === i)
@@ -157,30 +157,41 @@ function DsuView({ frame }: { frame: Frame<DsuState> }) {
 }
 
 function parse(text: string): ParseResult<DsuInput> {
-  const parts = splitBar(text)
-  if (parts.length !== 2) return { ok: false, error: '格式是「元素个数 | 操作 ; 操作」，例如：6 | u 1 2 ; u 3 4 ; u 1 3 ; q 2 4' }
-  const nn = toNums(parts[0])
-  if (nn.length !== 1 || !Number.isInteger(nn[0]) || nn[0] < 3 || nn[0] > 8) return { ok: false, error: '元素个数请取 3～8。' }
-  const n = nn[0]
-  const groups = parts[1].split(/[;；]/).map((g) => g.trim()).filter(Boolean)
-  if (groups.length < 1 || groups.length > 7) return { ok: false, error: '请写 1～7 个操作，用分号隔开。' }
-  const ops: DsuOp[] = []
-  for (const g of groups) {
-    const m = /^([uUqQ])\s+(\d+)\s+(\d+)$/.exec(g)
-    if (!m) return { ok: false, error: `“${g}”不对：合并写成 u a b，询问写成 q a b。` }
-    const a = Number(m[2])
-    const b = Number(m[3])
-    if (a < 1 || b < 1 || a > n || b > n) return { ok: false, error: `元素编号要在 1～${n} 之间。` }
-    ops.push({ kind: m[1].toLowerCase() as 'u' | 'q', a, b })
-  }
-  return { ok: true, value: { n, ops } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 3, 8)
+    const m = r.int('m', 1, 7)
+    const ops: DsuOp[] = []
+    for (let k = 1; k <= m; k++) {
+      const z = r.int(`第 ${k} 个操作的类型 z`, 1, 2)
+      const a = r.int(`第 ${k} 个操作的 a`, 1, n)
+      const b = r.int(`第 ${k} 个操作的 b`, 1, n)
+      ops.push({ kind: z === 1 ? 'u' : 'q', a, b })
+    }
+    r.end()
+    return { n, ops }
+  })
 }
 
 export const dsu: AlgoDef<DsuInput, DsuState> = {
   id: 'dsu',
-  title: '并查集',
-  tagline: '用一片树表示若干个集合，支持“合并两个集合”和“判断两个元素是否同组”',
+  title: 'DSU',
+  tagline: '并查集：用一片树表示若干个集合，支持“合并两个集合”和“判断两个元素是否同组”',
   kind: '数据结构',
+  slug: 'relatives',
+  name: '亲戚',
+  type: '合并与查询',
+  statement: {
+    desc: [
+      '一共有 n 个人，开始时每个人自成一组。接下来有 m 个操作：操作 1 a b 表示 a 和 b 是亲戚，把他们所在的两组合并成一组；操作 2 a b 表示询问 a 和 b 是否在同一组。“亲戚的亲戚也是亲戚”，所以只要能通过一连串的亲戚关系连起来，就算在同一组。',
+    ],
+    input: [
+      '第一行两个整数 n 和 m（3 ≤ n ≤ 8，1 ≤ m ≤ 7）。',
+      '接下来 m 行，每行三个整数 z、a、b。z 为 1 表示合并，z 为 2 表示询问；a 和 b 是人的编号（1 ≤ a, b ≤ n）。',
+    ],
+    output: [
+      '对每个询问输出一行：a 和 b 在同一组输出 Y，否则输出 N。',
+    ],
+  },
   intro: [
     '并查集管理的是一批互不相交的集合，只支持两种操作：把两个元素所在的集合合并，以及查询两个元素是不是在同一个集合里。社交网络里的“朋友的朋友也是朋友”、图里的连通块、判断加入一条边之后会不会出现环，都是它的用武之地。',
     '实现的办法出奇地简单：用 fa[x] 记录 x 的“上一级”，每个集合就是一棵树，树根的 fa 指向自己，树根就是这个集合的代表。查找 x 的集合，就是顺着 fa 一路向上走到根；两个元素的根相同，就在同一个集合里；合并就是让一个根挂到另一个根下面。两个优化让它快到几乎是常数时间：查找时顺手做路径压缩，合并时让小树挂到大树下面。',
@@ -197,15 +208,24 @@ export const dsu: AlgoDef<DsuInput, DsuState> = {
     '并查集只能合并，不能把集合拆开。需要“删除”的场景要换别的办法。',
   ],
   complexity: { time: 'O(α(n))', space: 'O(n)', note: 'α 是反阿克曼函数，增长极慢，在实际数据规模里可以看作不超过 5，所以每次操作几乎是常数时间。' },
-  inputHint: '格式：元素个数 | 操作 ; 操作。u a b 是合并，q a b 是询问，例如 6 | u 1 2 ; u 3 4 ; u 1 3 ; q 2 4。',
   presets: [
-    { label: '先合并再询问', text: '6 | u 1 2 ; u 3 4 ; u 1 3 ; q 2 4 ; q 2 5' },
-    { label: '串成一条链', text: '6 | u 1 2 ; u 2 3 ; u 3 4 ; u 4 5 ; q 1 5' },
-    { label: '重复合并', text: '5 | u 1 2 ; u 2 1 ; u 3 4 ; q 1 4' },
+    { label: '先合并再询问', text: '6 5\n1 1 2\n1 3 4\n1 1 3\n2 2 4\n2 2 5' },
+    { label: '串成一条链', text: '6 5\n1 1 2\n1 2 3\n1 3 4\n1 4 5\n2 1 5' },
+    { label: '重复合并', text: '5 4\n1 1 2\n1 2 1\n1 3 4\n2 1 4' },
   ],
   defaultInput: { n: 6, ops: [{ kind: 'u', a: 1, b: 2 }, { kind: 'u', a: 3, b: 4 }, { kind: 'u', a: 1, b: 3 }, { kind: 'q', a: 2, b: 4 }, { kind: 'q', a: 2, b: 5 }] },
   parse,
-  format: (v) => `${v.n} | ${v.ops.map((o) => `${o.kind} ${o.a} ${o.b}`).join(' ; ')}`,
+  format: (v) => `${v.n} ${v.ops.length}\n${v.ops.map((o) => `${o.kind === 'u' ? 1 : 2} ${o.a} ${o.b}`).join('\n')}`,
+  answer: (v) => {
+    const fa = Array.from({ length: v.n + 1 }, (_, i) => i)
+    const find = (x: number): number => (fa[x] === x ? x : (fa[x] = find(fa[x])))
+    const out: string[] = []
+    for (const o of v.ops) {
+      if (o.kind === 'u') fa[find(o.a)] = find(o.b)
+      else out.push(find(o.a) === find(o.b) ? 'Y' : 'N')
+    }
+    return out.join('\n')
+  },
   random: () => {
     const n = randInt(5, 8)
     const ops: DsuOp[] = []
@@ -224,30 +244,34 @@ export const dsu: AlgoDef<DsuInput, DsuState> = {
 #include <stdio.h>
 int fa[1005],sz[1005];
 int find(int x){
-    if (fa[x]==x) return x;                     //@root
-    int r=find(fa[x]);                          //@climb
-    fa[x]=r;                                    //@compress
+    if (fa[x]==x) return x;                   //@root
+    int r=find(fa[x]);                        //@climb
+    fa[x]=r;                                  //@compress
     return r;
 }
 void merge(int a,int b){
-    a=find(a);                                  //@roots
+    a=find(a);                                //@roots
     b=find(b);
-    if (a==b) return;                           //@same
-    if (sz[a]<sz[b]){ int t=a; a=b; b=t; }
-    fa[b]=a;                                    //@link
-    sz[a]+=sz[b];                               //@link
+    if (a==b) return;                         //@same
+    if (sz[a]<sz[b]){
+        int t=a;
+        a=b;
+        b=t;
+    }
+    fa[b]=a;                                  //@link
+    sz[a]+=sz[b];                             //@link
 }
 int main(){
     int n,m,z,a,b;
     scanf("%d %d",&n,&m);
     for (int i=1;i<=n;i++){
-        fa[i]=i;                                //@init
+        fa[i]=i;                              //@init
         sz[i]=1;
     }
     while (m--){
         scanf("%d %d %d",&z,&a,&b);
         if (z==1) merge(a,b);
-        else puts(find(a)==find(b)?"Y":"N");    //@answer
+        else puts(find(a)==find(b)?"Y":"N");  //@answer
     }
     return 0;
 }
@@ -257,30 +281,30 @@ int main(){
 using namespace std;
 int fa[1005],sz[1005];
 int find(int x){
-    if (fa[x]==x) return x;                     //@root
-    int r=find(fa[x]);                          //@climb
-    fa[x]=r;                                    //@compress
+    if (fa[x]==x) return x;                           //@root
+    int r=find(fa[x]);                                //@climb
+    fa[x]=r;                                          //@compress
     return r;
 }
 void merge(int a,int b){
-    a=find(a);                                  //@roots
+    a=find(a);                                        //@roots
     b=find(b);
-    if (a==b) return;                           //@same
+    if (a==b) return;                                 //@same
     if (sz[a]<sz[b]) swap(a,b);
-    fa[b]=a;                                    //@link
-    sz[a]+=sz[b];                               //@link
+    fa[b]=a;                                          //@link
+    sz[a]+=sz[b];                                     //@link
 }
 int main(){
     int n,m,z,a,b;
     cin>>n>>m;
     for (int i=1;i<=n;i++){
-        fa[i]=i;                                //@init
+        fa[i]=i;                                      //@init
         sz[i]=1;
     }
     while (m--){
         cin>>z>>a>>b;
         if (z==1) merge(a,b);
-        else cout<<(find(a)==find(b)?"Y":"N")<<endl;    //@answer
+        else cout<<(find(a)==find(b)?"Y":"N")<<endl;  //@answer
     }
     return 0;
 }
@@ -289,69 +313,70 @@ int main(){
 import sys
 sys.setrecursionlimit(10000)
 
-
 def find(x):
-    if fa[x] == x:
-        return x                                #@root
-    r = find(fa[x])                             #@climb
-    fa[x] = r                                   #@compress
+    if fa[x]==x:
+        return x                                 #@root
+    r=find(fa[x])                                #@climb
+    fa[x]=r                                      #@compress
     return r
 
+def merge(a,b):
+    a=find(a)                                    #@roots
+    b=find(b)
+    if a==b:
+        return                                   #@same
+    if sz[a]<sz[b]:
+        a,b=b,a
+    fa[b]=a                                      #@link
+    sz[a]+=sz[b]                                 #@link
 
-def merge(a, b):
-    a = find(a)                                 #@roots
-    b = find(b)
-    if a == b:
-        return                                  #@same
-    if sz[a] < sz[b]:
-        a, b = b, a
-    fa[b] = a                                   #@link
-    sz[a] += sz[b]                              #@link
-
-
-n, m = map(int, input().split())
-fa = list(range(n + 1))                         #@init
-sz = [1] * (n + 1)
+n,m=map(int,input().split())
+fa=list(range(n+1))                              #@init
+sz=[1]*(n+1)
 for _ in range(m):
-    z, a, b = map(int, input().split())
-    if z == 1:
-        merge(a, b)
+    z,a,b=map(int,input().split())
+    if z==1:
+        merge(a,b)
     else:
-        print("Y" if find(a) == find(b) else "N")   #@answer
+        print("Y" if find(a)==find(b) else "N")  #@answer
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int[] fa = new int[1005], sz = new int[1005];
+public class Main{
+    static int[] fa=new int[1005],sz=new int[1005];
 
-    static int find(int x) {
-        if (fa[x] == x) return x;                   //@root
-        int r = find(fa[x]);                        //@climb
-        fa[x] = r;                                  //@compress
+    static int find(int x){
+        if (fa[x]==x) return x;                                 //@root
+        int r=find(fa[x]);                                      //@climb
+        fa[x]=r;                                                //@compress
         return r;
     }
 
-    static void merge(int a, int b) {
-        a = find(a);                                //@roots
-        b = find(b);
-        if (a == b) return;                         //@same
-        if (sz[a] < sz[b]) { int t = a; a = b; b = t; }
-        fa[b] = a;                                  //@link
-        sz[a] += sz[b];                             //@link
+    static void merge(int a,int b){
+        a=find(a);                                              //@roots
+        b=find(b);
+        if (a==b) return;                                       //@same
+        if (sz[a]<sz[b]){
+            int t=a;
+            a=b;
+            b=t;
+        }
+        fa[b]=a;                                                //@link
+        sz[a]+=sz[b];                                           //@link
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt(), m = sc.nextInt();
-        for (int i = 1; i <= n; i++) {
-            fa[i] = i;                              //@init
-            sz[i] = 1;
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(),m=sc.nextInt();
+        for (int i=1;i<=n;i++){
+            fa[i]=i;                                            //@init
+            sz[i]=1;
         }
-        while (m-- > 0) {
-            int z = sc.nextInt(), a = sc.nextInt(), b = sc.nextInt();
-            if (z == 1) merge(a, b);
-            else System.out.println(find(a) == find(b) ? "Y" : "N");   //@answer
+        while (m-- > 0){
+            int z=sc.nextInt(),a=sc.nextInt(),b=sc.nextInt();
+            if (z==1) merge(a,b);
+            else System.out.println(find(a)==find(b)?"Y":"N");  //@answer
         }
     }
 }

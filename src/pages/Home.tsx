@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { ALGOS } from '../algos'
+import { ALGOS, examplesOf } from '../algos'
 import { bubbleSort } from '../algos/bubbleSort'
 import { Arrow, Circled, PencilArt, Sparkle } from '../components/Doodles'
 import { IconArrow } from '../components/icons'
@@ -172,24 +172,25 @@ export default function Home() {
         <div className="container">
           <Reveal>
             <h2 className="section-title">动画实验室</h2>
-            <p className="section-sub">数据结构和算法会配上逐步演示的动画，代码同步高亮。内容还在持续增加。</p>
+            <p className="section-sub">每个专题里有几道不同类型的例题：题面、可以修改的输入、逐步演示的动画，以及四种语言的代码，都在同一页。</p>
           </Reveal>
-          <div className="lab-cards">
-            {ALGOS.map((a, i) => (
-              <Reveal key={a.id} delay={0.07 * i}>
-                <Link to={`/lab/${a.id}`} className="card">
-                  <span className="tag tag-kind">{a.kind}</span>
-                  <h3>{a.title}</h3>
-                  <p>{a.tagline}</p>
-                  <div className="card-foot">
-                    <span className="card-cx">时间 {a.complexity.time}</span>
-                    <span className="card-go">
-                      进入演示 <IconArrow />
-                    </span>
-                  </div>
-                </Link>
-              </Reveal>
-            ))}
+          {(['数据结构', '算法'] as const).map((kind) => (
+            <div key={kind} className="tiles-group">
+              <h3 className="group-title">{kind}</h3>
+              <div className="tiles">
+                {ALGOS.filter((a) => a.kind === kind).map((a) => (
+                  <Link key={a.id} to={`/lab/${a.id}`} className="tile">
+                    {a.title}
+                    {examplesOf(a).length > 1 && <small>{examplesOf(a).length} 道例题</small>}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="cta-row tiles-more">
+            <Link to="/lab" className="btn btn-ghost">
+              查看全部专题 <IconArrow />
+            </Link>
           </div>
         </div>
       </section>

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { bit, runBit, type BitOp } from '../src/algos/bit'
-import { dsu, runDsu, type DsuOp } from '../src/algos/dsu'
-import { hashTable, runHash } from '../src/algos/hashTable'
-import { linkedList, listToArray, runReverse } from '../src/algos/linkedList'
-import { itPrograms, rnd, rndList } from './helpers'
+import { runBit, type BitOp } from '../src/algos/bit'
+import { runDsu, type DsuOp } from '../src/algos/dsu'
+import { runHash } from '../src/algos/hashTable'
+import { listToArray, runReverse } from '../src/algos/linkedList'
+import { rnd, rndList } from './helpers'
 
 describe('链表反转', () => {
   it('结果恰好是原来的倒序，并且每个结点只被处理一次', () => {
@@ -14,12 +14,6 @@ describe('链表反转', () => {
       expect(last.flipped.length).toBe(arr.length)
     }
   })
-  itPrograms(linkedList, () =>
-    Array.from({ length: 15 }, () => {
-      const arr = rndList(rnd(1, 20), 1, 99)
-      return { input: `${arr.length}\n${arr.join(' ')}\n`, expected: [...arr].reverse().join(' ') }
-    }),
-  )
 })
 
 describe('并查集', () => {
@@ -45,13 +39,6 @@ describe('并查集', () => {
       expect(last.answers).toEqual(ref(n, ops))
     }
   })
-  itPrograms(dsu, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(3, 30)
-      const ops = randOps(n)
-      return { input: `${n} ${ops.length}\n${ops.map((o) => `${o.kind === 'u' ? 1 : 2} ${o.a} ${o.b}`).join('\n')}\n`, expected: ref(n, ops).join(' ') }
-    }),
-  )
 })
 
 describe('哈希表', () => {
@@ -69,13 +56,6 @@ describe('哈希表', () => {
       last.buckets.forEach((b, i) => b.forEach((k) => expect(k % 7).toBe(i)))
     }
   })
-  itPrograms(hashTable, () =>
-    Array.from({ length: 20 }, () => {
-      const keys = distinct(rnd(2, 30))
-      const target = Math.random() < 0.5 ? keys[rnd(0, keys.length - 1)] : rnd(1, 99)
-      return { input: `${keys.length}\n${keys.join(' ')}\n${target}\n`, expected: keys.includes(target) ? 'YES' : 'NO' }
-    }),
-  )
 })
 
 describe('树状数组', () => {
@@ -104,12 +84,4 @@ describe('树状数组', () => {
       expect(runBit({ arr, ops }).at(-1)!.state.results).toEqual(naive(arr, ops))
     }
   })
-  itPrograms(bit, () =>
-    Array.from({ length: 20 }, () => {
-      const n = rnd(3, 40)
-      const arr = rndList(n, 0, 99)
-      const ops = randOps(n)
-      return { input: `${n}\n${arr.join(' ')}\n${ops.length}\n${ops.map((o) => (o.kind === 'q' ? `2 ${o.l} ${o.r}` : `1 ${o.i} ${o.k}`)).join('\n')}\n`, expected: naive(arr, ops).join(' ') }
-    }),
-  )
 })

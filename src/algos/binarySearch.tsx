@@ -3,6 +3,8 @@ import { Stats } from '../components/Stats'
 import { pickProblems } from '../data/problems'
 import { Recorder } from '../engine/recorder'
 import type { AlgoDef, Frame, ParseResult } from '../engine/types'
+import { binaryAnswer } from './binaryAnswer'
+import { fail, readInput } from './shared'
 
 export interface BsInput {
   arr: number[]
@@ -88,31 +90,38 @@ function BsView({ frame }: { frame: Frame<BsState> }) {
   )
 }
 
-function parseNums(text: string): number[] {
-  return text
-    .trim()
-    .split(/[\s,，、]+/)
-    .filter(Boolean)
-    .map(Number)
-}
-
 function parse(text: string): ParseResult<BsInput> {
-  const parts = text.split(/[|｜]/)
-  if (parts.length !== 2) return { ok: false, error: '格式是「有序数组 | 目标」，例如：1 3 5 7 9 | 7' }
-  const arr = parseNums(parts[0])
-  const t = parseNums(parts[1])
-  if (arr.length < 1 || arr.length > 14) return { ok: false, error: '数组里请放 1～14 个整数。' }
-  if (t.length !== 1) return { ok: false, error: '“|”右边只放一个目标数。' }
-  if ([...arr, t[0]].some((x) => !Number.isInteger(x) || x < 0 || x > 99)) return { ok: false, error: '数都要是 0～99 之间的整数哦。' }
-  for (let i = 1; i < arr.length; i++) if (arr[i] < arr[i - 1]) return { ok: false, error: '二分查找要求数组已经从小到大排好序，请先排序再输入。' }
-  return { ok: true, value: { arr, target: t[0] } }
+  return readInput(text, (r) => {
+    const n = r.int('n', 1, 14)
+    const arr = r.ints(n, '数', 0, 99)
+    const target = r.int('t', 0, 99)
+    r.end()
+    for (let i = 1; i < n; i++) if (arr[i] <= arr[i - 1]) fail('数组要从小到大排好序，并且互不相同，二分查找才能用。')
+    return { arr, target }
+  })
 }
 
 export const binarySearch: AlgoDef<BsInput, BsState> = {
   id: 'binary-search',
-  title: '二分查找',
-  tagline: '在有序数组里每次查看正中间的元素，一次就能排除一半的候选',
+  title: '二分',
+  tagline: '在有序的范围里每次只看正中间，一次就能排除一半的候选',
   kind: '算法',
+  slug: 'search',
+  name: '在有序数组里查找',
+  type: '查找下标',
+  statement: {
+    desc: [
+      '给定一个已经从小到大排好序、并且互不相同的数组，和一个目标数 t。请找出 t 在数组里的下标（从 0 开始）；如果 t 不在数组里，输出 -1。',
+    ],
+    input: [
+      '第一行一个整数 n（1 ≤ n ≤ 14）。',
+      '第二行 n 个整数，从小到大排列，互不相同，每个在 0～99 之间。',
+      '第三行一个整数 t（0～99）。',
+    ],
+    output: [
+      '一行一个整数：t 的下标，不存在时输出 -1。',
+    ],
+  },
   intro: [
     '二分查找只能用在已经排好序的数据上。每次先看候选区间正中间的数：如果它恰好是目标，查找就结束了；如果它比目标小，目标只可能在右边；如果比目标大，则只可能在左边。',
     '每看一次，候选范围就缩小一半，所以 n 个数最多只需要看大约 log₂n 次，一百万个数也不过二十次左右。',
@@ -129,16 +138,16 @@ export const binarySearch: AlgoDef<BsInput, BsState> = {
     '数组里有重复的数时，这种写法找到的不一定是第一个。如果要找“第一个大于等于 x 的位置”，需要使用 lower_bound 的写法，后面会专门介绍。',
   ],
   complexity: { time: 'O(log n)', space: 'O(1)' },
-  inputHint: '格式：有序数组 | 目标，例如 1 3 5 7 9 11 | 7（0～99，最多 14 个数）。',
   presets: [
-    { label: '找得到', text: '2 5 8 12 16 23 38 56 | 23' },
-    { label: '找不到', text: '2 5 8 12 16 23 38 56 | 20' },
-    { label: '在最左边', text: '2 5 8 12 16 23 38 56 | 2' },
-    { label: '在最右边', text: '2 5 8 12 16 23 38 56 | 56' },
+    { label: '找得到', text: '8\n2 5 8 12 16 23 38 56\n23' },
+    { label: '找不到', text: '8\n2 5 8 12 16 23 38 56\n20' },
+    { label: '在最左边', text: '8\n2 5 8 12 16 23 38 56\n2' },
+    { label: '在最右边', text: '8\n2 5 8 12 16 23 38 56\n56' },
   ],
   defaultInput: { arr: [2, 5, 8, 12, 16, 23, 38, 56], target: 23 },
   parse,
-  format: (v) => `${v.arr.join(' ')} | ${v.target}`,
+  format: (v) => `${v.arr.length}\n${v.arr.join(' ')}\n${v.target}`,
+  answer: (v) => String(v.arr.indexOf(v.target)),
   random: () => {
     const set = new Set<number>()
     while (set.size < 10) set.add(1 + Math.floor(Math.random() * 60))
@@ -152,14 +161,14 @@ export const binarySearch: AlgoDef<BsInput, BsState> = {
     c: String.raw`
 #include <stdio.h>
 int binarySearch(int a[],int n,int target){
-    int lo=0,hi=n-1;                         //@init
-    while (lo<=hi){                          //@loop
-        int mid=lo+(hi-lo)/2;                //@mid
-        if (a[mid]==target) return mid;      //@hit
-        else if (a[mid]<target) lo=mid+1;    //@goRight
-        else hi=mid-1;                       //@goLeft
+    int lo=0,hi=n-1;                        //@init
+    while (lo<=hi){                         //@loop
+        int mid=lo+(hi-lo)/2;               //@mid
+        if (a[mid]==target) return mid;     //@hit
+        else if (a[mid]<target) lo=mid+1;   //@goRight
+        else hi=mid-1;                      //@goLeft
     }
-    return -1;                               //@miss
+    return -1;                              //@miss
 }
 int main(){
     int n,target,a[1005];
@@ -174,14 +183,14 @@ int main(){
 #include <bits/stdc++.h>
 using namespace std;
 int binarySearch(int a[],int n,int target){
-    int lo=0,hi=n-1;                         //@init
-    while (lo<=hi){                          //@loop
-        int mid=lo+(hi-lo)/2;                //@mid
-        if (a[mid]==target) return mid;      //@hit
-        else if (a[mid]<target) lo=mid+1;    //@goRight
-        else hi=mid-1;                       //@goLeft
+    int lo=0,hi=n-1;                        //@init
+    while (lo<=hi){                         //@loop
+        int mid=lo+(hi-lo)/2;               //@mid
+        if (a[mid]==target) return mid;     //@hit
+        else if (a[mid]<target) lo=mid+1;   //@goRight
+        else hi=mid-1;                      //@goLeft
     }
-    return -1;                               //@miss
+    return -1;                              //@miss
 }
 int main(){
     int n,target,a[1005];
@@ -193,49 +202,49 @@ int main(){
 }
 `,
     python: String.raw`
-def binary_search(a, target):
-    lo, hi = 0, len(a) - 1               #@init
-    while lo <= hi:                      #@loop
-        mid = lo + (hi - lo) // 2        #@mid
-        if a[mid] == target:             #@hit
-            return mid                   #@hit
-        elif a[mid] < target:            #@goRight
-            lo = mid + 1                 #@goRight
-        else:                            #@goLeft
-            hi = mid - 1                 #@goLeft
-    return -1                            #@miss
+def binary_search(a,target):
+    lo,hi=0,len(a)-1                        #@init
+    while lo<=hi:                           #@loop
+        mid=lo+(hi-lo)//2                   #@mid
+        if a[mid]==target:                  #@hit
+            return mid                      #@hit
+        elif a[mid]<target:                 #@goRight
+            lo=mid+1                        #@goRight
+        else:                               #@goLeft
+            hi=mid-1                        #@goLeft
+    return -1                               #@miss
 
-
-n = int(input())
-a = list(map(int, input().split()))
-target = int(input())
-print(binary_search(a, target))
+n=int(input())
+a=list(map(int,input().split()))
+target=int(input())
+print(binary_search(a,target))
 `,
     java: String.raw`
 import java.util.*;
 
-public class Main {
-    static int binarySearch(int[] a, int target) {
-        int lo = 0, hi = a.length - 1;           //@init
-        while (lo <= hi) {                       //@loop
-            int mid = lo + (hi - lo) / 2;        //@mid
-            if (a[mid] == target) return mid;    //@hit
-            else if (a[mid] < target) lo = mid + 1;   //@goRight
-            else hi = mid - 1;                   //@goLeft
+public class Main{
+    static int binarySearch(int[] a,int target){
+        int lo=0,hi=a.length-1;                //@init
+        while (lo<=hi){                        //@loop
+            int mid=lo+(hi-lo)/2;              //@mid
+            if (a[mid]==target) return mid;    //@hit
+            else if (a[mid]<target) lo=mid+1;  //@goRight
+            else hi=mid-1;                     //@goLeft
         }
-        return -1;                               //@miss
+        return -1;                             //@miss
     }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
-        int[] a = new int[n];
-        for (int i = 0; i < n; i++) a[i] = sc.nextInt();
-        int target = sc.nextInt();
-        System.out.println(binarySearch(a, target));
+    public static void main(String[] args){
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt();
+        int[] a=new int[n];
+        for (int i=0;i<n;i++) a[i]=sc.nextInt();
+        int target=sc.nextInt();
+        System.out.println(binarySearch(a,target));
     }
 }
 `,
   },
   problems: pickProblems('P2249', 'P1678', 'P1873'),
+  extra: [binaryAnswer],
 }

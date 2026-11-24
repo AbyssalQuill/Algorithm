@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { plainCode } from '../src/engine/source'
-import type { AnyAlgo, Lang } from '../src/engine/types'
+import type { Lang } from '../src/engine/types'
 
 /** 把演示里展示的完整程序真的编译、运行：四种语言共用的测试工具 */
 const win = process.platform === 'win32'
@@ -23,8 +23,15 @@ export const LANG_LIST: Lang[] = ['c', 'cpp', 'python', 'java']
 
 export type Runner = (input: string) => string
 
-export function build(algo: AnyAlgo, lang: Lang): Runner {
-  const dir = join(root, `${algo.id}-${lang}`)
+/** 能被编译运行的东西：专题或者一道例题都行 */
+export interface Prog {
+  id?: string
+  slug: string
+  sources: Record<Lang, string>
+}
+
+export function build(algo: Prog, lang: Lang): Runner {
+  const dir = join(root, `${algo.id ?? 'ex'}-${algo.slug}-${lang}`)
   mkdirSync(dir, { recursive: true })
   const code = plainCode(algo.sources[lang], lang)
   const exe = join(dir, win ? 'prog.exe' : 'prog')
@@ -53,9 +60,9 @@ export function build(algo: AnyAlgo, lang: Lang): Runner {
 }
 
 /** 四种语言的程序各跑一遍：对每组输入，输出（按空白归一化）要和期望一致 */
-export function itPrograms(algo: AnyAlgo, makeCases: () => { input: string; expected: string; label?: string }[]) {
+export function itPrograms(algo: Prog, makeCases: () => { input: string; expected: string; label?: string }[], langs: Lang[] = LANG_LIST) {
   const norm = (s: string) => s.trim().split(/\s+/).join(' ')
-  for (const lang of LANG_LIST) {
+  for (const lang of langs) {
     it.skipIf(!tools[lang])(`${lang} 程序`, () => {
       const run = build(algo, lang)
       for (const c of makeCases()) expect(norm(run(c.input)), c.label ?? c.input).toBe(norm(c.expected))
